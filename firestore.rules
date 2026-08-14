@@ -1,0 +1,85 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ==========================================
+    // FUNÇÕES AUXILIARES DE AUTENTICAÇÃO E PERFIS
+    // ==========================================
+    function isLogged() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function isAdmin() {
+      return isLogged() && getUserData().role == 'admin';
+    }
+
+    function isSecretario() {
+      return isLogged() && getUserData().role == 'secretario';
+    }
+
+    function isStaff() {
+      return isAdmin() || isSecretario();
+    }
+
+    // ==========================================
+    // 1. CONFIGURAÇÕES GERAIS DO SISTEMA
+    // ==========================================
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ==========================================
+    // 2. USUÁRIOS E PERFIS
+    // ==========================================
+    match /users/{userId} {
+      allow read: if isLogged();
+      allow create: if isAdmin() || (isLogged() && request.auth.uid == userId);
+      allow update: if isAdmin() || (
+        isLogged() && request.auth.uid == userId 
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role'])
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // 3. WHITELIST / PRÉ-CADASTRO (allowed_users)
+    // ==========================================
+    match /allowed_users/{userId} {
+      // Checagem individual para 1º login
+      allow get: if true; 
+      // Coordenador (Admin) e Secretaria podem listar todos os pré-cadastrados para agendamento
+      allow list: if isStaff();
+      // Apenas o Admin pode cadastrar novas permissões ou importar em lote
+      allow create, update: if isAdmin();
+      // O usuário pode remover sua permissão após se registrar, ou o Admin pode revogar
+      allow delete: if isLogged() || isAdmin();
+    }
+
+    // ==========================================
+    // 4. AGENDAMENTOS DOS LABORATÓRIOS (schedules)
+    // ==========================================
+    match /schedules/{scheduleId} {
+      allow read: if true; 
+      allow create: if isLogged() && (
+        request.auth.uid == request.resource.data.professorId || isStaff()
+      );
+      allow update, delete: if isStaff() || (
+        isLogged() && request.auth.uid == resource.data.professorId
+      );
+    }
+
+    // ==========================================
+    // 5. HISTÓRICO DE TRANSPARÊNCIA E AUDITORIA (logs)
+    // ==========================================
+    match /logs/{logId} {
+      allow read: if true;
+      allow create: if isLogged() && request.auth.uid == request.resource.data.professorId;
+      allow update, delete: if false;
+    }
+  }
+}
