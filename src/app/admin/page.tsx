@@ -28,6 +28,7 @@ import {
   ChevronRight,
   Globe
 } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface AllowedUser {
   id: string; // The username (matricula)
@@ -323,8 +324,8 @@ export default function AdminPage() {
   if (loading || !user || user.role !== 'admin') return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <header className="bg-amber-50/90 border-b border-amber-200 sticky top-0 z-40 shadow-xs backdrop-blur-xs">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-20 transition-colors">
+      <header className="bg-amber-50/90 dark:bg-gray-900/90 border-b border-amber-200 dark:border-gray-800 sticky top-0 z-40 shadow-xs backdrop-blur-xs">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             
@@ -334,10 +335,10 @@ export default function AdminPage() {
                 <ShieldAlert className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-base sm:text-xl font-bold text-gray-900 tracking-tight leading-tight truncate">
+                <h1 className="text-base sm:text-xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight truncate">
                   Painel do Coordenador
                 </h1>
-                <p className="text-[11px] sm:text-xs font-bold text-amber-800 uppercase tracking-wide truncate">
+                <p className="text-[11px] sm:text-xs font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wide truncate">
                   Gestão & Regras
                 </p>
               </div>
@@ -349,10 +350,10 @@ export default function AdminPage() {
               {/* TROCAR SENHA: ALWAYS OUTSIDE THE SANDWICH */}
               <button
                 onClick={() => router.push("/change-password")}
-                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold text-gray-700 hover:text-amber-800 bg-white hover:bg-amber-100/60 border border-amber-300/80 rounded-xl transition-all shadow-2xs active:scale-95"
+                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-amber-800 dark:hover:text-amber-300 bg-white dark:bg-gray-800 hover:bg-amber-100/60 dark:hover:bg-gray-750 border border-amber-300/80 dark:border-gray-700 rounded-xl transition-all shadow-2xs active:scale-95"
                 title="Alterar Senha"
               >
-                <LockKeyhole className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600" />
+                <LockKeyhole className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600 dark:text-gray-300" />
                 <span className="hidden sm:inline">Trocar Senha</span>
               </button>
 
@@ -360,16 +361,17 @@ export default function AdminPage() {
               <div className="hidden md:flex items-center gap-2">
                 <button 
                   onClick={() => router.push("/logs")}
-                  className="flex items-center gap-1.5 px-3.5 py-2 hover:bg-emerald-100/70 border border-emerald-300 rounded-xl text-xs font-bold transition-colors text-emerald-800 bg-white"
+                  className="flex items-center gap-1.5 px-3.5 py-2 hover:bg-emerald-100/70 dark:hover:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded-xl text-xs font-bold transition-colors text-emerald-800 dark:text-emerald-300 bg-white dark:bg-gray-800"
                 >
-                  <Clock className="w-4 h-4 text-emerald-600" /> Histórico & Ranking
+                  <Clock className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> Histórico & Ranking
                 </button>
                 <button 
                   onClick={() => router.push("/dashboard")}
-                  className="flex items-center gap-1.5 px-3.5 py-2 hover:bg-amber-100 border border-amber-300 rounded-xl text-xs font-bold transition-colors text-amber-900 bg-white shadow-2xs"
+                  className="flex items-center gap-1.5 px-3.5 py-2 hover:bg-amber-100 dark:hover:bg-amber-950/40 border border-amber-300 dark:border-amber-800 rounded-xl text-xs font-bold transition-colors text-amber-900 dark:text-amber-300 bg-white dark:bg-gray-800 shadow-2xs"
                 >
-                  <ArrowLeft className="w-4 h-4 text-amber-700" /> Voltar ao Calendário
+                  <ArrowLeft className="w-4 h-4 text-amber-700 dark:text-amber-400" /> Voltar ao Calendário
                 </button>
+                <ThemeToggle variant="icon" />
               </div>
 
               {/* MOBILE HAMBURGER BUTTON (MD:HIDDEN) */}
@@ -378,8 +380,8 @@ export default function AdminPage() {
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className={`md:hidden p-2 rounded-xl border transition-all ${
                   isMobileMenuOpen
-                    ? "bg-amber-200 text-amber-900 border-amber-400"
-                    : "bg-white text-gray-700 border-amber-200 hover:bg-amber-100"
+                    ? "bg-amber-200 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border-amber-400 dark:border-amber-700"
+                    : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-amber-200 dark:border-gray-700 hover:bg-amber-100 dark:hover:bg-gray-700"
                 }`}
                 aria-label="Menu do Coordenador"
               >
@@ -391,10 +393,15 @@ export default function AdminPage() {
 
         {/* MOBILE SLIDE-DOWN DRAWER / SANDWICH MENU */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-amber-200 bg-amber-50/98 backdrop-blur-md px-4 py-3 space-y-2 animate-fade-in shadow-xl">
-            <span className="text-[11px] font-bold text-amber-900/60 uppercase tracking-wider block mb-1">
-              Opções de Navegação
+          <div className="md:hidden border-t border-amber-200 dark:border-gray-800 bg-amber-50/98 dark:bg-gray-900/98 backdrop-blur-md px-4 py-3 space-y-2.5 animate-fade-in shadow-xl">
+            <span className="text-[11px] font-bold text-amber-900/60 dark:text-amber-400/60 uppercase tracking-wider block mb-1">
+              Menu do Coordenador
             </span>
+
+            {/* THEME TOGGLE INSIDE SANDWICH MENU */}
+            <div className="py-1">
+              <ThemeToggle variant="row" />
+            </div>
 
             <button
               type="button"
@@ -402,10 +409,10 @@ export default function AdminPage() {
                 setIsMobileMenuOpen(false);
                 router.push("/dashboard");
               }}
-              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-800 bg-white hover:bg-amber-100/50 transition-colors border border-amber-200"
+              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-850 hover:bg-amber-100/50 dark:hover:bg-amber-950/30 transition-colors border border-amber-200 dark:border-gray-800"
             >
               <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-blue-100 text-blue-700 rounded-lg">
+                <div className="p-2 bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400 rounded-lg">
                   <ArrowLeft className="w-4 h-4" />
                 </div>
                 <span>📅 Voltar ao Calendário de Reservas</span>
@@ -419,10 +426,10 @@ export default function AdminPage() {
                 setIsMobileMenuOpen(false);
                 router.push("/logs");
               }}
-              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-800 bg-white hover:bg-emerald-50 transition-colors border border-emerald-200"
+              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-850 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors border border-emerald-200 dark:border-gray-800"
             >
               <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-emerald-100 text-emerald-700 rounded-lg">
+                <div className="p-2 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 rounded-lg">
                   <Clock className="w-4 h-4" />
                 </div>
                 <span>🏆 Histórico & Ranking Geral</span>
@@ -436,10 +443,10 @@ export default function AdminPage() {
                 setIsMobileMenuOpen(false);
                 router.push("/calendario");
               }}
-              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-800 bg-white hover:bg-indigo-50 transition-colors border border-indigo-200"
+              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-850 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors border border-indigo-200 dark:border-gray-800"
             >
               <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-indigo-100 text-indigo-700 rounded-lg">
+                <div className="p-2 bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 rounded-lg">
                   <Globe className="w-4 h-4" />
                 </div>
                 <span>🌐 Painel Público de Horários</span>
@@ -453,51 +460,51 @@ export default function AdminPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
         
         {/* GLOBAL SYSTEM SETTINGS CARD */}
-        <section className="bg-white rounded-3xl shadow-sm border border-gray-200/80 overflow-hidden">
-          <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent p-6 sm:p-8 border-b border-gray-100">
+        <section className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200/80 dark:border-gray-800 overflow-hidden transition-colors">
+          <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent dark:from-amber-950/40 dark:via-amber-950/20 dark:to-transparent p-6 sm:p-8 border-b border-gray-100 dark:border-gray-800">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="space-y-1.5 max-w-2xl">
                 <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-200">
-                    <SlidersHorizontal className="w-3.5 h-3.5 text-amber-700" /> Configuração Geral do Sistema
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 dark:bg-amber-950/90 text-amber-900 dark:text-amber-300 border border-amber-200 dark:border-amber-700">
+                    <SlidersHorizontal className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" /> Configuração Geral do Sistema
                   </span>
-                  <span className="text-xs text-gray-500 font-medium">
-                    Ativo agora: <strong className="text-gray-900 font-bold">{savedWeeklyQuota} aulas/semana</strong>
+                  <span className="text-xs text-gray-600 dark:text-gray-300 font-medium">
+                    Ativo agora: <strong className="text-gray-900 dark:text-white font-bold">{savedWeeklyQuota} aulas/semana</strong>
                   </span>
                 </div>
-                <h2 className="text-lg font-bold text-gray-900 tracking-tight">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">
                   Limite Geral de Aulas Semanais por Professor
                 </h2>
-                <p className="text-sm text-gray-600 leading-relaxed">
+                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                   Defina a quantidade máxima de aulas que cada professor poderá agendar semanalmente (de segunda a domingo) somando todos os laboratórios. Quando alterado aqui, todos os painéis e regras são atualizados instantaneamente em tempo real.
                 </p>
               </div>
 
               {/* QUOTA CONTROLLER */}
-              <div className="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col items-center gap-4 min-w-[280px]">
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Cota Semanal Global</span>
+              <div className="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col items-center gap-4 min-w-[280px]">
+                <span className="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Cota Semanal Global</span>
                 
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={() => setWeeklyQuotaInput((prev) => Math.max(1, prev - 1))}
-                    className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-lg flex items-center justify-center transition-colors shadow-sm"
+                    className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 font-bold text-lg flex items-center justify-center transition-colors shadow-sm"
                     title="Diminuir cota"
                   >
                     -
                   </button>
 
                   <div className="text-center px-4">
-                    <div className="text-3xl font-black text-amber-600 tracking-tight">
+                    <div className="text-3xl font-black text-amber-600 dark:text-amber-400 tracking-tight">
                       {weeklyQuotaInput}
                     </div>
-                    <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">aulas/sem</span>
+                    <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-400 uppercase tracking-wider">aulas/sem</span>
                   </div>
 
                   <button
                     type="button"
                     onClick={() => setWeeklyQuotaInput((prev) => Math.min(30, prev + 1))}
-                    className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-lg flex items-center justify-center transition-colors shadow-sm"
+                    className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 font-bold text-lg flex items-center justify-center transition-colors shadow-sm"
                     title="Aumentar cota"
                   >
                     +
@@ -514,7 +521,7 @@ export default function AdminPage() {
                       className={`px-2 py-1 text-xs font-bold rounded-md transition-all ${
                         weeklyQuotaInput === num
                           ? "bg-amber-600 text-white shadow-xs"
-                          : "bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200"
+                          : "bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600"
                       }`}
                     >
                       {num} {num === 1 ? "aula" : "aulas"}
@@ -529,7 +536,7 @@ export default function AdminPage() {
                   disabled={isSavingSettings || weeklyQuotaInput === savedWeeklyQuota}
                   className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm ${
                     weeklyQuotaInput === savedWeeklyQuota
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
+                      ? "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-400 cursor-not-allowed border border-gray-200 dark:border-gray-600"
                       : "bg-amber-600 hover:bg-amber-700 active:scale-[0.98] text-white shadow-amber-600/20 shadow-md"
                   }`}
                 >
@@ -537,7 +544,7 @@ export default function AdminPage() {
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   ) : weeklyQuotaInput === savedWeeklyQuota ? (
                     <>
-                      <Check className="w-4 h-4 text-emerald-600" /> Cota em Vigor
+                      <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> Cota em Vigor
                     </>
                   ) : (
                     <>
@@ -547,8 +554,8 @@ export default function AdminPage() {
                 </button>
 
                 {settingsMsg && (
-                  <div className="w-full text-center py-1 px-2 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-xs font-medium animate-fade-in flex items-center justify-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> {settingsMsg}
+                  <div className="w-full text-center py-1 px-2 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 rounded-lg text-xs font-medium animate-fade-in flex items-center justify-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> {settingsMsg}
                   </div>
                 )}
               </div>
@@ -559,15 +566,15 @@ export default function AdminPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* ADD FORM SECTION WITH TABS */}
             <section className="lg:col-span-1">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
+                <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 space-y-6 transition-colors">
                     
                     {/* TAB SWITCHER */}
-                    <div className="flex bg-gray-100 p-1 rounded-xl">
+                    <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
                       <button
                         type="button"
                         onClick={() => { setActiveTab("single"); setError(""); setMsg(""); }}
                         className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
-                          activeTab === "single" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                          activeTab === "single" ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm" : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                         }`}
                       >
                         <UserPlus className="w-3.5 h-3.5" /> Individual
@@ -576,25 +583,25 @@ export default function AdminPage() {
                         type="button"
                         onClick={() => { setActiveTab("bulk"); setError(""); setMsg(""); }}
                         className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
-                          activeTab === "bulk" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                          activeTab === "bulk" ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm" : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                         }`}
                       >
                         <FileText className="w-3.5 h-3.5 text-amber-500" /> Em Lote (Relatório)
                       </button>
                     </div>
 
-                    {error && <p className="text-xs text-red-500 bg-red-50 p-3 border border-red-100 rounded-lg font-medium">{error}</p>}
-                    {msg && <p className="text-xs text-green-700 bg-green-50 p-3 border border-green-200 rounded-lg font-medium">{msg}</p>}
+                    {error && <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/40 p-3 border border-red-100 dark:border-red-900/60 rounded-lg font-medium">{error}</p>}
+                    {msg && <p className="text-xs text-green-700 dark:text-emerald-400 bg-green-50 dark:bg-emerald-950/40 p-3 border border-green-200 dark:border-emerald-900/60 rounded-lg font-medium">{msg}</p>}
 
                     {/* SINGLE USER FORM */}
                     {activeTab === "single" ? (
                       <form onSubmit={handleAddUser} className="space-y-4">
-                          <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                          <h2 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
                              <Plus className="text-amber-500 w-4 h-4" /> Cadastrar Usuário Único
                           </h2>
                           
                           <div className="space-y-1">
-                             <label className="text-xs font-bold text-gray-700">Nome Completo</label>
+                             <label className="text-xs font-bold text-gray-700 dark:text-gray-300">Nome Completo</label>
                              <input 
                                type="text" 
                                placeholder="Ex: Maria dos Santos Silva" 
@@ -610,31 +617,31 @@ export default function AdminPage() {
                                    setNewUsername(clean);
                                  }
                                }}
-                               className="w-full text-sm font-semibold p-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 shadow-2xs" 
+                               className="w-full text-sm font-semibold p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 shadow-2xs" 
                              />
                           </div>
 
                           <div className="space-y-1">
-                             <label className="text-xs font-bold text-gray-700">Usuário de Acesso (Matrícula ou Login)</label>
+                             <label className="text-xs font-bold text-gray-700 dark:text-gray-300">Usuário de Acesso (Matrícula ou Login)</label>
                              <input 
                                type="text" 
                                placeholder="Ex: maria.silva ou 1234567" 
                                value={newUsername} 
                                onChange={e => setNewUsername(e.target.value)}
-                               className="w-full text-sm font-semibold p-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 shadow-2xs" 
+                               className="w-full text-sm font-semibold p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 shadow-2xs" 
                              />
-                             <p className="text-[11px] text-gray-500">Usado no campo &quot;Usuário / Matrícula&quot; na tela de login.</p>
+                             <p className="text-[11px] text-gray-500 dark:text-gray-400">Usado no campo &quot;Usuário / Matrícula&quot; na tela de login.</p>
                           </div>
 
                           <div className="space-y-1">
-                             <label className="text-xs font-bold text-gray-700">Tipo de Perfil</label>
+                             <label className="text-xs font-bold text-gray-700 dark:text-gray-300">Tipo de Perfil</label>
                              <select
                                value={newRole}
                                onChange={(e) => setNewRole(e.target.value as "professor" | "secretario")}
-                               className="w-full text-sm font-bold p-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 shadow-2xs cursor-pointer"
+                               className="w-full text-sm font-bold p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 shadow-2xs cursor-pointer"
                              >
-                               <option value="professor" className="text-gray-900 font-semibold bg-white">Professor(a)</option>
-                               <option value="secretario" className="text-gray-900 font-semibold bg-white">Secretário(a) / Gestor(a)</option>
+                               <option value="professor" className="text-gray-900 dark:text-white font-semibold bg-white dark:bg-gray-800">Professor(a)</option>
+                               <option value="secretario" className="text-gray-900 dark:text-white font-semibold bg-white dark:bg-gray-800">Secretário(a) / Gestor(a)</option>
                              </select>
                           </div>
 
@@ -649,51 +656,51 @@ export default function AdminPage() {
                       /* BULK IMPORT FORM */
                       <div className="space-y-4">
                         <div>
-                          <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                          <h2 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
                              <Sparkles className="text-amber-500 w-4 h-4" /> Importação em Lote via Relatório
                           </h2>
-                          <p className="text-xs text-gray-600 mt-1">
-                            Abra o arquivo PDF/relatório do Sigeduc ou quadro de horários, selecione todo o texto (<kbd className="bg-gray-100 px-1 rounded border">Ctrl+A</kbd>), copie (<kbd className="bg-gray-100 px-1 rounded border">Ctrl+C</kbd>) e cole aqui.
+                          <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
+                            Abra o arquivo PDF/relatório do Sigeduc ou quadro de horários, selecione todo o texto (<kbd className="bg-gray-100 dark:bg-gray-800 px-1 rounded border dark:border-gray-700">Ctrl+A</kbd>), copie (<kbd className="bg-gray-100 dark:bg-gray-800 px-1 rounded border dark:border-gray-700">Ctrl+C</kbd>) e cole aqui.
                           </p>
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-xs font-bold text-gray-700">Perfil para os Usuários Importados</label>
+                          <label className="text-xs font-bold text-gray-700 dark:text-gray-300">Perfil para os Usuários Importados</label>
                           <select
                             value={bulkRole}
                             onChange={(e) => setBulkRole(e.target.value as "professor" | "secretario")}
-                            className="w-full text-sm font-bold p-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 shadow-2xs cursor-pointer"
+                            className="w-full text-sm font-bold p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 shadow-2xs cursor-pointer"
                           >
-                            <option value="professor" className="text-gray-900 font-semibold bg-white">Professores (Padrão)</option>
-                            <option value="secretario" className="text-gray-900 font-semibold bg-white">Secretários / Gestores</option>
+                            <option value="professor" className="text-gray-900 dark:text-white font-semibold bg-white dark:bg-gray-800">Professores (Padrão)</option>
+                            <option value="secretario" className="text-gray-900 dark:text-white font-semibold bg-white dark:bg-gray-800">Secretários / Gestores</option>
                           </select>
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-xs font-bold text-gray-700">Cole o Conteúdo do Relatório / PDF:</label>
+                          <label className="text-xs font-bold text-gray-700 dark:text-gray-300">Cole o Conteúdo do Relatório / PDF:</label>
                           <textarea
                             rows={6}
                             value={bulkText}
                             onChange={(e) => setBulkText(e.target.value)}
                             placeholder="Cole o texto copiado do relatório ou PDF aqui..."
-                            className="w-full text-xs font-mono p-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 shadow-2xs"
+                            className="w-full text-xs font-mono p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 shadow-2xs"
                           ></textarea>
                         </div>
 
                         {/* PREVIEW OF PARSED USERS */}
                         {parsedBulkUsers.length > 0 && (
-                          <div className="bg-amber-50/50 border border-amber-200/60 rounded-xl p-3 space-y-2">
+                          <div className="bg-amber-50/50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-800/60 rounded-xl p-3 space-y-2">
                             <div className="flex items-center justify-between text-xs">
-                              <span className="font-bold text-amber-900">
+                              <span className="font-bold text-amber-900 dark:text-amber-300">
                                 ✨ {parsedBulkUsers.length} professores identificados
                               </span>
-                              <span className="text-amber-700 text-[11px]">Pré-visualização</span>
+                              <span className="text-amber-700 dark:text-amber-400 text-[11px]">Pré-visualização</span>
                             </div>
                             <div className="max-h-40 overflow-y-auto space-y-1 pr-1">
                               {parsedBulkUsers.map((u, idx) => (
-                                <div key={idx} className="flex items-center justify-between bg-white px-2.5 py-1.5 rounded-lg border border-amber-100 text-xs">
-                                  <span className="font-medium text-gray-800 truncate mr-2">{u.name}</span>
-                                  <span className="font-mono text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded text-[11px] font-bold shrink-0">{u.username}</span>
+                                <div key={idx} className="flex items-center justify-between bg-white dark:bg-gray-800 px-2.5 py-1.5 rounded-lg border border-amber-100 dark:border-amber-900/60 text-xs">
+                                  <span className="font-medium text-gray-800 dark:text-gray-200 truncate mr-2">{u.name}</span>
+                                  <span className="font-mono text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/80 px-1.5 py-0.5 rounded text-[11px] font-bold shrink-0">{u.username}</span>
                                 </div>
                               ))}
                             </div>
@@ -707,7 +714,7 @@ export default function AdminPage() {
                           className={`w-full py-3 font-bold text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 ${
                             parsedBulkUsers.length > 0 && !isImporting
                               ? "bg-amber-600 hover:bg-amber-700 active:scale-[0.98] text-white shadow-amber-600/20"
-                              : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                              : "bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
                           }`}
                         >
                           {isImporting ? (
@@ -727,22 +734,22 @@ export default function AdminPage() {
             <section className="lg:col-span-2 space-y-8">
                  
                  {/* ALLOWED USERS */}
-                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                       <h2 className="text-sm font-bold text-gray-700 uppercase tracking-widest flex items-center gap-2">
-                         <Building2 className="w-4 h-4 text-indigo-500" /> Usuários com Acesso Pré-Autorizado
+                 <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-colors">
+                    <div className="bg-gray-50 dark:bg-gray-800 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                       <h2 className="text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-widest flex items-center gap-2">
+                         <Building2 className="w-4 h-4 text-indigo-500 dark:text-indigo-400" /> Usuários com Acesso Pré-Autorizado
                        </h2>
-                       <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100">
+                       <span className="text-xs font-bold text-indigo-600 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/90 px-2.5 py-1 rounded-full border border-indigo-100 dark:border-indigo-800">
                          {allowedUsers.length} autorizados
                        </span>
                     </div>
                     <div className="p-0">
                         {allowedUsers.length === 0 ? (
-                            <p className="p-6 text-sm text-gray-500 text-center">Nenhum usuário pré-autorizado ainda.</p>
+                            <p className="p-6 text-sm text-gray-500 dark:text-gray-400 text-center">Nenhum usuário pré-autorizado ainda.</p>
                         ) : (
                             <div className="overflow-x-auto max-h-[300px]">
                             <table className="w-full text-sm text-left">
-                               <thead className="bg-gray-50 text-gray-500 text-xs uppercase sticky top-0">
+                               <thead className="bg-gray-50 dark:bg-gray-800/90 text-gray-600 dark:text-gray-300 text-xs uppercase sticky top-0 border-b border-gray-100 dark:border-gray-700">
                                   <tr>
                                      <th className="px-6 py-3">Login / Matrícula</th>
                                      <th className="px-6 py-3">Nome</th>
@@ -752,16 +759,16 @@ export default function AdminPage() {
                                </thead>
                                <tbody>
                                   {allowedUsers.map(u => (
-                                      <tr key={u.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50">
-                                          <td className="px-6 py-4 font-bold text-indigo-600">{u.id}</td>
-                                          <td className="px-6 py-4 text-gray-600">{u.name}</td>
+                                      <tr key={u.id} className="border-b border-gray-50 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors">
+                                          <td className="px-6 py-4 font-bold text-indigo-600 dark:text-indigo-400">{u.id}</td>
+                                          <td className="px-6 py-4 text-gray-600 dark:text-gray-200">{u.name}</td>
                                           <td className="px-6 py-4">
-                                             <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${u.role === 'secretario' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                                             <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${u.role === 'secretario' ? 'bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300' : 'bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300'}`}>
                                                {u.role === 'secretario' ? 'Secretário(a)' : 'Professor(a)'}
                                              </span>
                                           </td>
                                           <td className="px-6 py-4 text-right">
-                                              <button onClick={() => handleRevokeAllowed(u.id)} className="text-red-500 hover:text-red-700 font-medium px-3 py-1 bg-red-50 rounded-md">
+                                              <button onClick={() => handleRevokeAllowed(u.id)} className="text-red-500 dark:text-red-400 hover:text-red-700 font-medium px-3 py-1 bg-red-50 dark:bg-red-950/50 rounded-md">
                                                  Revogar
                                               </button>
                                           </td>
@@ -774,22 +781,22 @@ export default function AdminPage() {
                  </div>
 
                  {/* REGISTERED USERS */}
-                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                       <h2 className="text-sm font-bold text-gray-700 uppercase tracking-widest flex items-center gap-2">
-                         <Users className="w-4 h-4 text-green-500" /> Usuários Ativos na Escola
+                 <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-colors">
+                    <div className="bg-gray-50 dark:bg-gray-800 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                       <h2 className="text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-widest flex items-center gap-2">
+                         <Users className="w-4 h-4 text-green-500 dark:text-emerald-400" /> Usuários Ativos na Escola
                        </h2>
-                       <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
+                       <span className="text-xs font-bold text-emerald-600 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/90 px-2.5 py-1 rounded-full border border-emerald-100 dark:border-emerald-800">
                          {registeredUsers.length} ativos
                        </span>
                     </div>
                     <div className="p-0">
                         {registeredUsers.length === 0 ? (
-                            <p className="p-6 text-sm text-gray-500 text-center">Nenhum usuário ativo encontrado no banco de dados.</p>
+                            <p className="p-6 text-sm text-gray-500 dark:text-gray-400 text-center">Nenhum usuário ativo encontrado no banco de dados.</p>
                         ) : (
                             <div className="overflow-x-auto max-h-[300px]">
                             <table className="w-full text-sm text-left">
-                               <thead className="bg-gray-50 text-gray-500 text-xs uppercase sticky top-0">
+                               <thead className="bg-gray-50 dark:bg-gray-800/90 text-gray-600 dark:text-gray-300 text-xs uppercase sticky top-0 border-b border-gray-100 dark:border-gray-700">
                                   <tr>
                                      <th className="px-6 py-3">Nome</th>
                                      <th className="px-6 py-3">Perfil</th>
@@ -799,16 +806,16 @@ export default function AdminPage() {
                                </thead>
                                <tbody>
                                   {registeredUsers.map(u => (
-                                      <tr key={u.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50">
-                                          <td className="px-6 py-4 font-bold text-gray-900">{u.name}</td>
+                                      <tr key={u.id} className="border-b border-gray-50 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors">
+                                          <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">{u.name}</td>
                                           <td className="px-6 py-4">
-                                             <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${u.role === 'secretario' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                                             <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${u.role === 'secretario' ? 'bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300' : 'bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300'}`}>
                                                {u.role === 'secretario' ? 'Secretário(a)' : 'Professor(a)'}
                                              </span>
                                           </td>
-                                          <td className="px-6 py-4 text-emerald-600 font-medium text-xs">Ativo e Autenticado</td>
+                                          <td className="px-6 py-4 text-emerald-600 dark:text-emerald-400 font-medium text-xs">Ativo e Autenticado</td>
                                           <td className="px-6 py-4 text-right">
-                                              <button onClick={() => handleDeleteUser(u.id)} className="text-red-500 hover:text-red-700 font-medium px-3 py-1 hover:bg-red-50 rounded-md transition-colors">
+                                              <button onClick={() => handleDeleteUser(u.id)} className="text-red-500 dark:text-red-400 hover:text-red-700 font-medium px-3 py-1 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-md transition-colors">
                                                  <Trash2 className="w-4 h-4 inline" /> Excluir Vínculo
                                               </button>
                                           </td>

@@ -9,6 +9,7 @@ import { auth, db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { ShieldAlert } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function ChangePasswordPage() {
   const { user, loading, refreshUser } = useAuth();
@@ -76,8 +77,13 @@ export default function ChangePasswordPage() {
   if (loading || !user) return null;
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+    <main className="flex min-h-screen items-center justify-center p-4 bg-gray-50 dark:bg-gray-950 transition-colors relative">
+      {/* FLOATING THEME TOGGLE */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+        <ThemeToggle variant="icon" />
+      </div>
+
+      <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-3xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-800 transition-colors">
         <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-8 text-center">
           <ShieldAlert className="w-12 h-12 text-white mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-white">Segurança</h1>
@@ -85,39 +91,39 @@ export default function ChangePasswordPage() {
         </div>
         
         <form onSubmit={handleChange} className="p-8 space-y-6">
-          <div className="text-sm text-gray-600 mb-4 p-4 bg-gray-50 border border-gray-100 rounded-lg text-center">
-            Olá, <strong>{user.name}</strong>.<br/> Como este é o seu primeiro acesso, é obrigatório criar uma nova senha por motivos de segurança.
+          <div className="text-sm text-gray-600 dark:text-gray-200 mb-4 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl text-center">
+            Olá, <strong className="text-gray-900 dark:text-white">{user.name}</strong>.<br/> Como este é o seu primeiro acesso, é obrigatório criar uma nova senha por motivos de segurança.
           </div>
           
           {error && (
-            <div className="bg-red-50 text-red-500 p-3 rounded-lg text-sm border border-red-100 font-medium">
+            <div className="bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 p-3 rounded-xl text-sm border border-red-100 dark:border-red-900/60 font-medium">
               {error}
             </div>
           )}
           
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Nova Senha</label>
+            <label className="text-sm font-bold text-gray-700 dark:text-gray-300">Nova Senha</label>
             <input
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="text-gray-900 placeholder-gray-400 bg-white w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all"
+              className="text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-800 w-full p-3 border border-gray-300 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all"
             />
           </div>
           
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Confirmar Nova Senha</label>
+            <label className="text-sm font-bold text-gray-700 dark:text-gray-300">Confirmar Nova Senha</label>
             <input
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="text-gray-900 placeholder-gray-400 bg-white w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all"
+              className="text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-800 w-full p-3 border border-gray-300 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all"
             />
           </div>
 
           <button
             disabled={loadingAction}
-            className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-lg transition-colors flex items-center justify-center transform active:scale-95 shadow-md hover:shadow-lg"
+            className="w-full py-3.5 bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-white font-bold rounded-xl transition-all flex items-center justify-center shadow-lg shadow-amber-500/20"
           >
             {loadingAction ? (
                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

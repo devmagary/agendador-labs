@@ -26,6 +26,7 @@ import {
   LockKeyhole,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface LogEntry {
   id: string;
@@ -189,9 +190,9 @@ export default function LogsPage() {
   }, [professorRanking]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col transition-colors">
       {/* HEADER */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-xs">
+      <header className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 sticky top-0 z-30 shadow-xs">
         <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
@@ -199,10 +200,10 @@ export default function LogsPage() {
                 <History className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-base sm:text-xl font-bold text-gray-900 tracking-tight leading-tight truncate">
+                <h1 className="text-base sm:text-xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight truncate">
                   Central de Transparência & Ranking
                 </h1>
-                <p className="text-[11px] sm:text-xs font-semibold text-emerald-600 uppercase tracking-wide truncate">
+                <p className="text-[11px] sm:text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide truncate">
                   Histórico de Agendamentos
                 </p>
               </div>
@@ -212,16 +213,18 @@ export default function LogsPage() {
               {/* TROCAR SENHA: ALWAYS OUTSIDE */}
               <button
                 onClick={() => router.push("/change-password")}
-                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold text-gray-700 hover:text-emerald-700 bg-gray-100/80 hover:bg-emerald-50 border border-gray-200 hover:border-emerald-200 rounded-xl transition-all shadow-2xs active:scale-95"
+                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-emerald-700 dark:hover:text-emerald-400 bg-gray-100/80 dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-gray-750 border border-gray-200 dark:border-gray-700 hover:border-emerald-200 dark:hover:border-emerald-800 rounded-xl transition-all shadow-2xs active:scale-95"
                 title="Alterar Senha"
               >
-                <LockKeyhole className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600" />
+                <LockKeyhole className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600 dark:text-gray-300" />
                 <span className="hidden sm:inline">Trocar Senha</span>
               </button>
 
+              <ThemeToggle variant="icon" />
+
               <button
                 onClick={() => router.back()}
-                className="flex items-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-gray-100 border border-gray-200 rounded-xl text-xs sm:text-sm font-semibold transition-colors text-gray-700 active:scale-95"
+                className="flex items-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs sm:text-sm font-semibold transition-colors text-gray-700 dark:text-gray-200 active:scale-95 bg-white dark:bg-gray-800"
               >
                 <ArrowLeft className="w-4 h-4" /> Voltar
               </button>
@@ -234,7 +237,7 @@ export default function LogsPage() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-6 space-y-5 sm:space-y-6">
         
         {/* TABS NAVIGATION */}
-        <div className="flex items-center justify-between flex-wrap gap-3 bg-white p-1.5 sm:p-2 rounded-2xl shadow-xs border border-gray-200">
+        <div className="flex items-center justify-between flex-wrap gap-3 bg-white dark:bg-gray-900 p-1.5 sm:p-2 rounded-2xl shadow-xs border border-gray-200 dark:border-gray-800 transition-colors">
           <div className="grid grid-cols-2 gap-1.5 sm:gap-2 w-full sm:w-auto">
             <button
               type="button"
@@ -242,7 +245,7 @@ export default function LogsPage() {
               className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all text-center ${
                 activeTab === "timeline"
                   ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20 scale-[1.01]"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               }`}
             >
               <History className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
@@ -255,7 +258,7 @@ export default function LogsPage() {
               className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all text-center ${
                 activeTab === "ranking"
                   ? "bg-amber-500 text-white shadow-md shadow-amber-500/20 scale-[1.01]"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               }`}
             >
               <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-200 shrink-0" />
@@ -263,7 +266,7 @@ export default function LogsPage() {
             </button>
           </div>
 
-          <div className="hidden md:flex items-center gap-2 text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">
+          <div className="hidden md:flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1.5 rounded-full border border-emerald-100 dark:border-emerald-800">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -274,27 +277,27 @@ export default function LogsPage() {
 
         {/* TAB 1: TIMELINE OF ACTIONS */}
         {activeTab === "timeline" && (
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
-              <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+          <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden transition-colors">
+            <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-800/60 flex items-center justify-between">
+              <h2 className="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-widest">
                 Últimos 100 Registros de Atividade
               </h2>
-              <span className="text-xs text-gray-400 font-semibold">{logs.length} registros</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 font-semibold">{logs.length} registros</span>
             </div>
 
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-gray-50 dark:divide-gray-800">
               {loading ? (
                 <div className="p-20 flex flex-col items-center justify-center gap-4">
                   <div className="w-10 h-10 border-4 border-emerald-100 border-t-emerald-600 rounded-full animate-spin"></div>
-                  <p className="text-sm font-medium text-gray-400">Carregando histórico...</p>
+                  <p className="text-sm font-medium text-gray-400 dark:text-gray-500">Carregando histórico...</p>
                 </div>
               ) : logs.length === 0 ? (
                 <div className="p-20 text-center">
-                  <div className="bg-gray-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-100">
-                    <Clock className="w-8 h-8 text-gray-300" />
+                  <div className="bg-gray-50 dark:bg-gray-800 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-100 dark:border-gray-700">
+                    <Clock className="w-8 h-8 text-gray-300 dark:text-gray-600" />
                   </div>
-                  <h3 className="text-gray-900 font-bold">Nenhum registro encontrado</h3>
-                  <p className="text-gray-500 text-sm mt-1">As ações aparecerão aqui assim que ocorrerem.</p>
+                  <h3 className="text-gray-900 dark:text-white font-bold">Nenhum registro encontrado</h3>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">As ações aparecerão aqui assim que ocorrerem.</p>
                 </div>
               ) : (
                 <div className="p-4 sm:p-8 space-y-6">
@@ -313,17 +316,17 @@ export default function LogsPage() {
                       <div key={log.id} className="space-y-6">
                         {showDateHeader && (
                           <div className="flex items-center gap-4 py-4">
-                            <div className="h-px flex-1 bg-gray-100"></div>
-                            <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                            <div className="h-px flex-1 bg-gray-100 dark:bg-gray-800"></div>
+                            <span className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center gap-2">
                               <CalendarDays className="w-3.5 h-3.5" /> {formattedDate}
                             </span>
-                            <div className="h-px flex-1 bg-gray-100"></div>
+                            <div className="h-px flex-1 bg-gray-100 dark:bg-gray-800"></div>
                           </div>
                         )}
 
                         <div className="group relative flex gap-4">
                           {!isLast && (
-                            <div className="absolute left-[1.125rem] top-10 bottom-[-1.5rem] w-px bg-gray-100 group-last:hidden"></div>
+                            <div className="absolute left-[1.125rem] top-10 bottom-[-1.5rem] w-px bg-gray-100 dark:bg-gray-800 group-last:hidden"></div>
                           )}
 
                           <div
@@ -331,8 +334,8 @@ export default function LogsPage() {
                               relative z-10 w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-xs border
                               ${
                                 log.action === "create"
-                                  ? "bg-blue-50 border-blue-100 text-blue-600"
-                                  : "bg-red-50 border-red-100 text-red-600"
+                                  ? "bg-blue-50 dark:bg-blue-950/80 border-blue-100 dark:border-blue-800 text-blue-600 dark:text-blue-400"
+                                  : "bg-red-50 dark:bg-red-950/80 border-red-100 dark:border-red-800 text-red-600 dark:text-red-400"
                               }
                             `}
                           >
@@ -342,25 +345,25 @@ export default function LogsPage() {
                           <div className="flex-1 pt-1 pb-2">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
                               <div className="flex items-center gap-2">
-                                <span className="text-sm font-bold text-gray-900">{log.professorName}</span>
+                                <span className="text-sm font-bold text-gray-900 dark:text-white">{log.professorName}</span>
                                 <span
                                   className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
                                     log.action === "create"
-                                      ? "bg-blue-100 text-blue-700"
-                                      : "bg-red-100 text-red-700"
+                                      ? "bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
+                                      : "bg-red-100 dark:bg-red-950/80 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800"
                                   }`}
                                 >
                                   {log.action === "create" ? "Agendou" : "Cancelou"}
                                 </span>
                               </div>
-                              <span className="text-xs font-medium text-gray-400 flex items-center gap-1">
+                              <span className="text-xs font-medium text-gray-400 dark:text-gray-500 flex items-center gap-1">
                                 <Clock className="w-3 h-3" />{" "}
                                 {log.timestamp && log.timestamp.toDate
                                   ? format(log.timestamp.toDate(), "HH:mm:ss")
                                   : "--:--"}
                               </span>
                             </div>
-                            <p className="text-sm text-gray-600 leading-relaxed font-medium">
+                            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
                               {formatLogText(log)}
                             </p>
                           </div>
@@ -380,50 +383,50 @@ export default function LogsPage() {
             
             {/* QUICK STATS CARDS */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-white p-5 rounded-3xl border border-gray-200 shadow-xs flex items-center gap-3.5">
-                <div className="p-3 bg-amber-50 rounded-2xl text-amber-600 border border-amber-100 shrink-0">
+              <div className="bg-white dark:bg-gray-900 p-5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-xs flex items-center gap-3.5 transition-colors">
+                <div className="p-3 bg-amber-50 dark:bg-amber-950/60 rounded-2xl text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-800 shrink-0">
                   <Trophy className="w-6 h-6" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Líder do Ranking</span>
+                  <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block">Líder do Ranking</span>
                   <p 
-                    className="text-sm sm:text-base font-extrabold text-gray-900 truncate leading-tight my-0.5" 
+                    className="text-sm sm:text-base font-extrabold text-gray-900 dark:text-white truncate leading-tight my-0.5" 
                     title={professorRanking[0]?.name || "Nenhum ainda"}
                   >
                     {professorRanking[0]?.name || "Nenhum ainda"}
                   </p>
-                  <span className="text-xs font-bold text-amber-600 block">
+                  <span className="text-xs font-bold text-amber-600 dark:text-amber-400 block">
                     {professorRanking[0]?.totalHours || 0} {professorRanking[0]?.totalHours === 1 ? "aula reservada" : "aulas reservadas"}
                   </span>
                 </div>
               </div>
 
-              <div className="bg-white p-5 rounded-3xl border border-gray-200 shadow-xs flex items-center gap-3.5">
-                <div className="p-3 bg-blue-50 rounded-2xl text-blue-600 border border-blue-100 shrink-0">
+              <div className="bg-white dark:bg-gray-900 p-5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-xs flex items-center gap-3.5 transition-colors">
+                <div className="p-3 bg-blue-50 dark:bg-blue-950/60 rounded-2xl text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800 shrink-0">
                   <BarChart3 className="w-6 h-6" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Total de Aulas</span>
-                  <p className="text-xl font-extrabold text-gray-900 leading-tight my-0.5">{totalBookedHours} {totalBookedHours === 1 ? "aula" : "aulas"}</p>
-                  <span className="text-xs font-medium text-gray-500 block">em toda a história</span>
+                  <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block">Total de Aulas</span>
+                  <p className="text-xl font-extrabold text-gray-900 dark:text-white leading-tight my-0.5">{totalBookedHours} {totalBookedHours === 1 ? "aula" : "aulas"}</p>
+                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400 block">em toda a história</span>
                 </div>
               </div>
 
-              <div className="bg-white p-5 rounded-3xl border border-gray-200 shadow-xs flex items-center gap-3.5">
-                <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600 border border-emerald-100 shrink-0">
+              <div className="bg-white dark:bg-gray-900 p-5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-xs flex items-center gap-3.5 transition-colors">
+                <div className="p-3 bg-emerald-50 dark:bg-emerald-950/60 rounded-2xl text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800 shrink-0">
                   <Users className="w-6 h-6" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Professores Engajados</span>
-                  <p className="text-xl font-extrabold text-gray-900 leading-tight my-0.5">{professorRanking.length} docentes</p>
-                  <span className="text-xs font-medium text-gray-500 block">utilizando laboratórios</span>
+                  <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block">Professores Engajados</span>
+                  <p className="text-xl font-extrabold text-gray-900 dark:text-white leading-tight my-0.5">{professorRanking.length} docentes</p>
+                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400 block">utilizando laboratórios</span>
                 </div>
               </div>
             </div>
 
             {/* TOP 3 PODIUM */}
             {professorRanking.length >= 2 && (
-              <div className="bg-gradient-to-b from-gray-900 to-gray-800 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-gray-900/10">
+              <div className="bg-gradient-to-b from-gray-900 to-gray-800 dark:from-gray-900 dark:to-gray-950 border border-gray-800 rounded-3xl p-6 sm:p-8 text-white shadow-xl">
                 <div className="text-center mb-8 space-y-1">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
                     <Flame className="w-3.5 h-3.5 text-amber-400" /> Pódio de Destaque
@@ -483,11 +486,11 @@ export default function LogsPage() {
             )}
 
             {/* FULL RANKING TABLE */}
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50/50">
+            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden transition-colors">
+              <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50/70 dark:bg-gray-800/60">
                 <div>
-                  <h3 className="text-base font-bold text-gray-900">Classificação Geral de Utilização</h3>
-                  <p className="text-xs text-gray-500">Ordenado pelo total de aulas reservadas</p>
+                  <h3 className="text-base font-bold text-gray-900 dark:text-white">Classificação Geral de Utilização</h3>
+                  <p className="text-xs text-gray-600 dark:text-gray-300">Ordenado pelo total de aulas reservadas</p>
                 </div>
 
                 {/* SEARCH INPUT */}
@@ -498,19 +501,19 @@ export default function LogsPage() {
                     placeholder="Buscar professor..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full text-xs pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                    className="w-full text-xs pl-9 pr-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                   />
                 </div>
               </div>
 
               {filteredRanking.length === 0 ? (
                 <div className="p-16 text-center">
-                  <p className="text-sm font-medium text-gray-400">Nenhum professor encontrado para esta busca.</p>
+                  <p className="text-sm font-medium text-gray-400 dark:text-gray-500">Nenhum professor encontrado para esta busca.</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm text-left">
-                    <thead className="bg-gray-50 text-gray-500 text-[11px] font-bold uppercase tracking-wider border-b border-gray-100">
+                    <thead className="bg-gray-50 dark:bg-gray-800/90 text-gray-600 dark:text-gray-300 text-[11px] font-bold uppercase tracking-wider border-b border-gray-100 dark:border-gray-700">
                       <tr>
                         <th className="px-6 py-3.5 text-center w-16">Posição</th>
                         <th className="px-6 py-3.5">Professor</th>
@@ -519,29 +522,29 @@ export default function LogsPage() {
                         <th className="px-6 py-3.5 text-center">Salas c/ TV</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {filteredRanking.map((p, idx) => {
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                      {filteredRanking.map((p) => {
                         const originalPos = professorRanking.findIndex((x) => x.name === p.name) + 1;
                         const percentage = Math.round((p.totalHours / maxRankHours) * 100);
 
                         return (
-                          <tr key={p.name} className="hover:bg-gray-50/80 transition-colors">
+                          <tr key={p.name} className="hover:bg-gray-50/80 dark:hover:bg-gray-800/50 transition-colors">
                             {/* POSITION BADGE */}
                             <td className="px-6 py-4 text-center">
                               {originalPos === 1 ? (
-                                <span className="inline-flex items-center justify-center w-7 h-7 rounded-xl bg-amber-100 text-amber-800 font-black text-xs border border-amber-200">
+                                <span className="inline-flex items-center justify-center w-7 h-7 rounded-xl bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 font-black text-xs border border-amber-200 dark:border-amber-800">
                                   🥇 1º
                                 </span>
                               ) : originalPos === 2 ? (
-                                <span className="inline-flex items-center justify-center w-7 h-7 rounded-xl bg-slate-100 text-slate-700 font-black text-xs border border-slate-200">
+                                <span className="inline-flex items-center justify-center w-7 h-7 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-black text-xs border border-slate-200 dark:border-slate-700">
                                   🥈 2º
                                 </span>
                               ) : originalPos === 3 ? (
-                                <span className="inline-flex items-center justify-center w-7 h-7 rounded-xl bg-amber-50 text-amber-900 font-black text-xs border border-amber-200">
+                                <span className="inline-flex items-center justify-center w-7 h-7 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 font-black text-xs border border-amber-200 dark:border-amber-800">
                                   🥉 3º
                                 </span>
                               ) : (
-                                <span className="text-xs font-bold text-gray-400">
+                                <span className="text-xs font-bold text-gray-400 dark:text-gray-500">
                                   #{originalPos}
                                 </span>
                               )}
@@ -550,12 +553,12 @@ export default function LogsPage() {
                             {/* PROFESSOR NAME */}
                             <td className="px-6 py-4 max-w-[260px]">
                               <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0">
+                                <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-100 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-xs shrink-0">
                                   {p.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <span className="font-bold text-gray-900 block truncate" title={p.name}>{p.name}</span>
-                                  <span className="text-[11px] text-gray-400 font-medium">
+                                  <span className="font-bold text-gray-900 dark:text-white block truncate" title={p.name}>{p.name}</span>
+                                  <span className="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
                                     {p.totalReservations} {p.totalReservations === 1 ? "reserva" : "reservas"}
                                   </span>
                                 </div>
@@ -566,10 +569,10 @@ export default function LogsPage() {
                             <td className="px-6 py-4 min-w-[180px]">
                               <div className="space-y-1">
                                 <div className="flex items-center justify-between text-xs">
-                                  <span className="font-extrabold text-gray-900">{p.totalHours} {p.totalHours === 1 ? "aula" : "aulas"}</span>
-                                  <span className="text-gray-400 font-semibold">{percentage}% do líder</span>
+                                  <span className="font-extrabold text-gray-900 dark:text-white">{p.totalHours} {p.totalHours === 1 ? "aula" : "aulas"}</span>
+                                  <span className="text-gray-400 dark:text-gray-500 font-semibold">{percentage}% do líder</span>
                                 </div>
-                                <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                                <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2 overflow-hidden">
                                   <div
                                     className="bg-amber-500 h-full rounded-full transition-all duration-500"
                                     style={{ width: `${percentage}%` }}
@@ -582,17 +585,17 @@ export default function LogsPage() {
                             <td className="px-6 py-4">
                               <div className="flex flex-wrap items-center gap-1.5">
                                 {p.labTecHours > 0 && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-50 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800">
                                     <Monitor className="w-3 h-3" /> LabTec: {p.labTecHours} {p.labTecHours === 1 ? "aula" : "aulas"}
                                   </span>
                                 )}
                                 {p.manutecHours > 0 && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-100">
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border border-amber-100 dark:border-amber-800">
                                     <Wrench className="w-3 h-3" /> Manutec: {p.manutecHours} {p.manutecHours === 1 ? "aula" : "aulas"}
                                   </span>
                                 )}
                                 {p.roboticaHours > 0 && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-purple-50 text-purple-700 border border-purple-100">
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-purple-50 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 border border-purple-100 dark:border-purple-800">
                                     <Bot className="w-3 h-3" /> Robótica: {p.roboticaHours} {p.roboticaHours === 1 ? "aula" : "aulas"}
                                   </span>
                                 )}
@@ -602,11 +605,11 @@ export default function LogsPage() {
                             {/* TV BADGE */}
                             <td className="px-6 py-4 text-center">
                               {p.tvCount > 0 ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800">
                                   <Tv className="w-3 h-3" /> {p.tvCount}x
                                 </span>
                               ) : (
-                                <span className="text-gray-300 text-xs">-</span>
+                                <span className="text-gray-300 dark:text-gray-600 text-xs">-</span>
                               )}
                             </td>
                           </tr>
@@ -622,8 +625,8 @@ export default function LogsPage() {
 
       </main>
 
-      <footer className="py-8 text-center border-t border-gray-100 bg-white">
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+      <footer className="py-8 text-center border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 transition-colors">
+        <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
           AgendaLab • Transparência Pública & Gestão Escolar
         </p>
       </footer>

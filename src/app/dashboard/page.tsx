@@ -39,12 +39,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Tv,
-  CalendarDays,
   AlertCircle,
   Menu,
   X,
   LogOut,
+  Users,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 type Laboratory = "LabTec" | "Manutec" | "Robotica";
 type Shift = "Matutino" | "Vespertino" | "Noturno";
@@ -450,19 +451,31 @@ export default function DashboardPage() {
   const roleBadge = () => {
     switch (user.role) {
       case "admin":
-        return <span className="bg-amber-100 text-amber-800 text-xs px-2.5 py-0.5 rounded-full font-bold border border-amber-200">Coordenador / Admin</span>;
+        return (
+          <span className="bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 text-xs px-2.5 py-0.5 rounded-full font-bold border border-amber-200 dark:border-amber-800">
+            Coordenador / Admin
+          </span>
+        );
       case "secretario":
-        return <span className="bg-purple-100 text-purple-800 text-xs px-2.5 py-0.5 rounded-full font-bold border border-purple-200">Secretaria Escolar</span>;
+        return (
+          <span className="bg-purple-100 dark:bg-purple-950/60 text-purple-900 dark:text-purple-300 text-xs px-2.5 py-0.5 rounded-full font-bold border border-purple-200 dark:border-purple-800">
+            Secretaria Escolar
+          </span>
+        );
       default:
-        return <span className="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded-full font-bold border border-blue-200">Professor(a)</span>;
+        return (
+          <span className="bg-blue-100 dark:bg-blue-950/60 text-blue-900 dark:text-blue-300 text-xs px-2.5 py-0.5 rounded-full font-bold border border-blue-200 dark:border-blue-800">
+            Professor(a)
+          </span>
+        );
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 transition-colors">
       {/* HEADER */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <header className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40 shadow-xs">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             
             {/* LOGO & USER INFO */}
@@ -472,11 +485,11 @@ export default function DashboardPage() {
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 sm:gap-2">
-                  <h1 className="text-base sm:text-xl font-bold text-gray-900 tracking-tight">AgendaLab</h1>
+                  <h1 className="text-base sm:text-xl font-bold text-gray-900 dark:text-white tracking-tight">AgendaLab</h1>
                   <div className="hidden xs:inline-flex">{roleBadge()}</div>
                 </div>
-                <p className="text-[11px] sm:text-xs text-gray-500 font-medium truncate max-w-[140px] sm:max-w-[240px]">
-                  Olá, <strong className="text-gray-700">{user.name}</strong>
+                <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium truncate max-w-[130px] sm:max-w-[240px]">
+                  Olá, <strong className="text-gray-700 dark:text-gray-200">{user.name}</strong>
                 </p>
               </div>
             </div>
@@ -487,10 +500,10 @@ export default function DashboardPage() {
               {/* TROCAR SENHA: ALWAYS OUTSIDE THE SANDWICH (MOBILE & DESKTOP) */}
               <button
                 onClick={() => router.push("/change-password")}
-                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold text-gray-700 hover:text-blue-700 bg-gray-100/80 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 rounded-xl transition-all shadow-2xs active:scale-95"
+                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-blue-700 dark:hover:text-blue-400 bg-gray-100/80 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-gray-750 border border-gray-200 dark:border-gray-700 rounded-xl transition-all shadow-2xs active:scale-95"
                 title="Alterar Senha"
               >
-                <LockKeyhole className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600" />
+                <LockKeyhole className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600 dark:text-gray-300" />
                 <span className="hidden sm:inline">Trocar Senha</span>
               </button>
 
@@ -498,33 +511,36 @@ export default function DashboardPage() {
               <div className="hidden md:flex items-center gap-2">
                 <button
                   onClick={() => router.push("/logs")}
-                  className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-gray-700 hover:text-emerald-700 bg-gray-50 hover:bg-emerald-50 border border-gray-200 hover:border-emerald-200 rounded-xl transition-all"
+                  className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-emerald-700 dark:hover:text-emerald-400 bg-gray-50 dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-gray-200 dark:border-gray-700 rounded-xl transition-all"
                 >
-                  <Clock className="w-4 h-4 text-emerald-600" />
+                  <Clock className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   Histórico & Ranking
                 </button>
 
                 <button
                   onClick={() => router.push("/calendario")}
-                  className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-gray-700 hover:text-blue-700 bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 rounded-xl transition-all"
+                  className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-blue-700 dark:hover:text-blue-400 bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-gray-200 dark:border-gray-700 rounded-xl transition-all"
                 >
-                  <Globe className="w-4 h-4 text-blue-600" />
+                  <Globe className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                   Painel Público
                 </button>
 
                 {user.role === "admin" && (
                   <button
                     onClick={() => router.push("/admin")}
-                    className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl transition-all shadow-xs"
+                    className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 border border-amber-200 dark:border-amber-800 rounded-xl transition-all shadow-xs"
                   >
-                    <ShieldAlert className="w-4 h-4 text-amber-600" />
+                    <ShieldAlert className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                     Painel do Coordenador
                   </button>
                 )}
 
+                {/* DESKTOP THEME TOGGLE */}
+                <ThemeToggle variant="icon" />
+
                 <button
                   onClick={handleLogout}
-                  className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-xl transition-colors text-xs font-bold flex items-center gap-1"
+                  className="p-2 text-red-500 hover:text-red-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-colors text-xs font-bold flex items-center gap-1"
                   title="Sair"
                 >
                   <LogOut className="w-4 h-4" />
@@ -538,8 +554,8 @@ export default function DashboardPage() {
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className={`md:hidden p-2 rounded-xl border transition-all ${
                   isMobileMenuOpen
-                    ? "bg-blue-50 text-blue-600 border-blue-200"
-                    : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+                    ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800"
+                    : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                 }`}
                 aria-label="Abrir menu de navegação"
               >
@@ -551,12 +567,17 @@ export default function DashboardPage() {
 
         {/* MOBILE SLIDE-DOWN DRAWER / SANDWICH MENU */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-100 bg-white/95 backdrop-blur-md px-4 py-3 space-y-2 animate-fade-in shadow-xl">
-            <div className="pb-2 mb-2 border-b border-gray-100 flex items-center justify-between">
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-                Navegação do Sistema
+          <div className="md:hidden border-t border-gray-100 dark:border-gray-800 bg-white/95 dark:bg-gray-900/98 backdrop-blur-md px-4 py-3 space-y-2.5 animate-fade-in shadow-2xl">
+            <div className="pb-2 mb-1 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+              <span className="text-[11px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
+                Menu do Sistema
               </span>
               <div>{roleBadge()}</div>
+            </div>
+
+            {/* THEME TOGGLE INSIDE SANDWICH MENU */}
+            <div className="py-1">
+              <ThemeToggle variant="row" />
             </div>
 
             <button
@@ -565,10 +586,10 @@ export default function DashboardPage() {
                 setIsMobileMenuOpen(false);
                 router.push("/logs");
               }}
-              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-700 hover:text-emerald-700 hover:bg-emerald-50 transition-colors border border-gray-100"
+              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-800 dark:text-gray-100 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xs"
             >
               <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-emerald-100 text-emerald-700 rounded-lg">
+                <div className="p-2 bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 rounded-lg">
                   <Clock className="w-4 h-4" />
                 </div>
                 <span>🏆 Histórico & Ranking Geral</span>
@@ -582,10 +603,10 @@ export default function DashboardPage() {
                 setIsMobileMenuOpen(false);
                 router.push("/calendario");
               }}
-              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-700 hover:text-blue-700 hover:bg-blue-50 transition-colors border border-gray-100"
+              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-800 dark:text-gray-100 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xs"
             >
               <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-blue-100 text-blue-700 rounded-lg">
+                <div className="p-2 bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 rounded-lg">
                   <Globe className="w-4 h-4" />
                 </div>
                 <span>🌐 Painel Público de Horários</span>
@@ -600,7 +621,7 @@ export default function DashboardPage() {
                   setIsMobileMenuOpen(false);
                   router.push("/admin");
                 }}
-                className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-amber-900 bg-amber-50/70 hover:bg-amber-100 transition-colors border border-amber-200"
+                className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-amber-900 dark:text-amber-200 bg-amber-50/70 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 transition-colors border border-amber-200 dark:border-amber-700 shadow-xs"
               >
                 <div className="flex items-center gap-2.5">
                   <div className="p-2 bg-amber-500 text-white rounded-lg">
@@ -608,18 +629,18 @@ export default function DashboardPage() {
                   </div>
                   <span>🛡️ Painel do Coordenador</span>
                 </div>
-                <ChevronRight className="w-4 h-4 text-amber-700" />
+                <ChevronRight className="w-4 h-4 text-amber-700 dark:text-amber-400" />
               </button>
             )}
 
-            <div className="pt-2 border-t border-gray-100">
+            <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
               <button
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
                   handleLogout();
                 }}
-                className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 transition-colors border border-red-100"
+                className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors border border-red-100 dark:border-red-900/60"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Sair da Conta</span>
@@ -629,26 +650,26 @@ export default function DashboardPage() {
         )}
       </header>
 
-      {/* MAIN CONTAINER */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 space-y-5 sm:space-y-6">
+      {/* MAIN BODY */}
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-8 space-y-5 sm:space-y-6">
         
         {/* SUCCESS MESSAGE BANNER */}
         {successMsg && (
-          <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-2xl flex items-center gap-2 text-sm font-semibold shadow-sm animate-fade-in">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+          <div className="bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 px-4 py-3 rounded-2xl flex items-center gap-2 text-sm font-semibold shadow-sm animate-fade-in">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span>{successMsg}</span>
           </div>
         )}
 
         {/* LABORATORY SELECTOR TABS (GRID 3 COLUMNS ON MOBILE & DESKTOP) */}
-        <section className="bg-white p-1.5 sm:p-2 rounded-2xl shadow-xs border border-gray-200 grid grid-cols-3 gap-1 sm:gap-2">
+        <section className="bg-white dark:bg-gray-900 p-1.5 sm:p-2 rounded-2xl shadow-xs border border-gray-200 dark:border-gray-800 grid grid-cols-3 gap-1 sm:gap-2 transition-colors">
           <button
             type="button"
             onClick={() => { setSelectedLab("LabTec"); setSelectedClasses([]); setSelectedShift(null); }}
             className={`py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-center ${
               selectedLab === "LabTec"
                 ? "bg-blue-600 text-white shadow-md shadow-blue-500/20 scale-[1.01]"
-                : "text-gray-600 hover:bg-gray-50 border border-transparent hover:border-gray-200"
+                : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
             }`}
           >
             <Monitor className="w-4 h-4 shrink-0" />
@@ -661,7 +682,7 @@ export default function DashboardPage() {
             className={`py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-center ${
               selectedLab === "Manutec"
                 ? "bg-amber-600 text-white shadow-md shadow-amber-500/20 scale-[1.01]"
-                : "text-gray-600 hover:bg-gray-50 border border-transparent hover:border-gray-200"
+                : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
             }`}
           >
             <Wrench className="w-4 h-4 shrink-0" />
@@ -674,7 +695,7 @@ export default function DashboardPage() {
             className={`py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-center ${
               selectedLab === "Robotica"
                 ? "bg-purple-600 text-white shadow-md shadow-purple-500/20 scale-[1.01]"
-                : "text-gray-600 hover:bg-gray-50 border border-transparent hover:border-gray-200"
+                : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
             }`}
           >
             <Bot className="w-4 h-4 shrink-0" />
@@ -684,33 +705,37 @@ export default function DashboardPage() {
 
         {/* SECRETARY SPECIAL BOOKING CONTROLS */}
         {user.role === "secretario" && (
-          <section className="bg-purple-50/70 border border-purple-200 rounded-3xl p-5 sm:p-6 shadow-xs space-y-4">
+          <section className="bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/70 rounded-3xl p-5 sm:p-6 shadow-xs space-y-4 transition-colors">
             <div className="flex items-center gap-2.5">
               <div className="p-2 bg-purple-600 rounded-xl text-white">
-                <CalendarDays className="w-4 h-4" />
+                <Users className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-purple-950">Agendamento por Delegação (Secretaria)</h3>
-                <p className="text-xs text-purple-700">Selecione o professor para quem você está agendando. O limite semanal será aplicado a ele.</p>
+                <h3 className="text-sm font-bold text-purple-950 dark:text-purple-100">
+                  Painel de Delegação da Secretaria
+                </h3>
+                <p className="text-xs text-purple-700 dark:text-purple-300 font-medium">
+                  Como secretária, você pode agendar aulas em nome de qualquer um dos professores cadastrados na base.
+                </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-bold text-purple-950 mb-1.5 flex items-center justify-between">
+                <label className="text-xs font-bold text-purple-950 dark:text-purple-200 mb-1.5 flex items-center justify-between">
                   <span>Selecionar Professor Cadastrado</span>
-                  <span className="text-[11px] font-bold text-purple-800 bg-purple-100 px-2 py-0.5 rounded-md border border-purple-200">
+                  <span className="text-[11px] font-bold text-purple-800 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/60 px-2 py-0.5 rounded-md border border-purple-200 dark:border-purple-800">
                     {professorsList.length} professores na base
                   </span>
                 </label>
                 <select
                   value={targetProfessorName}
                   onChange={(e) => setTargetProfessorName(e.target.value)}
-                  className="w-full text-xs sm:text-sm font-bold p-3 bg-white border-2 border-purple-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 text-gray-950 shadow-xs cursor-pointer"
+                  className="w-full text-xs sm:text-sm font-bold p-3 bg-white dark:bg-gray-900 border-2 border-purple-300 dark:border-purple-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 text-gray-950 dark:text-white shadow-xs cursor-pointer"
                 >
-                  <option value="" className="text-gray-500 font-normal">-- Escolha um professor da lista ({professorsList.length} disponíveis) --</option>
+                  <option value="" className="text-gray-500 dark:text-gray-400 font-normal">-- Escolha um professor da lista ({professorsList.length} disponíveis) --</option>
                   {professorsList.map((p) => (
-                    <option key={p.id} value={p.name} className="text-gray-950 font-bold bg-white py-1">
+                    <option key={p.id} value={p.name} className="text-gray-950 dark:text-white font-bold bg-white dark:bg-gray-900 py-1">
                       {p.name}
                     </option>
                   ))}
@@ -718,9 +743,9 @@ export default function DashboardPage() {
               </div>
 
               <div className="relative">
-                <label className="text-xs font-bold text-purple-950 mb-1.5 flex items-center justify-between">
+                <label className="text-xs font-bold text-purple-950 dark:text-purple-200 mb-1.5 flex items-center justify-between">
                   <span>Ou Digite o Nome do Professor</span>
-                  <span className="text-[11px] text-purple-700 font-medium">Busca em tempo real</span>
+                  <span className="text-[11px] text-purple-700 dark:text-purple-300 font-medium">Busca em tempo real</span>
                 </label>
                 <input
                   type="text"
@@ -728,7 +753,7 @@ export default function DashboardPage() {
                   placeholder="Ex: Digite o nome para buscar na base..."
                   value={targetProfessorName}
                   onChange={(e) => setTargetProfessorName(e.target.value)}
-                  className="w-full text-xs sm:text-sm font-bold p-3 bg-white border-2 border-purple-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 text-gray-950 placeholder:text-gray-400 shadow-xs"
+                  className="w-full text-xs sm:text-sm font-bold p-3 bg-white dark:bg-gray-900 border-2 border-purple-300 dark:border-purple-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 text-gray-950 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 shadow-xs"
                 />
                 <datalist id="professors-datalist">
                   {professorsList.map((p) => (
@@ -738,8 +763,8 @@ export default function DashboardPage() {
 
                 {/* INTERACTIVE MATCHING PILLS */}
                 {professorSuggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border-2 border-purple-200 rounded-2xl shadow-xl z-30 p-2 space-y-1 animate-fade-in">
-                    <span className="text-[10px] font-bold text-purple-700 uppercase tracking-wider px-2 block">
+                  <div className="absolute top-full left-0 right-0 mt-1.5 bg-white dark:bg-gray-900 border-2 border-purple-200 dark:border-purple-800 rounded-2xl shadow-xl z-30 p-2 space-y-1 animate-fade-in">
+                    <span className="text-[10px] font-bold text-purple-700 dark:text-purple-300 uppercase tracking-wider px-2 block">
                       Sugestões encontradas na base ({professorSuggestions.length}):
                     </span>
                     {professorSuggestions.map((p) => (
@@ -747,10 +772,10 @@ export default function DashboardPage() {
                         key={p.id}
                         type="button"
                         onClick={() => setTargetProfessorName(p.name)}
-                        className="w-full text-left px-3 py-2 text-xs font-bold text-gray-900 hover:bg-purple-100 hover:text-purple-950 rounded-xl transition-colors flex items-center justify-between border border-transparent hover:border-purple-200"
+                        className="w-full text-left px-3 py-2 text-xs font-bold text-gray-900 dark:text-gray-100 hover:bg-purple-100 dark:hover:bg-purple-950/60 hover:text-purple-950 dark:hover:text-purple-200 rounded-xl transition-colors flex items-center justify-between border border-transparent hover:border-purple-200 dark:hover:border-purple-800"
                       >
                         <span>{p.name}</span>
-                        <span className="text-[10px] text-purple-600 font-semibold bg-purple-50 px-2 py-0.5 rounded-md">
+                        <span className="text-[10px] text-purple-600 dark:text-purple-400 font-semibold bg-purple-50 dark:bg-purple-950/80 px-2 py-0.5 rounded-md">
                           Selecionar ↵
                         </span>
                       </button>
@@ -761,17 +786,17 @@ export default function DashboardPage() {
             </div>
 
             {targetProfessorName.trim() && (
-              <div className="pt-2 border-t border-purple-200/60 flex flex-wrap items-center justify-between gap-3">
-                <div className="text-xs text-purple-900 font-semibold">
+              <div className="pt-2 border-t border-purple-200/60 dark:border-purple-800/60 flex flex-wrap items-center justify-between gap-3">
+                <div className="text-xs text-purple-900 dark:text-purple-200 font-semibold">
                   Cota de <strong>{targetProfessorName}</strong> nesta semana ({weeklyUsage.weekStartFormatted} a {weeklyUsage.weekEndFormatted}):{" "}
                   <span className={`px-2 py-0.5 rounded-full font-bold ${
-                    weeklyUsage.used >= maxWeeklyHours ? "bg-red-100 text-red-700" : "bg-purple-200 text-purple-900"
+                    weeklyUsage.used >= maxWeeklyHours ? "bg-red-100 dark:bg-red-950/70 text-red-700 dark:text-red-300" : "bg-purple-200 dark:bg-purple-900/70 text-purple-900 dark:text-purple-200"
                   }`}>
                     {weeklyUsage.used} / {maxWeeklyHours} {maxWeeklyHours === 1 ? "aula utilizada" : "aulas utilizadas"}
                   </span>
                 </div>
 
-                <label className="flex items-center gap-2 text-xs font-bold text-purple-950 cursor-pointer bg-white px-3 py-1.5 rounded-xl border border-purple-200 shadow-2xs">
+                <label className="flex items-center gap-2 text-xs font-bold text-purple-950 dark:text-purple-200 cursor-pointer bg-white dark:bg-gray-900 px-3 py-1.5 rounded-xl border border-purple-200 dark:border-purple-800 shadow-2xs">
                   <input
                     type="checkbox"
                     checked={allowSecretaryOverride}
@@ -786,18 +811,18 @@ export default function DashboardPage() {
         )}
 
         {/* MONTHLY CALENDAR CARD */}
-        <section className="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
+        <section className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden transition-colors">
           {/* MONTH HEADER CONTROLS */}
-          <div className="px-6 py-5 border-b border-gray-100 flex flex-wrap items-center justify-between gap-4 bg-gray-50/50">
+          <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex flex-wrap items-center justify-between gap-4 bg-gray-50/70 dark:bg-gray-800/60">
             <div className="flex items-center gap-3">
-              <div className="bg-blue-50 p-2 rounded-xl text-blue-600 border border-blue-100">
+              <div className="bg-blue-50 dark:bg-blue-950/80 p-2 rounded-xl text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800">
                 <CalendarIcon className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-base font-bold text-gray-900 capitalize">
+                <h2 className="text-base font-bold text-gray-900 dark:text-white capitalize">
                   {format(currentMonth, "MMMM 'de' yyyy", { locale: ptBR })}
                 </h2>
-                <p className="text-xs text-gray-500">Selecione um dia do mês para visualizar ou realizar agendamentos</p>
+                <p className="text-xs text-gray-600 dark:text-gray-300">Selecione um dia do mês para visualizar ou realizar agendamentos</p>
               </div>
             </div>
 
@@ -809,25 +834,25 @@ export default function DashboardPage() {
                   setCurrentMonth(today);
                   setSelectedDate(today);
                 }}
-                className="px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl transition-colors"
+                className="px-3 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/80 hover:bg-blue-100 dark:hover:bg-blue-900/60 border border-blue-200 dark:border-blue-700 rounded-xl transition-colors shadow-2xs"
               >
                 Hoje
               </button>
 
-              <div className="flex items-center bg-white border border-gray-200 rounded-xl shadow-2xs overflow-hidden">
+              <div className="flex items-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xs overflow-hidden">
                 <button
                   type="button"
                   onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                  className="p-2 hover:bg-gray-100 text-gray-600 transition-colors"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
                   title="Mês Anterior"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                <div className="w-px h-4 bg-gray-200"></div>
+                <div className="w-px h-4 bg-gray-200 dark:bg-gray-700"></div>
                 <button
                   type="button"
                   onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                  className="p-2 hover:bg-gray-100 text-gray-600 transition-colors"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
                   title="Próximo Mês"
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -842,7 +867,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center">
               {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((d, i) => (
                 <div key={d} className={`text-[11px] font-bold uppercase tracking-wider py-1.5 ${
-                  i >= 5 ? "text-gray-400" : "text-gray-600"
+                  i >= 5 ? "text-gray-400 dark:text-gray-500" : "text-gray-600 dark:text-gray-300"
                 }`}>
                   {d}
                 </div>
@@ -872,26 +897,34 @@ export default function DashboardPage() {
                     }}
                     className={`
                       relative flex flex-col items-center justify-between p-1.5 sm:p-2.5 rounded-xl sm:rounded-2xl border transition-all min-h-[48px] sm:min-h-[78px] text-left
-                      ${!isCurrentMonth ? "opacity-35 bg-gray-50/50 border-transparent hover:opacity-75" : ""}
-                      ${isWeekendDay && isCurrentMonth ? "bg-gray-50/60 border-gray-100 text-gray-400" : ""}
+                      ${!isCurrentMonth ? "opacity-30 dark:opacity-20 bg-gray-50/50 dark:bg-gray-950/40 border-transparent hover:opacity-70" : ""}
+                      ${isWeekendDay && isCurrentMonth ? "bg-gray-50/60 dark:bg-gray-950/50 border-gray-100 dark:border-gray-800/80 text-gray-400 dark:text-gray-500" : ""}
                       ${
                         isSelected
                           ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/25 scale-[1.02] z-10"
                           : isCurrentDay
-                          ? "border-blue-300 bg-blue-50/50 text-blue-900 hover:border-blue-400"
-                          : "border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50/30"
+                          ? "border-blue-400 dark:border-blue-500 bg-blue-50/60 dark:bg-blue-950/60 text-blue-900 dark:text-blue-200 hover:border-blue-500"
+                          : !isWeekendDay && isCurrentMonth
+                          ? "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50/30 dark:hover:bg-gray-700 shadow-2xs"
+                          : ""
                       }
                     `}
                   >
                     <div className="w-full flex items-center justify-between">
-                      <span className={`text-xs sm:text-sm font-bold ${
-                        isSelected ? "text-white" : isCurrentDay ? "text-blue-600" : "text-gray-800"
+                      <span className={`text-xs sm:text-sm font-extrabold ${
+                        isSelected
+                          ? "text-white"
+                          : isCurrentDay
+                          ? "text-blue-600 dark:text-blue-300"
+                          : isWeekendDay
+                          ? "text-gray-400 dark:text-gray-500"
+                          : "text-gray-800 dark:text-gray-100"
                       }`}>
                         {format(day, "d")}
                       </span>
 
                       {isCurrentDay && !isSelected && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400"></span>
                       )}
                     </div>
 
@@ -904,10 +937,10 @@ export default function DashboardPage() {
                             isSelected
                               ? "bg-white/20 text-white"
                               : selectedLab === "LabTec"
-                              ? "bg-blue-100 text-blue-700"
+                              ? "bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-200 border border-blue-200 dark:border-blue-700/60"
                               : selectedLab === "Manutec"
-                              ? "bg-amber-100 text-amber-800"
-                              : "bg-purple-100 text-purple-800"
+                              ? "bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-700/60"
+                              : "bg-purple-100 dark:bg-purple-900/60 text-purple-800 dark:text-purple-200 border border-purple-200 dark:border-purple-700/60"
                           }`}>
                             <span className="w-1 h-1 rounded-full bg-current"></span>
                             {reservationsCount} {reservationsCount === 1 ? "reserva" : "reservas"}
@@ -937,30 +970,30 @@ export default function DashboardPage() {
 
         {/* PROFESSOR WEEKLY QUOTA WIDGET (4 HOURS LIMIT) */}
         {(user.role === "professor" || (user.role === "secretario" && targetProfessorName.trim())) && (
-          <section className="bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-gray-200">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <section className="bg-white dark:bg-gray-900 rounded-3xl p-5 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-800 transition-colors">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Cota Semanal de Agendamentos</span>
-                  <span className="text-[11px] font-semibold text-gray-400">
+                  <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Cota Semanal de Agendamentos</span>
+                  <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-400">
                     (Semana: {weeklyUsage.weekStartFormatted} a {weeklyUsage.weekEndFormatted})
                   </span>
                 </div>
-                <h3 className="text-sm font-bold text-gray-900">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white">
                   {user.role === "secretario" ? `Uso do(a) Prof. ${effectiveProfName}` : "Seu Limite Semanal"}
                 </h3>
               </div>
 
               <div className="flex flex-col sm:items-end gap-1 min-w-[200px]">
                 <div className="flex items-center justify-between sm:justify-end gap-3 text-xs font-bold">
-                  <span className="text-gray-500">Aulas Utilizadas:</span>
+                  <span className="text-gray-500 dark:text-gray-400">Aulas Utilizadas:</span>
                   <span
                     className={`text-sm ${
                       weeklyUsage.used >= maxWeeklyHours
-                        ? "text-red-600 font-extrabold"
+                        ? "text-red-600 dark:text-red-400 font-extrabold"
                         : weeklyUsage.used >= maxWeeklyHours - 1
-                        ? "text-amber-600"
-                        : "text-emerald-600"
+                        ? "text-amber-600 dark:text-amber-400"
+                        : "text-emerald-600 dark:text-emerald-400"
                     }`}
                   >
                     {weeklyUsage.used} / {maxWeeklyHours}
@@ -968,7 +1001,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* PROGRESS BAR */}
-                <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden p-0.5 border border-gray-200">
+                <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-3 overflow-hidden p-0.5 border border-gray-200 dark:border-gray-700">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${
                       weeklyUsage.used >= maxWeeklyHours
@@ -982,11 +1015,11 @@ export default function DashboardPage() {
                 </div>
 
                 {weeklyUsage.used >= maxWeeklyHours ? (
-                  <p className="text-[11px] text-red-600 font-bold flex items-center gap-1">
+                  <p className="text-[11px] text-red-600 dark:text-red-400 font-bold flex items-center gap-1">
                     <AlertCircle className="w-3.5 h-3.5" /> Limite semanal atingido!
                   </p>
                 ) : (
-                  <p className="text-[11px] text-gray-500 font-medium">
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium">
                     {maxWeeklyHours - weeklyUsage.used} {maxWeeklyHours - weeklyUsage.used === 1 ? "aula disponível" : "aulas disponíveis"}
                   </p>
                 )}
@@ -996,25 +1029,25 @@ export default function DashboardPage() {
         )}
 
         {/* TIME SLOTS GRID FOR THE SELECTED DAY */}
-        <section className="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-6 py-5 border-b border-gray-100 flex flex-wrap justify-between items-center gap-4 bg-gray-50/50">
+        <section className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden transition-colors">
+          <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex flex-wrap justify-between items-center gap-4 bg-gray-50/70 dark:bg-gray-800/60">
             <div>
-              <h2 className="text-lg font-bold text-gray-900 uppercase">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white uppercase">
                 {selectedLab}{" "}
-                <span className="text-gray-400 font-medium ml-2">
+                <span className="text-gray-500 dark:text-gray-300 font-medium ml-2">
                   — {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
                 </span>
               </h2>
             </div>
             <div className="flex flex-wrap gap-4 text-xs font-semibold">
-              <span className="flex items-center gap-1.5 text-gray-500">
-                <div className="w-3 h-3 rounded-full border-2 border-gray-300"></div> Livre
+              <span className="flex items-center gap-1.5 text-gray-500 dark:text-gray-300">
+                <div className="w-3 h-3 rounded-full border-2 border-gray-300 dark:border-gray-500"></div> Livre
               </span>
-              <span className="flex items-center gap-1.5 text-blue-600">
-                <div className="w-3 h-3 rounded-full bg-blue-600"></div> Selecionado
+              <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
+                <div className="w-3 h-3 rounded-full bg-blue-600 dark:bg-blue-500"></div> Selecionado
               </span>
-              <span className="flex items-center gap-1.5 text-red-500">
-                <div className="w-3 h-3 rounded-full bg-red-100 border border-red-300"></div> Ocupado
+              <span className="flex items-center gap-1.5 text-red-500 dark:text-red-400">
+                <div className="w-3 h-3 rounded-full bg-red-100 dark:bg-red-950 border border-red-300 dark:border-red-800"></div> Ocupado
               </span>
             </div>
           </div>
@@ -1022,8 +1055,8 @@ export default function DashboardPage() {
           <div className="p-4 md:p-6 space-y-8">
             {SHIFTS.map((shift) => (
               <div key={shift} className="space-y-3">
-                <h3 className="flex items-center gap-2 text-sm font-bold text-gray-700 uppercase tracking-widest border-b border-gray-100 pb-2">
-                  <Clock className="w-4 h-4 text-indigo-500" /> {shift}
+                <h3 className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-widest border-b border-gray-100 dark:border-gray-800 pb-2">
+                  <Clock className="w-4 h-4 text-indigo-500 dark:text-indigo-400" /> {shift}
                 </h3>
 
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -1052,11 +1085,11 @@ export default function DashboardPage() {
                           ${
                             isOccupied
                               ? canCancel
-                                ? "bg-amber-50/80 border-amber-300 cursor-pointer hover:bg-red-50 hover:border-red-300 transition-colors shadow-sm"
-                                : "bg-red-50/80 border-red-200 cursor-not-allowed opacity-90"
+                                ? "bg-amber-50/80 dark:bg-amber-950/50 border-amber-300 dark:border-amber-700 cursor-pointer hover:bg-red-50 dark:hover:bg-red-950/60 hover:border-red-300 dark:hover:border-red-700 transition-colors shadow-sm"
+                                : "bg-red-50/80 dark:bg-red-950/40 border-red-200 dark:border-red-900/60 cursor-not-allowed opacity-90"
                               : isSelected
                               ? "bg-blue-600 border-blue-600 text-white shadow-lg transform scale-[1.02]"
-                              : "bg-white border-gray-200 hover:border-blue-400 hover:bg-blue-50/50 shadow-sm"
+                              : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-gray-700 shadow-sm"
                           }
                         `}
                       >
@@ -1064,11 +1097,11 @@ export default function DashboardPage() {
                           className={`text-xs font-bold uppercase tracking-wider mb-1 ${
                             isOccupied
                               ? canCancel
-                                ? "text-amber-800 group-hover:text-red-700"
-                                : "text-gray-500"
+                                ? "text-amber-800 dark:text-amber-300 group-hover:text-red-700 dark:group-hover:text-red-400"
+                                : "text-gray-600 dark:text-gray-300"
                               : isSelected
                               ? "text-blue-100"
-                              : "text-gray-400"
+                              : "text-gray-500 dark:text-gray-300"
                           }`}
                         >
                           Aula {classHour}
@@ -1077,22 +1110,22 @@ export default function DashboardPage() {
                         {isOccupied ? (
                           <div className="flex flex-col items-center gap-1 mt-1 w-full">
                             {canCancel ? (
-                              <div className="hidden group-hover:flex items-center gap-1 text-red-600 text-xs font-bold">
+                              <div className="hidden group-hover:flex items-center gap-1 text-red-600 dark:text-red-400 text-xs font-bold">
                                 <Trash2 className="w-3.5 h-3.5" /> Cancelar
                               </div>
                             ) : null}
 
                             <div className={`flex flex-col items-center text-center ${canCancel ? "group-hover:hidden" : ""}`}>
-                              <span className="text-xs font-bold text-gray-900 line-clamp-1">
+                              <span className="text-xs font-bold text-gray-900 dark:text-gray-100 line-clamp-1">
                                 {occupier?.professorName}
                               </span>
                               {occupier?.createdBySecretario && (
-                                <span className="text-[10px] text-purple-600 font-semibold">
+                                <span className="text-[10px] text-purple-600 dark:text-purple-400 font-semibold">
                                   via Secretaria
                                 </span>
                               )}
                               {occupier?.hasTv && (
-                                <span className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">
+                                <span className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800">
                                   <Tv className="w-3 h-3" /> TV
                                 </span>
                               )}
@@ -1105,7 +1138,7 @@ export default function DashboardPage() {
                                 <Check className="w-3.5 h-3.5" /> Selecionado
                               </span>
                             ) : (
-                              <span className="text-xs font-semibold text-gray-400 group-hover:text-blue-600">
+                              <span className="text-xs font-semibold text-gray-500 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">
                                 Disponível
                               </span>
                             )}
@@ -1122,11 +1155,11 @@ export default function DashboardPage() {
 
         {/* BOOKING FLOATING BAR */}
         {selectedShift && selectedClasses.length > 0 && (
-          <div className="fixed bottom-6 inset-x-0 z-40 max-w-4xl mx-auto px-4 animate-fade-in-up">
-            <div className="bg-gray-900/95 backdrop-blur-md text-white p-4 sm:p-5 rounded-3xl shadow-2xl border border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="bg-blue-600 p-3 rounded-2xl">
-                  <Clock className="w-6 h-6 text-white" />
+          <div className="fixed bottom-4 sm:bottom-6 inset-x-2 sm:inset-x-0 z-40 max-w-4xl mx-auto px-2 sm:px-4 animate-fade-in-up">
+            <div className="bg-gray-900/95 dark:bg-gray-950/98 backdrop-blur-md text-white p-4 sm:p-5 rounded-3xl shadow-2xl border border-gray-700 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="bg-blue-600 p-2.5 sm:p-3 rounded-2xl shrink-0">
+                  <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
                 <div>
                   <h4 className="font-bold text-sm sm:text-base flex items-center gap-2">
@@ -1140,25 +1173,25 @@ export default function DashboardPage() {
               </div>
 
               {/* TV RESOURCE SELECTION & CONFIRM BUTTON */}
-              <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end">
+              <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full sm:w-auto justify-end">
                 {/* TV TOGGLE */}
                 <button
                   type="button"
                   onClick={() => setHasTv(!hasTv)}
-                  className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold border transition-all ${
+                  className={`flex items-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl text-xs font-bold border transition-all ${
                     hasTv
                       ? "bg-indigo-600 border-indigo-400 text-white shadow-md shadow-indigo-500/30"
                       : "bg-gray-800 border-gray-600 text-gray-300 hover:text-white hover:bg-gray-700"
                   }`}
                 >
                   <Tv className="w-4 h-4" />
-                  <span>{hasTv ? "Sala COM TV Solicitada 📺" : "Precisa de TV? (Sem TV)"}</span>
+                  <span>{hasTv ? "Sala COM TV 📺" : "Precisa de TV?"}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => { setSelectedClasses([]); setSelectedShift(null); setHasTv(false); }}
-                  className="px-4 py-2.5 text-xs font-bold text-gray-400 hover:text-white transition-colors"
+                  className="px-3 py-2 text-xs font-bold text-gray-400 hover:text-white transition-colors"
                 >
                   Desmarcar
                 </button>
@@ -1167,7 +1200,7 @@ export default function DashboardPage() {
                   type="button"
                   disabled={isSubmitting}
                   onClick={handleSaveSchedule}
-                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-bold rounded-xl shadow-lg shadow-blue-600/30 transition-all flex items-center gap-2"
+                  className="px-5 sm:px-6 py-2 sm:py-2.5 bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-bold rounded-xl shadow-lg shadow-blue-600/30 transition-all flex items-center gap-2"
                 >
                   {isSubmitting ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
