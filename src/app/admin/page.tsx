@@ -62,6 +62,8 @@ export default function AdminPage() {
   const [savedWeeklyQuota, setSavedWeeklyQuota] = useState<number>(4);
   const [hideWeekendsInput, setHideWeekendsInput] = useState<boolean>(false);
   const [savedHideWeekends, setSavedHideWeekends] = useState<boolean>(false);
+  const [secretaryOverrideInput, setSecretaryOverrideInput] = useState<boolean>(true);
+  const [savedSecretaryOverride, setSavedSecretaryOverride] = useState<boolean>(true);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [settingsMsg, setSettingsMsg] = useState("");
 
@@ -99,6 +101,10 @@ export default function AdminPage() {
         if (typeof data.hideWeekends === "boolean") {
           setHideWeekendsInput(data.hideWeekends);
           setSavedHideWeekends(data.hideWeekends);
+        }
+        if (typeof data.secretaryQuotaOverride === "boolean") {
+          setSecretaryOverrideInput(data.secretaryQuotaOverride);
+          setSavedSecretaryOverride(data.secretaryQuotaOverride);
         }
       }
     });
@@ -158,6 +164,7 @@ export default function AdminPage() {
       await setDoc(doc(db, "settings", "general"), {
         weeklyQuota: Number(weeklyQuotaInput),
         hideWeekends: hideWeekendsInput,
+        secretaryQuotaOverride: secretaryOverrideInput,
         updatedAt: serverTimestamp(),
         updatedBy: user?.name || "Coordenador",
       }, { merge: true });
@@ -502,6 +509,23 @@ export default function AdminPage() {
                     Ao marcar esta opção, os sábados e domingos serão removidos das grades do calendário mensal (no painel do professor e no painel público), otimizando o espaço da tela em dispositivos móveis.
                   </p>
                 </div>
+                <div className="border-t border-gray-100 dark:border-gray-800 pt-4 mt-4 space-y-2">
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+                    Autorização da Secretaria
+                  </h3>
+                  <label className="flex items-center gap-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={secretaryOverrideInput}
+                      onChange={(e) => setSecretaryOverrideInput(e.target.checked)}
+                      className="w-4 h-4 text-amber-600 rounded focus:ring-amber-500 border-gray-300 dark:border-gray-600 cursor-pointer"
+                    />
+                    <span>Permitir que a secretaria ultrapasse a cota dos professores</span>
+                  </label>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                    Ao ativar, a secretaria poderá liberar reservas acima do limite semanal de qualquer professor usando a opção &quot;Autorização Especial da Secretaria&quot;. Ao desativar, o limite da cota será obrigatório também para a secretaria.
+                  </p>
+                </div>
               </div>
 
               {/* QUOTA CONTROLLER */}
@@ -557,16 +581,16 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={() => handleSaveSettings()}
-                  disabled={isSavingSettings || (weeklyQuotaInput === savedWeeklyQuota && hideWeekendsInput === savedHideWeekends)}
+                  disabled={isSavingSettings || (weeklyQuotaInput === savedWeeklyQuota && hideWeekendsInput === savedHideWeekends && secretaryOverrideInput === savedSecretaryOverride)}
                   className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm ${
-                    (weeklyQuotaInput === savedWeeklyQuota && hideWeekendsInput === savedHideWeekends)
+                    (weeklyQuotaInput === savedWeeklyQuota && hideWeekendsInput === savedHideWeekends && secretaryOverrideInput === savedSecretaryOverride)
                       ? "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-400 cursor-not-allowed border border-gray-200 dark:border-gray-600"
                       : "bg-amber-600 hover:bg-amber-700 active:scale-[0.98] text-white shadow-amber-600/20 shadow-md cursor-pointer"
                   }`}
                 >
                   {isSavingSettings ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : (weeklyQuotaInput === savedWeeklyQuota && hideWeekendsInput === savedHideWeekends) ? (
+                  ) : (weeklyQuotaInput === savedWeeklyQuota && hideWeekendsInput === savedHideWeekends && secretaryOverrideInput === savedSecretaryOverride) ? (
                     <>
                       <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> Configurações em Vigor
                     </>

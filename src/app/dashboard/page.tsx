@@ -79,6 +79,7 @@ export default function DashboardPage() {
   // Dynamic Weekly Quota from Firestore (defaults to 4)
   const [maxWeeklyHours, setMaxWeeklyHours] = useState<number>(4);
   const [hideWeekends, setHideWeekends] = useState<boolean>(false);
+  const [secretaryQuotaOverride, setSecretaryQuotaOverride] = useState<boolean>(true);
 
   const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
   const [selectedClasses, setSelectedClasses] = useState<number[]>([]);
@@ -108,6 +109,9 @@ export default function DashboardPage() {
         }
         if (typeof data.hideWeekends === "boolean") {
           setHideWeekends(data.hideWeekends);
+        }
+        if (typeof data.secretaryQuotaOverride === "boolean") {
+          setSecretaryQuotaOverride(data.secretaryQuotaOverride);
         }
       }
     });
@@ -329,13 +333,20 @@ export default function DashboardPage() {
       return;
     }
 
-    if (isSec && !allowSecretaryOverride && totalAfterBooking > maxWeeklyHours) {
-      alert(
-        `Limite Semanal Excedido para o Prof. ${finalProfName}!\n\n` +
-        `O professor já possui ${weeklyUsage.used} de ${maxWeeklyHours} aulas agendadas nesta semana (${weeklyUsage.weekStartFormatted} a ${weeklyUsage.weekEndFormatted}).\n` +
-        `Para liberar essa reserva como exceção, marque a opção "Autorização Especial da Secretaria".`
-      );
-      return;
+    if (isSec && totalAfterBooking > maxWeeklyHours) {
+      const canOverride = secretaryQuotaOverride && allowSecretaryOverride;
+      if (!canOverride) {
+        alert(
+          secretaryQuotaOverride
+            ? `Limite Semanal Excedido para o Prof. ${finalProfName}!\n\n` +
+              `O professor já possui ${weeklyUsage.used} de ${maxWeeklyHours} aulas agendadas nesta semana (${weeklyUsage.weekStartFormatted} a ${weeklyUsage.weekEndFormatted}).\n` +
+              `Para liberar essa reserva como exceção, marque a opção "Autorização Especial da Secretaria".`
+            : `Limite Semanal Excedido para o Prof. ${finalProfName}!\n\n` +
+              `O professor já possui ${weeklyUsage.used} de ${maxWeeklyHours} aulas agendadas nesta semana (${weeklyUsage.weekStartFormatted} a ${weeklyUsage.weekEndFormatted}).\n` +
+              `A autorização da secretaria para ultrapassar a cota dos professores está desativada pelo coordenador.`
+        );
+        return;
+      }
     }
 
     setIsSubmitting(true);
@@ -800,15 +811,22 @@ export default function DashboardPage() {
                   </span>
                 </div>
 
-                <label className="flex items-center gap-2 text-xs font-bold text-purple-950 dark:text-purple-200 cursor-pointer bg-white dark:bg-gray-900 px-3 py-1.5 rounded-xl border border-purple-200 dark:border-purple-800 shadow-2xs">
-                  <input
-                    type="checkbox"
-                    checked={allowSecretaryOverride}
-                    onChange={(e) => setAllowSecretaryOverride(e.target.checked)}
-                    className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
-                  />
-                  <span>Autorização Especial da Secretaria (Liberar acima da cota)</span>
-                </label>
+                {secretaryQuotaOverride ? (
+                  <label className="flex items-center gap-2 text-xs font-bold text-purple-950 dark:text-purple-200 cursor-pointer bg-white dark:bg-gray-900 px-3 py-1.5 rounded-xl border border-purple-200 dark:border-purple-800 shadow-2xs">
+                    <input
+                      type="checkbox"
+                      checked={allowSecretaryOverride}
+                      onChange={(e) => setAllowSecretaryOverride(e.target.checked)}
+                      className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
+                    />
+                    <span>Autorização Especial da Secretaria (Liberar acima da cota)</span>
+                  </label>
+                ) : (
+                  <span className="flex items-center gap-2 text-xs font-bold text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/40 px-3 py-1.5 rounded-xl border border-red-200 dark:border-red-800/60 shadow-2xs">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    Coordenador desativou a autorização para ultrapassar a cota dos professores.
+                  </span>
+                )}
               </div>
             )}
           </section>
