@@ -40,18 +40,15 @@ export function ThemeToggle({ variant = "icon", className = "" }: ThemeTogglePro
     <button
       type="button"
       onClick={toggleTheme}
-      className={`p-2 rounded-xl border transition-all active:scale-95 flex items-center gap-1.5 ${
+      className={`h-10 w-10 flex items-center justify-center rounded-xl border transition-all active:scale-95 shrink-0 ${
         isDark
           ? "bg-gray-800 border-gray-700 text-amber-300 hover:bg-gray-700 shadow-xs"
-          : "bg-gray-100 border-gray-200 text-amber-600 hover:bg-amber-50 shadow-2xs"
+          : "bg-white border-gray-200 text-amber-600 hover:bg-gray-50 shadow-2xs"
       } ${className}`}
       title={isDark ? "Alternar para Modo Claro" : "Alternar para Modo Escuro"}
       aria-label="Alternar tema claro/escuro"
     >
-      {isDark ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-      <span className="sr-only sm:not-sr-only text-xs font-bold hidden xl:inline">
-        {isDark ? "Escuro" : "Claro"}
-      </span>
+      {isDark ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
     </button>
   );
 }

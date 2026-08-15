@@ -213,10 +213,10 @@ export default function LogsPage() {
               {/* TROCAR SENHA: ALWAYS OUTSIDE */}
               <button
                 onClick={() => router.push("/change-password")}
-                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-emerald-700 dark:hover:text-emerald-400 bg-gray-100/80 dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-gray-750 border border-gray-200 dark:border-gray-700 hover:border-emerald-200 dark:hover:border-emerald-800 rounded-xl transition-all shadow-2xs active:scale-95"
+                className="flex items-center justify-center gap-1.5 h-10 w-10 sm:w-auto sm:px-4 text-xs font-bold text-gray-700 dark:text-gray-250 hover:text-emerald-700 dark:hover:text-emerald-400 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl transition-all shadow-2xs active:scale-95 shrink-0"
                 title="Alterar Senha"
               >
-                <LockKeyhole className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600 dark:text-gray-300" />
+                <LockKeyhole className="w-5 h-5 sm:w-4 sm:h-4 text-gray-600 dark:text-gray-300" />
                 <span className="hidden sm:inline">Trocar Senha</span>
               </button>
 
@@ -224,9 +224,10 @@ export default function LogsPage() {
 
               <button
                 onClick={() => router.back()}
-                className="flex items-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs sm:text-sm font-semibold transition-colors text-gray-700 dark:text-gray-200 active:scale-95 bg-white dark:bg-gray-800"
+                className="flex items-center justify-center gap-1.5 h-10 w-10 sm:w-auto sm:px-4 text-xs font-bold text-gray-700 dark:text-gray-250 hover:text-emerald-700 dark:hover:text-emerald-400 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl transition-all active:scale-95 shrink-0 shadow-2xs"
               >
-                <ArrowLeft className="w-4 h-4" /> Voltar
+                <ArrowLeft className="w-5 h-5 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Voltar</span>
               </button>
             </div>
           </div>

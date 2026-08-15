@@ -364,12 +364,17 @@ export default function AdminPage() {
               {/* TROCAR SENHA: ALWAYS OUTSIDE THE SANDWICH */}
               <button
                 onClick={() => router.push("/change-password")}
-                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-amber-800 dark:hover:text-amber-300 bg-white dark:bg-gray-800 hover:bg-amber-100/60 dark:hover:bg-gray-750 border border-amber-300/80 dark:border-gray-700 rounded-xl transition-all shadow-2xs active:scale-95"
+                className="flex items-center justify-center gap-1.5 h-10 w-10 sm:w-auto sm:px-4 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-amber-800 dark:hover:text-amber-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-amber-300/80 dark:border-gray-700 rounded-xl transition-all shadow-2xs active:scale-95 shrink-0"
                 title="Alterar Senha"
               >
-                <LockKeyhole className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600 dark:text-gray-300" />
+                <LockKeyhole className="w-5 h-5 sm:w-4 sm:h-4 text-gray-600 dark:text-gray-300" />
                 <span className="hidden sm:inline">Trocar Senha</span>
               </button>
+
+              {/* MOBILE THEME TOGGLE: ALWAYS OUTSIDE THE SANDWICH (MD:HIDDEN) */}
+              <span className="md:hidden">
+                <ThemeToggle variant="icon" />
+              </span>
 
               {/* DESKTOP NAVIGATION BUTTONS */}
               <div className="hidden md:flex items-center gap-2">
@@ -392,7 +397,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={`md:hidden p-2 rounded-xl border transition-all ${
+                className={`md:hidden h-10 w-10 flex items-center justify-center rounded-xl border transition-all active:scale-95 shrink-0 ${
                   isMobileMenuOpen
                     ? "bg-amber-200 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border-amber-400 dark:border-amber-700"
                     : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-amber-200 dark:border-gray-700 hover:bg-amber-100 dark:hover:bg-gray-700"
@@ -412,11 +417,6 @@ export default function AdminPage() {
               Menu do Coordenador
             </span>
 
-            {/* THEME TOGGLE INSIDE SANDWICH MENU */}
-            <div className="py-1">
-              <ThemeToggle variant="row" />
-            </div>
-
             <button
               type="button"
               onClick={() => {
@@ -429,7 +429,7 @@ export default function AdminPage() {
                 <div className="p-2 bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400 rounded-lg">
                   <ArrowLeft className="w-4 h-4" />
                 </div>
-                <span>📅 Voltar ao Calendário de Reservas</span>
+                <span>Voltar ao Calendário de Reservas</span>
               </div>
               <ChevronRight className="w-4 h-4 text-gray-400" />
             </button>
@@ -446,7 +446,7 @@ export default function AdminPage() {
                 <div className="p-2 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 rounded-lg">
                   <Clock className="w-4 h-4" />
                 </div>
-                <span>🏆 Histórico & Ranking Geral</span>
+                <span>Histórico & Ranking Geral</span>
               </div>
               <ChevronRight className="w-4 h-4 text-gray-400" />
             </button>
@@ -463,7 +463,7 @@ export default function AdminPage() {
                 <div className="p-2 bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 rounded-lg">
                   <Globe className="w-4 h-4" />
                 </div>
-                <span>🌐 Painel Público de Horários</span>
+                <span>Painel Público de Horários</span>
               </div>
               <ChevronRight className="w-4 h-4 text-gray-400" />
             </button>

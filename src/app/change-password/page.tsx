@@ -51,6 +51,8 @@ export default function ChangePasswordPage() {
        return;
     }
 
+    const wasFirstAccess = user?.mustChangePassword === true;
+
     try {
       if (!auth.currentUser) throw new Error("Não autenticado");
       
@@ -64,9 +66,9 @@ export default function ChangePasswordPage() {
       
       // Refresh Auth Context
       await refreshUser();
-      
-      // Redirect manually to dashboard
-      router.push("/dashboard");
+
+      // Redireciona para o dashboard (com o parâmetro de tour no primeiro acesso)
+      router.push(wasFirstAccess ? "/dashboard?tour=1" : "/dashboard");
     } catch {
       setError("Erro ao alterar senha. Talvez você precise sair e entrar novamente.");
     } finally {

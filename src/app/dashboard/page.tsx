@@ -44,8 +44,11 @@ import {
   X,
   LogOut,
   Users,
+  HelpCircle,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Tour } from "@/components/Tour";
+import type { TourStep } from "@/components/Tour";
 
 type Laboratory = "LabTec" | "Manutec" | "Robotica";
 type Shift = "Matutino" | "Vespertino" | "Noturno";
@@ -65,6 +68,63 @@ interface Schedule {
 
 const SHIFTS: Shift[] = ["Matutino", "Vespertino", "Noturno"];
 const CLASSES = [1, 2, 3, 4, 5];
+
+const PROFESSOR_TOUR_STEPS: TourStep[] = [
+  {
+    id: "welcome",
+    title: "Bem-vindo(a) ao AgendaLab!",
+    emoji: "👋",
+    description:
+      "Vamos fazer um rápido tour para você aprender a agendar aulas nos laboratórios, escolher TV, trocar o tema e alterar sua senha. Leva menos de um minuto.",
+  },
+  {
+    id: "labs",
+    title: "Escolha o Laboratório",
+    emoji: "🖥️",
+    target: "tour-labs",
+    description:
+      "Aqui você escolhe o laboratório que deseja reservar: LabTec (Tecnologia), Manutec (Manutenção) ou Robótica.",
+  },
+  {
+    id: "calendar",
+    title: "Selecione o Dia",
+    emoji: "📅",
+    target: "tour-calendar",
+    description:
+      "Toque no dia desejado no calendário mensal. Use as setas para navegar entre os meses e o botão \"Hoje\" para voltar ao dia atual.",
+  },
+  {
+    id: "slots",
+    title: "Escolha o Turno e as Aulas",
+    emoji: "⏰",
+    target: "tour-slots",
+    description:
+      "Toque nas aulas (1º a 5º) do turno desejado: Matutino, Vespertino ou Noturno. As células vermelhas já estão ocupadas por outro professor.",
+  },
+  {
+    id: "tv",
+    title: "Precisa de TV?",
+    emoji: "📺",
+    description:
+      "Após selecionar as aulas, aparece uma barra na parte inferior da tela. Marque a opção \"Precisa de TV?\" se a aula usar televisão e depois toque em \"Confirmar Reserva\".",
+  },
+  {
+    id: "theme",
+    title: "Modo Claro e Escuro",
+    emoji: "🌙",
+    target: "tour-theme",
+    description:
+      "Toque aqui para alternar entre o modo claro e o modo escuro do aplicativo, de acordo com a sua preferência.",
+  },
+  {
+    id: "password",
+    title: "Alterar sua Senha",
+    emoji: "🔒",
+    target: "tour-password",
+    description:
+      "Sempre que quiser trocar sua senha de acesso, toque neste botão \"Trocar Senha\" no topo da tela.",
+  },
+];
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
@@ -91,6 +151,7 @@ export default function DashboardPage() {
   const [professorsList, setProfessorsList] = useState<{ id: string; name: string }[]>([]);
   const [allowSecretaryOverride, setAllowSecretaryOverride] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showTour, setShowTour] = useState(false);
 
   useEffect(() => {
     if (!loading) {
@@ -98,6 +159,29 @@ export default function DashboardPage() {
       else if (user.mustChangePassword) router.push("/change-password");
     }
   }, [user, loading, router]);
+
+  // Show the onboarding tour the first time a professor opens the dashboard
+  useEffect(() => {
+    if (!user || user.role !== "professor" || user.mustChangePassword) return;
+    try {
+      let forced = false;
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("tour") === "1") {
+          forced = true;
+          params.delete("tour");
+          const clean = params.toString()
+            ? `${window.location.pathname}?${params.toString()}`
+            : window.location.pathname;
+          window.history.replaceState(null, "", clean);
+        }
+      }
+      const seen = localStorage.getItem(`agendalab-tour-${user.uid}`);
+      if (forced || !seen) setShowTour(true);
+    } catch {
+      setShowTour(true);
+    }
+  }, [user]);
 
   // Listen to global settings for weekly quota in real time
   useEffect(() => {
@@ -515,12 +599,18 @@ export default function DashboardPage() {
               {/* TROCAR SENHA: ALWAYS OUTSIDE THE SANDWICH (MOBILE & DESKTOP) */}
               <button
                 onClick={() => router.push("/change-password")}
-                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-blue-700 dark:hover:text-blue-400 bg-gray-100/80 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-gray-750 border border-gray-200 dark:border-gray-700 rounded-xl transition-all shadow-2xs active:scale-95"
+                className="flex items-center justify-center gap-1.5 h-10 w-10 sm:w-auto sm:px-4 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-blue-700 dark:hover:text-blue-400 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl transition-all shadow-2xs active:scale-95 shrink-0"
                 title="Alterar Senha"
+                data-tour-id="tour-password"
               >
-                <LockKeyhole className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600 dark:text-gray-300" />
+                <LockKeyhole className="w-5 h-5 sm:w-4 sm:h-4 text-gray-600 dark:text-gray-300" />
                 <span className="hidden sm:inline">Trocar Senha</span>
               </button>
+
+              {/* MOBILE THEME TOGGLE: ALWAYS OUTSIDE THE SANDWICH (MD:HIDDEN) */}
+              <span className="md:hidden" data-tour-id="tour-theme">
+                <ThemeToggle variant="icon" />
+              </span>
 
               {/* DESKTOP NAVIGATION (MD AND UP) */}
               <div className="hidden md:flex items-center gap-2">
@@ -540,6 +630,17 @@ export default function DashboardPage() {
                   Painel Público
                 </button>
 
+                {user.role === "professor" && (
+                  <button
+                    onClick={() => setShowTour(true)}
+                    className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-sky-700 dark:hover:text-sky-400 bg-gray-50 dark:bg-gray-800 hover:bg-sky-50 dark:hover:bg-sky-950/40 border border-gray-200 dark:border-gray-700 rounded-xl transition-all"
+                    title="Reiniciar tour guiado"
+                  >
+                    <HelpCircle className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                    Tour Guiado
+                  </button>
+                )}
+
                 {user.role === "admin" && (
                   <button
                     onClick={() => router.push("/admin")}
@@ -551,7 +652,9 @@ export default function DashboardPage() {
                 )}
 
                 {/* DESKTOP THEME TOGGLE */}
-                <ThemeToggle variant="icon" />
+                <span data-tour-id="tour-theme" className="inline-flex">
+                  <ThemeToggle variant="icon" />
+                </span>
 
                 <button
                   onClick={handleLogout}
@@ -567,7 +670,7 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={`md:hidden p-2 rounded-xl border transition-all ${
+                className={`md:hidden h-10 w-10 flex items-center justify-center rounded-xl border transition-all active:scale-95 shrink-0 ${
                   isMobileMenuOpen
                     ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800"
                     : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -590,10 +693,24 @@ export default function DashboardPage() {
               <div>{roleBadge()}</div>
             </div>
 
-            {/* THEME TOGGLE INSIDE SANDWICH MENU */}
-            <div className="py-1">
-              <ThemeToggle variant="row" />
-            </div>
+            {user.role === "professor" && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setShowTour(true);
+                }}
+                className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-800 dark:text-gray-100 hover:text-sky-700 dark:hover:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-950/40 transition-colors border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xs"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-sky-100 dark:bg-sky-950/80 text-sky-700 dark:text-sky-300 rounded-lg">
+                    <HelpCircle className="w-4 h-4" />
+                  </div>
+                  <span>Tour Guiado (Como usar)</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-gray-400" />
+              </button>
+            )}
 
             <button
               type="button"
@@ -607,7 +724,7 @@ export default function DashboardPage() {
                 <div className="p-2 bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 rounded-lg">
                   <Clock className="w-4 h-4" />
                 </div>
-                <span>🏆 Histórico & Ranking Geral</span>
+                <span>Histórico & Ranking Geral</span>
               </div>
               <ChevronRight className="w-4 h-4 text-gray-400" />
             </button>
@@ -624,7 +741,7 @@ export default function DashboardPage() {
                 <div className="p-2 bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 rounded-lg">
                   <Globe className="w-4 h-4" />
                 </div>
-                <span>🌐 Painel Público de Horários</span>
+                <span>Painel Público de Horários</span>
               </div>
               <ChevronRight className="w-4 h-4 text-gray-400" />
             </button>
@@ -642,7 +759,7 @@ export default function DashboardPage() {
                   <div className="p-2 bg-amber-500 text-white rounded-lg">
                     <ShieldAlert className="w-4 h-4" />
                   </div>
-                  <span>🛡️ Painel do Coordenador</span>
+                  <span>Painel do Coordenador</span>
                 </div>
                 <ChevronRight className="w-4 h-4 text-amber-700 dark:text-amber-400" />
               </button>
@@ -677,7 +794,7 @@ export default function DashboardPage() {
         )}
 
         {/* LABORATORY SELECTOR TABS (GRID 3 COLUMNS ON MOBILE & DESKTOP) */}
-        <section className="bg-white dark:bg-gray-900 p-1.5 sm:p-2 rounded-2xl shadow-xs border border-gray-200 dark:border-gray-800 grid grid-cols-3 gap-1 sm:gap-2 transition-colors">
+        <section data-tour-id="tour-labs" className="bg-white dark:bg-gray-900 p-1.5 sm:p-2 rounded-2xl shadow-xs border border-gray-200 dark:border-gray-800 grid grid-cols-3 gap-1 sm:gap-2 transition-colors">
           <button
             type="button"
             onClick={() => { setSelectedLab("LabTec"); setSelectedClasses([]); setSelectedShift(null); }}
@@ -833,7 +950,7 @@ export default function DashboardPage() {
         )}
 
         {/* MONTHLY CALENDAR CARD */}
-        <section className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden transition-colors">
+        <section data-tour-id="tour-calendar" className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden transition-colors">
           {/* MONTH HEADER CONTROLS */}
           <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex flex-wrap items-center justify-between gap-4 bg-gray-50/70 dark:bg-gray-800/60">
             <div className="flex items-center gap-3">
@@ -1051,7 +1168,7 @@ export default function DashboardPage() {
         )}
 
         {/* TIME SLOTS GRID FOR THE SELECTED DAY */}
-        <section className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden transition-colors">
+        <section data-tour-id="tour-slots" className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden transition-colors">
           <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex flex-wrap justify-between items-center gap-4 bg-gray-50/70 dark:bg-gray-800/60">
             <div>
               <h2 className="text-lg font-bold text-gray-900 dark:text-white uppercase">
@@ -1239,6 +1356,14 @@ export default function DashboardPage() {
         )}
 
       </main>
+
+      {showTour && user && user.role === "professor" && (
+        <Tour
+          steps={PROFESSOR_TOUR_STEPS}
+          storageKey={`agendalab-tour-${user.uid}`}
+          onClose={() => setShowTour(false)}
+        />
+      )}
     </div>
   );
 }
