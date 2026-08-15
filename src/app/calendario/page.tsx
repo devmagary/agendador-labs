@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, query, where, onSnapshot, doc } from "firebase/firestore";
 import {
   format,
   startOfToday,
@@ -58,6 +58,20 @@ export default function PublicCalendarPage() {
   const [selectedLab, setSelectedLab] = useState<Laboratory>("LabTec");
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [monthSchedules, setMonthSchedules] = useState<Schedule[]>([]);
+  const [hideWeekends, setHideWeekends] = useState<boolean>(false);
+
+  // Listen to global settings in real time
+  useEffect(() => {
+    const unsubSettings = onSnapshot(doc(db, "settings", "general"), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (typeof data.hideWeekends === "boolean") {
+          setHideWeekends(data.hideWeekends);
+        }
+      }
+    });
+    return () => unsubSettings();
+  }, []);
 
   // Listen to schedules for the whole month view to display indicators
   useEffect(() => {
@@ -258,19 +272,19 @@ export default function PublicCalendarPage() {
           {/* CALENDAR GRID */}
           <div className="p-4 sm:p-6">
             {/* WEEKDAY HEADERS */}
-            <div className="grid grid-cols-7 gap-2 mb-2 text-center text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
+            <div className={`grid ${hideWeekends ? "grid-cols-5" : "grid-cols-7"} gap-2 mb-2 text-center text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider`}>
               <span>Seg</span>
               <span>Ter</span>
               <span>Qua</span>
               <span>Qui</span>
               <span>Sex</span>
-              <span className="text-gray-300 dark:text-gray-500">Sáb</span>
-              <span className="text-gray-300 dark:text-gray-500">Dom</span>
+              {!hideWeekends && <span className="text-gray-300 dark:text-gray-500">Sáb</span>}
+              {!hideWeekends && <span className="text-gray-300 dark:text-gray-500">Dom</span>}
             </div>
 
             {/* DAYS GRID */}
-            <div className="grid grid-cols-7 gap-2">
-              {calendarDays.map((day) => {
+            <div className={`grid ${hideWeekends ? "grid-cols-5" : "grid-cols-7"} gap-2`}>
+              {calendarDays.filter(day => !hideWeekends || !isWeekend(day)).map((day) => {
                 const isSelected = isSameDay(day, selectedDate);
                 const isCurrentMonth = isSameMonth(day, currentMonth);
                 const isCurrentDay = isToday(day);

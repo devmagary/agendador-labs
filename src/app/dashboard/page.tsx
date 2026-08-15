@@ -78,6 +78,7 @@ export default function DashboardPage() {
 
   // Dynamic Weekly Quota from Firestore (defaults to 4)
   const [maxWeeklyHours, setMaxWeeklyHours] = useState<number>(4);
+  const [hideWeekends, setHideWeekends] = useState<boolean>(false);
 
   const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
   const [selectedClasses, setSelectedClasses] = useState<number[]>([]);
@@ -104,6 +105,9 @@ export default function DashboardPage() {
         const data = docSnap.data();
         if (typeof data.weeklyQuota === "number" && data.weeklyQuota > 0) {
           setMaxWeeklyHours(data.weeklyQuota);
+        }
+        if (typeof data.hideWeekends === "boolean") {
+          setHideWeekends(data.hideWeekends);
         }
       }
     });
@@ -864,10 +868,10 @@ export default function DashboardPage() {
           {/* MONTH GRID */}
           <div className="p-4 sm:p-6">
             {/* DAY NAMES HEADER */}
-            <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center">
-              {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((d, i) => (
+            <div className={`grid ${hideWeekends ? "grid-cols-5" : "grid-cols-7"} gap-1 sm:gap-2 mb-2 text-center`}>
+              {(hideWeekends ? ["Seg", "Ter", "Qua", "Qui", "Sex"] : ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"]).map((d, i) => (
                 <div key={d} className={`text-[11px] font-bold uppercase tracking-wider py-1.5 ${
-                  i >= 5 ? "text-gray-400 dark:text-gray-500" : "text-gray-600 dark:text-gray-300"
+                  !hideWeekends && i >= 5 ? "text-gray-400 dark:text-gray-500" : "text-gray-600 dark:text-gray-300"
                 }`}>
                   {d}
                 </div>
@@ -875,8 +879,8 @@ export default function DashboardPage() {
             </div>
 
             {/* DAYS CELLS */}
-            <div className="grid grid-cols-7 gap-1 sm:gap-2">
-              {calendarDays.map((day) => {
+            <div className={`grid ${hideWeekends ? "grid-cols-5" : "grid-cols-7"} gap-1 sm:gap-2`}>
+              {calendarDays.filter(day => !hideWeekends || !isWeekend(day)).map((day) => {
                 const isCurrentMonth = isSameMonth(day, currentMonth);
                 const isCurrentDay = isToday(day);
                 const isWeekendDay = isWeekend(day);

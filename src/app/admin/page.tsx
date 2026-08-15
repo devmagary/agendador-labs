@@ -60,6 +60,8 @@ export default function AdminPage() {
   // System Settings state (Weekly Quota)
   const [weeklyQuotaInput, setWeeklyQuotaInput] = useState<number>(4);
   const [savedWeeklyQuota, setSavedWeeklyQuota] = useState<number>(4);
+  const [hideWeekendsInput, setHideWeekendsInput] = useState<boolean>(false);
+  const [savedHideWeekends, setSavedHideWeekends] = useState<boolean>(false);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [settingsMsg, setSettingsMsg] = useState("");
 
@@ -93,6 +95,10 @@ export default function AdminPage() {
         if (typeof data.weeklyQuota === "number") {
           setWeeklyQuotaInput(data.weeklyQuota);
           setSavedWeeklyQuota(data.weeklyQuota);
+        }
+        if (typeof data.hideWeekends === "boolean") {
+          setHideWeekendsInput(data.hideWeekends);
+          setSavedHideWeekends(data.hideWeekends);
         }
       }
     });
@@ -151,10 +157,11 @@ export default function AdminPage() {
     try {
       await setDoc(doc(db, "settings", "general"), {
         weeklyQuota: Number(weeklyQuotaInput),
+        hideWeekends: hideWeekendsInput,
         updatedAt: serverTimestamp(),
         updatedBy: user?.name || "Coordenador",
       }, { merge: true });
-      setSettingsMsg(`Cota semanal atualizada para ${weeklyQuotaInput} aulas por professor!`);
+      setSettingsMsg(`Configurações salvas com sucesso!`);
       setTimeout(() => setSettingsMsg(""), 4000);
     } catch {
       setError("Erro ao salvar configuração de cota no banco de dados.");
@@ -478,6 +485,23 @@ export default function AdminPage() {
                 <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                   Defina a quantidade máxima de aulas que cada professor poderá agendar semanalmente (de segunda a domingo) somando todos os laboratórios. Quando alterado aqui, todos os painéis e regras são atualizados instantaneamente em tempo real.
                 </p>
+                <div className="border-t border-gray-100 dark:border-gray-800 pt-4 mt-4 space-y-2">
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+                    Visualização do Calendário
+                  </h3>
+                  <label className="flex items-center gap-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={hideWeekendsInput}
+                      onChange={(e) => setHideWeekendsInput(e.target.checked)}
+                      className="w-4 h-4 text-amber-600 rounded focus:ring-amber-500 border-gray-300 dark:border-gray-600 cursor-pointer"
+                    />
+                    <span>Ocultar sábados e domingos das visualizações</span>
+                  </label>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                    Ao marcar esta opção, os sábados e domingos serão removidos das grades do calendário mensal (no painel do professor e no painel público), otimizando o espaço da tela em dispositivos móveis.
+                  </p>
+                </div>
               </div>
 
               {/* QUOTA CONTROLLER */}
@@ -533,22 +557,22 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={() => handleSaveSettings()}
-                  disabled={isSavingSettings || weeklyQuotaInput === savedWeeklyQuota}
+                  disabled={isSavingSettings || (weeklyQuotaInput === savedWeeklyQuota && hideWeekendsInput === savedHideWeekends)}
                   className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm ${
-                    weeklyQuotaInput === savedWeeklyQuota
+                    (weeklyQuotaInput === savedWeeklyQuota && hideWeekendsInput === savedHideWeekends)
                       ? "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-400 cursor-not-allowed border border-gray-200 dark:border-gray-600"
-                      : "bg-amber-600 hover:bg-amber-700 active:scale-[0.98] text-white shadow-amber-600/20 shadow-md"
+                      : "bg-amber-600 hover:bg-amber-700 active:scale-[0.98] text-white shadow-amber-600/20 shadow-md cursor-pointer"
                   }`}
                 >
                   {isSavingSettings ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : weeklyQuotaInput === savedWeeklyQuota ? (
+                  ) : (weeklyQuotaInput === savedWeeklyQuota && hideWeekendsInput === savedHideWeekends) ? (
                     <>
-                      <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> Cota em Vigor
+                      <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> Configurações em Vigor
                     </>
                   ) : (
                     <>
-                      <Save className="w-4 h-4" /> Salvar Nova Cota ({weeklyQuotaInput} {weeklyQuotaInput === 1 ? "aula" : "aulas"})
+                      <Save className="w-4 h-4" /> Salvar Configurações
                     </>
                   )}
                 </button>
