@@ -131,72 +131,74 @@ export default function PublicCalendarPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <div className="flex items-center gap-3">
-              <div className="bg-indigo-600 p-2.5 rounded-xl text-white shadow-md shadow-indigo-500/20">
-                <CalendarIcon className="w-6 h-6" />
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-xs">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 sm:h-20">
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div className="bg-indigo-600 p-2 sm:p-2.5 rounded-xl sm:rounded-2xl text-white shadow-md shadow-indigo-500/20 shrink-0">
+                <CalendarIcon className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900 tracking-tight leading-tight">Painel Público</h1>
-                <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">Agendamento de Labs</p>
+              <div className="min-w-0">
+                <h1 className="text-base sm:text-xl font-bold text-gray-900 tracking-tight leading-tight truncate">Painel Público</h1>
+                <p className="text-[11px] sm:text-xs font-semibold text-indigo-600 uppercase tracking-wide truncate">Agendamento de Labs</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
               <button
                 onClick={() => (window.location.href = "/logs")}
-                className="hidden sm:flex items-center gap-1.5 px-4 py-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap border border-emerald-200"
+                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1.5 sm:py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-xl text-xs sm:text-sm font-bold transition-colors whitespace-nowrap border border-emerald-200 shadow-2xs active:scale-95"
               >
-                <Clock className="w-4 h-4" /> Histórico
+                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600" />
+                <span className="hidden sm:inline">Histórico & Ranking</span>
+                <span className="sm:hidden">Ranking</span>
               </button>
               <Link
                 href="/"
-                className="px-4 py-2 hover:bg-gray-100 border border-gray-200 rounded-lg text-sm font-semibold transition-colors text-gray-700 shadow-sm"
+                className="px-2.5 sm:px-4 py-1.5 sm:py-2 bg-white hover:bg-gray-100 border border-gray-200 rounded-xl text-xs sm:text-sm font-bold transition-colors text-gray-800 shadow-2xs active:scale-95 whitespace-nowrap"
               >
-                Acesso do Professor
+                Login
               </Link>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
-        <div className="bg-indigo-50 border border-indigo-100 text-indigo-700 p-4 rounded-2xl text-center font-medium text-sm shadow-sm">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-8 space-y-6 sm:space-y-8">
+        <div className="bg-indigo-50 border border-indigo-100 text-indigo-800 p-3.5 sm:p-4 rounded-2xl text-center font-medium text-xs sm:text-sm shadow-2xs">
           Este painel é de visualização pública em tempo real. Os agendamentos são realizados pelo portal dos professores.
         </div>
 
         {/* LABORATORY SELECTOR (LabTec, Manutec, Robótica) */}
-        <section className="bg-white rounded-2xl shadow-sm border border-gray-200 p-2 flex flex-wrap gap-2 w-full sm:w-max mx-auto justify-center">
+        <section className="bg-white rounded-2xl shadow-xs border border-gray-200 p-1.5 sm:p-2 grid grid-cols-3 gap-1 sm:gap-2 w-full sm:w-max mx-auto justify-center">
           <button
             onClick={() => setSelectedLab("LabTec")}
-            className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 outline-none focus:outline-none ${
+            className={`flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-3 sm:px-6 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 outline-none focus:outline-none ${
               selectedLab === "LabTec"
                 ? "bg-indigo-600 text-white shadow-md transform scale-100"
                 : "text-gray-600 hover:bg-gray-100"
             }`}
           >
-            <Monitor className="w-5 h-5" /> LabTec
+            <Monitor className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" /> <span className="truncate">LabTec</span>
           </button>
           <button
             onClick={() => setSelectedLab("Manutec")}
-            className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 outline-none focus:outline-none ${
+            className={`flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-3 sm:px-6 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 outline-none focus:outline-none ${
               selectedLab === "Manutec"
                 ? "bg-amber-500 text-white shadow-md transform scale-100"
                 : "text-gray-600 hover:bg-gray-100"
             }`}
           >
-            <Wrench className="w-5 h-5" /> Manutec
+            <Wrench className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" /> <span className="truncate">Manutec</span>
           </button>
           <button
             onClick={() => setSelectedLab("Robotica")}
-            className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 outline-none focus:outline-none ${
+            className={`flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-3 sm:px-6 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 outline-none focus:outline-none ${
               selectedLab === "Robotica"
                 ? "bg-purple-600 text-white shadow-md transform scale-100"
                 : "text-gray-600 hover:bg-gray-100"
             }`}
           >
-            <Bot className="w-5 h-5" /> Robótica
+            <Bot className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" /> <span className="truncate">Robótica</span>
           </button>
         </section>
 

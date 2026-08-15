@@ -41,6 +41,9 @@ import {
   Tv,
   CalendarDays,
   AlertCircle,
+  Menu,
+  X,
+  LogOut,
 } from "lucide-react";
 
 type Laboratory = "LabTec" | "Manutec" | "Robotica";
@@ -84,6 +87,7 @@ export default function DashboardPage() {
   const [targetProfessorName, setTargetProfessorName] = useState("");
   const [professorsList, setProfessorsList] = useState<{ id: string; name: string }[]>([]);
   const [allowSecretaryOverride, setAllowSecretaryOverride] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!loading) {
@@ -455,75 +459,178 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 pb-24">
       {/* HEADER */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-xs">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
+          <div className="flex items-center justify-between h-16 sm:h-20">
+            
             {/* LOGO & USER INFO */}
-            <div className="flex items-center gap-4">
-              <div className="bg-blue-600 p-2.5 rounded-2xl text-white shadow-md shadow-blue-500/20">
-                <CalendarIcon className="w-6 h-6" />
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div className="bg-blue-600 p-2 sm:p-2.5 rounded-xl sm:rounded-2xl text-white shadow-md shadow-blue-500/20 shrink-0">
+                <CalendarIcon className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-bold text-gray-900 tracking-tight">AgendaLab</h1>
-                  {roleBadge()}
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <h1 className="text-base sm:text-xl font-bold text-gray-900 tracking-tight">AgendaLab</h1>
+                  <div className="hidden xs:inline-flex">{roleBadge()}</div>
                 </div>
-                <p className="text-xs text-gray-500 font-medium">Olá, <strong className="text-gray-700">{user.name}</strong></p>
+                <p className="text-[11px] sm:text-xs text-gray-500 font-medium truncate max-w-[140px] sm:max-w-[240px]">
+                  Olá, <strong className="text-gray-700">{user.name}</strong>
+                </p>
               </div>
             </div>
 
-            {/* ACTION BUTTONS */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => router.push("/logs")}
-                className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-gray-700 hover:text-emerald-700 bg-gray-50 hover:bg-emerald-50 border border-gray-200 hover:border-emerald-200 rounded-xl transition-all"
-              >
-                <Clock className="w-4 h-4 text-emerald-600" />
-                Histórico & Ranking
-              </button>
-
-              <button
-                onClick={() => router.push("/calendario")}
-                className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-gray-700 hover:text-blue-700 bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 rounded-xl transition-all"
-              >
-                <Globe className="w-4 h-4 text-blue-600" />
-                Painel Público
-              </button>
-
-              {user.role === "admin" && (
-                <button
-                  onClick={() => router.push("/admin")}
-                  className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl transition-all shadow-xs"
-                >
-                  <ShieldAlert className="w-4 h-4 text-amber-600" />
-                  Painel do Coordenador
-                </button>
-              )}
-
+            {/* ACTION BUTTONS CONTAINER */}
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              
+              {/* TROCAR SENHA: ALWAYS OUTSIDE THE SANDWICH (MOBILE & DESKTOP) */}
               <button
                 onClick={() => router.push("/change-password")}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold text-gray-700 hover:text-blue-700 bg-gray-100/80 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 rounded-xl transition-all shadow-2xs active:scale-95"
                 title="Alterar Senha"
               >
-                <LockKeyhole className="w-4 h-4" />
+                <LockKeyhole className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600" />
+                <span className="hidden sm:inline">Trocar Senha</span>
               </button>
 
+              {/* DESKTOP NAVIGATION (MD AND UP) */}
+              <div className="hidden md:flex items-center gap-2">
+                <button
+                  onClick={() => router.push("/logs")}
+                  className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-gray-700 hover:text-emerald-700 bg-gray-50 hover:bg-emerald-50 border border-gray-200 hover:border-emerald-200 rounded-xl transition-all"
+                >
+                  <Clock className="w-4 h-4 text-emerald-600" />
+                  Histórico & Ranking
+                </button>
+
+                <button
+                  onClick={() => router.push("/calendario")}
+                  className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-gray-700 hover:text-blue-700 bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 rounded-xl transition-all"
+                >
+                  <Globe className="w-4 h-4 text-blue-600" />
+                  Painel Público
+                </button>
+
+                {user.role === "admin" && (
+                  <button
+                    onClick={() => router.push("/admin")}
+                    className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl transition-all shadow-xs"
+                  >
+                    <ShieldAlert className="w-4 h-4 text-amber-600" />
+                    Painel do Coordenador
+                  </button>
+                )}
+
+                <button
+                  onClick={handleLogout}
+                  className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-xl transition-colors text-xs font-bold flex items-center gap-1"
+                  title="Sair"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sair</span>
+                </button>
+              </div>
+
+              {/* MOBILE HAMBURGER BUTTON (MD:HIDDEN) */}
               <button
-                onClick={handleLogout}
-                className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-xl transition-colors text-xs font-bold flex items-center gap-1"
-                title="Sair"
+                type="button"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className={`md:hidden p-2 rounded-xl border transition-all ${
+                  isMobileMenuOpen
+                    ? "bg-blue-50 text-blue-600 border-blue-200"
+                    : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+                }`}
+                aria-label="Abrir menu de navegação"
               >
-                Sair
+                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
             </div>
           </div>
         </div>
+
+        {/* MOBILE SLIDE-DOWN DRAWER / SANDWICH MENU */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-100 bg-white/95 backdrop-blur-md px-4 py-3 space-y-2 animate-fade-in shadow-xl">
+            <div className="pb-2 mb-2 border-b border-gray-100 flex items-center justify-between">
+              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                Navegação do Sistema
+              </span>
+              <div>{roleBadge()}</div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                router.push("/logs");
+              }}
+              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-700 hover:text-emerald-700 hover:bg-emerald-50 transition-colors border border-gray-100"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-emerald-100 text-emerald-700 rounded-lg">
+                  <Clock className="w-4 h-4" />
+                </div>
+                <span>🏆 Histórico & Ranking Geral</span>
+              </div>
+              <ChevronRight className="w-4 h-4 text-gray-400" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                router.push("/calendario");
+              }}
+              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-700 hover:text-blue-700 hover:bg-blue-50 transition-colors border border-gray-100"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-blue-100 text-blue-700 rounded-lg">
+                  <Globe className="w-4 h-4" />
+                </div>
+                <span>🌐 Painel Público de Horários</span>
+              </div>
+              <ChevronRight className="w-4 h-4 text-gray-400" />
+            </button>
+
+            {user.role === "admin" && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  router.push("/admin");
+                }}
+                className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-amber-900 bg-amber-50/70 hover:bg-amber-100 transition-colors border border-amber-200"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-amber-500 text-white rounded-lg">
+                    <ShieldAlert className="w-4 h-4" />
+                  </div>
+                  <span>🛡️ Painel do Coordenador</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-amber-700" />
+              </button>
+            )}
+
+            <div className="pt-2 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  handleLogout();
+                }}
+                className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 transition-colors border border-red-100"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Sair da Conta</span>
+              </button>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* MAIN CONTAINER */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 space-y-5 sm:space-y-6">
         
         {/* SUCCESS MESSAGE BANNER */}
         {successMsg && (
@@ -533,45 +640,45 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* LABORATORY SELECTOR TABS */}
-        <section className="bg-white p-2 rounded-2xl shadow-sm border border-gray-200 flex flex-wrap gap-2">
+        {/* LABORATORY SELECTOR TABS (GRID 3 COLUMNS ON MOBILE & DESKTOP) */}
+        <section className="bg-white p-1.5 sm:p-2 rounded-2xl shadow-xs border border-gray-200 grid grid-cols-3 gap-1 sm:gap-2">
           <button
             type="button"
             onClick={() => { setSelectedLab("LabTec"); setSelectedClasses([]); setSelectedShift(null); }}
-            className={`flex-1 min-w-[140px] py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+            className={`py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-center ${
               selectedLab === "LabTec"
                 ? "bg-blue-600 text-white shadow-md shadow-blue-500/20 scale-[1.01]"
                 : "text-gray-600 hover:bg-gray-50 border border-transparent hover:border-gray-200"
             }`}
           >
-            <Monitor className="w-4 h-4" />
-            <span>Laboratório de Informática (LabTec)</span>
+            <Monitor className="w-4 h-4 shrink-0" />
+            <span className="truncate">LabTec</span>
           </button>
 
           <button
             type="button"
             onClick={() => { setSelectedLab("Manutec"); setSelectedClasses([]); setSelectedShift(null); }}
-            className={`flex-1 min-w-[140px] py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+            className={`py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-center ${
               selectedLab === "Manutec"
                 ? "bg-amber-600 text-white shadow-md shadow-amber-500/20 scale-[1.01]"
                 : "text-gray-600 hover:bg-gray-50 border border-transparent hover:border-gray-200"
             }`}
           >
-            <Wrench className="w-4 h-4" />
-            <span>Laboratório de Manutenção (Manutec)</span>
+            <Wrench className="w-4 h-4 shrink-0" />
+            <span className="truncate">Manutec</span>
           </button>
 
           <button
             type="button"
             onClick={() => { setSelectedLab("Robotica"); setSelectedClasses([]); setSelectedShift(null); }}
-            className={`flex-1 min-w-[140px] py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+            className={`py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-center ${
               selectedLab === "Robotica"
                 ? "bg-purple-600 text-white shadow-md shadow-purple-500/20 scale-[1.01]"
                 : "text-gray-600 hover:bg-gray-50 border border-transparent hover:border-gray-200"
             }`}
           >
-            <Bot className="w-4 h-4" />
-            <span>Laboratório de Robótica</span>
+            <Bot className="w-4 h-4 shrink-0" />
+            <span className="truncate">Robótica</span>
           </button>
         </section>
 

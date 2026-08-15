@@ -7,7 +7,27 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, setDoc, doc, deleteDoc, writeBatch, serverTimestamp } from "firebase/firestore";
-import { ShieldAlert, Users, Plus, Trash2, ArrowLeft, Building2, Clock, FileText, CheckCircle2, Sparkles, UserPlus, SlidersHorizontal, Save, Check } from "lucide-react";
+import { 
+  ShieldAlert, 
+  Users, 
+  Plus, 
+  Trash2, 
+  ArrowLeft, 
+  Building2, 
+  Clock, 
+  FileText, 
+  CheckCircle2, 
+  Sparkles, 
+  UserPlus, 
+  SlidersHorizontal, 
+  Save, 
+  Check, 
+  Menu, 
+  X, 
+  LockKeyhole, 
+  ChevronRight,
+  Globe
+} from "lucide-react";
 
 interface AllowedUser {
   id: string; // The username (matricula)
@@ -34,6 +54,7 @@ export default function AdminPage() {
   const [registeredUsers, setRegisteredUsers] = useState<UserDoc[]>([]);
 
   const [activeTab, setActiveTab] = useState<"single" | "bulk">("single");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // System Settings state (Weekly Quota)
   const [weeklyQuotaInput, setWeeklyQuotaInput] = useState<number>(4);
@@ -303,34 +324,130 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      <header className="bg-amber-50 border-b border-amber-200 sticky top-0 z-30 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <div className="flex items-center gap-3">
-              <div className="bg-amber-600 p-2.5 rounded-xl text-white">
-                <ShieldAlert className="w-6 h-6" />
+      <header className="bg-amber-50/90 border-b border-amber-200 sticky top-0 z-40 shadow-xs backdrop-blur-xs">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 sm:h-20">
+            
+            {/* LOGO & TITLE */}
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div className="bg-amber-600 p-2 sm:p-2.5 rounded-xl text-white shrink-0 shadow-md shadow-amber-600/20">
+                <ShieldAlert className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900 tracking-tight leading-tight">Painel do Coordenador</h1>
-                <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide">Gestão de Regras e Usuários</p>
+              <div className="min-w-0">
+                <h1 className="text-base sm:text-xl font-bold text-gray-900 tracking-tight leading-tight truncate">
+                  Painel do Coordenador
+                </h1>
+                <p className="text-[11px] sm:text-xs font-bold text-amber-800 uppercase tracking-wide truncate">
+                  Gestão & Regras
+                </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={() => router.push("/logs")}
-                className="flex items-center gap-1.5 px-4 py-2 hover:bg-emerald-100/50 border border-emerald-300 rounded-lg text-sm font-semibold transition-colors text-emerald-800"
+
+            {/* ACTION BUTTONS */}
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              
+              {/* TROCAR SENHA: ALWAYS OUTSIDE THE SANDWICH */}
+              <button
+                onClick={() => router.push("/change-password")}
+                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold text-gray-700 hover:text-amber-800 bg-white hover:bg-amber-100/60 border border-amber-300/80 rounded-xl transition-all shadow-2xs active:scale-95"
+                title="Alterar Senha"
               >
-                <Clock className="w-4 h-4" /> Histórico & Ranking
+                <LockKeyhole className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600" />
+                <span className="hidden sm:inline">Trocar Senha</span>
               </button>
-              <button 
-                onClick={() => router.push("/dashboard")}
-                className="flex items-center gap-1.5 px-4 py-2 hover:bg-amber-100/50 border border-amber-300 rounded-lg text-sm font-semibold transition-colors text-amber-800"
+
+              {/* DESKTOP NAVIGATION BUTTONS */}
+              <div className="hidden md:flex items-center gap-2">
+                <button 
+                  onClick={() => router.push("/logs")}
+                  className="flex items-center gap-1.5 px-3.5 py-2 hover:bg-emerald-100/70 border border-emerald-300 rounded-xl text-xs font-bold transition-colors text-emerald-800 bg-white"
+                >
+                  <Clock className="w-4 h-4 text-emerald-600" /> Histórico & Ranking
+                </button>
+                <button 
+                  onClick={() => router.push("/dashboard")}
+                  className="flex items-center gap-1.5 px-3.5 py-2 hover:bg-amber-100 border border-amber-300 rounded-xl text-xs font-bold transition-colors text-amber-900 bg-white shadow-2xs"
+                >
+                  <ArrowLeft className="w-4 h-4 text-amber-700" /> Voltar ao Calendário
+                </button>
+              </div>
+
+              {/* MOBILE HAMBURGER BUTTON (MD:HIDDEN) */}
+              <button
+                type="button"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className={`md:hidden p-2 rounded-xl border transition-all ${
+                  isMobileMenuOpen
+                    ? "bg-amber-200 text-amber-900 border-amber-400"
+                    : "bg-white text-gray-700 border-amber-200 hover:bg-amber-100"
+                }`}
+                aria-label="Menu do Coordenador"
               >
-                <ArrowLeft className="w-4 h-4" /> Voltar ao Calendário
+                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
             </div>
           </div>
         </div>
+
+        {/* MOBILE SLIDE-DOWN DRAWER / SANDWICH MENU */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-amber-200 bg-amber-50/98 backdrop-blur-md px-4 py-3 space-y-2 animate-fade-in shadow-xl">
+            <span className="text-[11px] font-bold text-amber-900/60 uppercase tracking-wider block mb-1">
+              Opções de Navegação
+            </span>
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                router.push("/dashboard");
+              }}
+              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-800 bg-white hover:bg-amber-100/50 transition-colors border border-amber-200"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-blue-100 text-blue-700 rounded-lg">
+                  <ArrowLeft className="w-4 h-4" />
+                </div>
+                <span>📅 Voltar ao Calendário de Reservas</span>
+              </div>
+              <ChevronRight className="w-4 h-4 text-gray-400" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                router.push("/logs");
+              }}
+              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-800 bg-white hover:bg-emerald-50 transition-colors border border-emerald-200"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-emerald-100 text-emerald-700 rounded-lg">
+                  <Clock className="w-4 h-4" />
+                </div>
+                <span>🏆 Histórico & Ranking Geral</span>
+              </div>
+              <ChevronRight className="w-4 h-4 text-gray-400" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                router.push("/calendario");
+              }}
+              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-800 bg-white hover:bg-indigo-50 transition-colors border border-indigo-200"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-indigo-100 text-indigo-700 rounded-lg">
+                  <Globe className="w-4 h-4" />
+                </div>
+                <span>🌐 Painel Público de Horários</span>
+              </div>
+              <ChevronRight className="w-4 h-4 text-gray-400" />
+            </button>
+          </div>
+        )}
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
