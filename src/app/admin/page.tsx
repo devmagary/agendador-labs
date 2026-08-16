@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import { db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot, setDoc, doc, deleteDoc, writeBatch, serverTimestamp } from "firebase/firestore";
+import { collection, query, where, onSnapshot, setDoc, doc, deleteDoc, writeBatch, serverTimestamp, addDoc } from "firebase/firestore";
 import { 
   ShieldAlert, 
   Users, 
@@ -168,6 +168,27 @@ export default function AdminPage() {
         updatedAt: serverTimestamp(),
         updatedBy: user?.name || "Coordenador",
       }, { merge: true });
+
+      if (user) {
+        await addDoc(collection(db, "logs"), {
+          professorId: user.uid,
+          professorName: user.name,
+          action: "settings_update",
+          performedBy: {
+            uid: user.uid,
+            name: user.name,
+            role: user.role,
+          },
+          details: `alterou as configurações do sistema (Cota Semanal: ${weeklyQuotaInput} aulas, Ocultar Fins de Semana: ${hideWeekendsInput ? "Sim" : "Não"})`,
+          changes: {
+            weeklyQuota: Number(weeklyQuotaInput),
+            hideWeekends: hideWeekendsInput,
+            secretaryQuotaOverride: secretaryOverrideInput,
+          },
+          timestamp: serverTimestamp(),
+        });
+      }
+
       setSettingsMsg(`Configurações salvas com sucesso!`);
       setTimeout(() => setSettingsMsg(""), 4000);
     } catch {
@@ -289,6 +310,16 @@ export default function AdminPage() {
           name: newName.trim(),
           role: newRole
        });
+       if (user) {
+         await addDoc(collection(db, "logs"), {
+           professorId: user.uid,
+           professorName: user.name,
+           action: "user_authorization_create",
+           performedBy: { uid: user.uid, name: user.name, role: user.role },
+           details: `autorizou o acesso para ${newName.trim()} (${newRole}) com o usuário '${cleanUsername}'`,
+           timestamp: serverTimestamp(),
+         });
+       }
        const roleLabel = newRole === "secretario" ? "Secretário(a)" : "Professor(a)";
        setMsg(`Permissão criada para ${newName.trim()} (${roleLabel}) acessar com o usuário '${cleanUsername}' e senha '123456'.`);
        setNewUsername("");
@@ -316,6 +347,16 @@ export default function AdminPage() {
       }
 
       await batch.commit();
+      if (user) {
+        await addDoc(collection(db, "logs"), {
+          professorId: user.uid,
+          professorName: user.name,
+          action: "user_authorization_bulk",
+          performedBy: { uid: user.uid, name: user.name, role: user.role },
+          details: `importou em lote ${parsedBulkUsers.length} usuários autorizados`,
+          timestamp: serverTimestamp(),
+        });
+      }
       const roleLabel = bulkRole === "secretario" ? "Secretário(a)s" : "Professor(a)es";
       setMsg(`Sucesso! ${parsedBulkUsers.length} ${roleLabel} foram cadastrados em lote. Todos usarão a senha padrão '123456' no primeiro acesso.`);
       setBulkText("");
@@ -327,12 +368,36 @@ export default function AdminPage() {
   };
 
   const handleRevokeAllowed = async (id: string) => {
-    try { await deleteDoc(doc(db, "allowed_users", id)); } catch {}
+    try {
+      await deleteDoc(doc(db, "allowed_users", id));
+      if (user) {
+        await addDoc(collection(db, "logs"), {
+          professorId: user.uid,
+          professorName: user.name,
+          action: "user_authorization_revoke",
+          performedBy: { uid: user.uid, name: user.name, role: user.role },
+          details: `revogou a autorização do usuário '${id}'`,
+          timestamp: serverTimestamp(),
+        });
+      }
+    } catch {}
   };
 
   const handleDeleteUser = async (id: string) => {
     if(!confirm("Atenção: Você tem certeza que deseja remover este usuário da lista de ativos?")) return;
-    try { await deleteDoc(doc(db, "users", id)); } catch {}
+    try {
+      await deleteDoc(doc(db, "users", id));
+      if (user) {
+        await addDoc(collection(db, "logs"), {
+          professorId: user.uid,
+          professorName: user.name,
+          action: "user_delete",
+          performedBy: { uid: user.uid, name: user.name, role: user.role },
+          details: `excluiu o cadastro ativo do usuário '${id}'`,
+          timestamp: serverTimestamp(),
+        });
+      }
+    } catch {}
   };
 
   if (loading || !user || user.role !== 'admin') return null;
@@ -364,10 +429,10 @@ export default function AdminPage() {
               {/* TROCAR SENHA: ALWAYS OUTSIDE THE SANDWICH */}
               <button
                 onClick={() => router.push("/change-password")}
-                className="flex items-center justify-center gap-1.5 h-10 w-10 sm:w-auto sm:px-4 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-amber-800 dark:hover:text-amber-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-amber-300/80 dark:border-gray-700 rounded-xl transition-all shadow-2xs active:scale-95 shrink-0"
+                className="flex items-center justify-center gap-1.5 h-9 w-9 sm:w-auto sm:px-3.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-amber-800 dark:hover:text-amber-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-amber-300/80 dark:border-gray-700 rounded-xl transition-all shadow-2xs active:scale-95 shrink-0"
                 title="Alterar Senha"
               >
-                <LockKeyhole className="w-5 h-5 sm:w-4 sm:h-4 text-gray-600 dark:text-gray-300" />
+                <LockKeyhole className="w-4 h-4 text-gray-600 dark:text-gray-300 shrink-0" />
                 <span className="hidden sm:inline">Trocar Senha</span>
               </button>
 
@@ -380,15 +445,15 @@ export default function AdminPage() {
               <div className="hidden md:flex items-center gap-2">
                 <button 
                   onClick={() => router.push("/logs")}
-                  className="flex items-center gap-1.5 px-3.5 py-2 hover:bg-emerald-100/70 dark:hover:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded-xl text-xs font-bold transition-colors text-emerald-800 dark:text-emerald-300 bg-white dark:bg-gray-800"
+                  className="flex items-center justify-center gap-1.5 h-9 px-3.5 hover:bg-emerald-100/70 dark:hover:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded-xl text-xs font-bold transition-colors text-emerald-800 dark:text-emerald-300 bg-white dark:bg-gray-800"
                 >
-                  <Clock className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> Histórico & Ranking
+                  <Clock className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" /> Histórico & Ranking
                 </button>
                 <button 
                   onClick={() => router.push("/dashboard")}
-                  className="flex items-center gap-1.5 px-3.5 py-2 hover:bg-amber-100 dark:hover:bg-amber-950/40 border border-amber-300 dark:border-amber-800 rounded-xl text-xs font-bold transition-colors text-amber-900 dark:text-amber-300 bg-white dark:bg-gray-800 shadow-2xs"
+                  className="flex items-center justify-center gap-1.5 h-9 px-3.5 hover:bg-amber-100 dark:hover:bg-amber-950/40 border border-amber-300 dark:border-amber-800 rounded-xl text-xs font-bold transition-colors text-amber-900 dark:text-amber-300 bg-white dark:bg-gray-800 shadow-2xs"
                 >
-                  <ArrowLeft className="w-4 h-4 text-amber-700 dark:text-amber-400" /> Voltar ao Calendário
+                  <ArrowLeft className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0" /> Voltar ao Calendário
                 </button>
                 <ThemeToggle variant="icon" />
               </div>
@@ -397,14 +462,14 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={`md:hidden h-10 w-10 flex items-center justify-center rounded-xl border transition-all active:scale-95 shrink-0 ${
+                className={`md:hidden h-9 w-9 flex items-center justify-center rounded-xl border transition-all active:scale-95 shrink-0 ${
                   isMobileMenuOpen
                     ? "bg-amber-200 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border-amber-400 dark:border-amber-700"
                     : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-amber-200 dark:border-gray-700 hover:bg-amber-100 dark:hover:bg-gray-700"
                 }`}
                 aria-label="Menu do Coordenador"
               >
-                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
               </button>
             </div>
           </div>

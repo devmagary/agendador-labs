@@ -465,6 +465,19 @@ export default function DashboardPage() {
         professorId: user.uid,
         professorName: user.name,
         action: "create",
+        performedBy: {
+          uid: user.uid,
+          name: user.name,
+          role: user.role,
+        },
+        targetProfessorName: finalProfName,
+        targetDate: format(selectedDate, "yyyy-MM-dd"),
+        laboratory: selectedLab,
+        shift: selectedShift,
+        classHours: selectedClasses,
+        hoursCount: selectedClasses.length,
+        hasTv: hasTv,
+        isSecretaryOverride: isSec && allowSecretaryOverride,
         details: logDetails,
         timestamp: serverTimestamp(),
       });
@@ -511,6 +524,28 @@ export default function DashboardPage() {
         professorId: user.uid,
         professorName: user.name,
         action: "cancel",
+        performedBy: {
+          uid: user.uid,
+          name: user.name,
+          role: user.role,
+        },
+        targetProfessorName: targetSchedule.professorName,
+        targetDate: targetSchedule.date,
+        laboratory: targetSchedule.laboratory,
+        shift: targetSchedule.shift,
+        classHours: targetSchedule.classHours,
+        hoursCount: targetSchedule.classHours?.length || 1,
+        hasTv: !!targetSchedule.hasTv,
+        cancelledScheduleSnapshot: {
+          id: targetSchedule.id,
+          professorId: targetSchedule.professorId || null,
+          professorName: targetSchedule.professorName,
+          laboratory: targetSchedule.laboratory,
+          date: targetSchedule.date,
+          shift: targetSchedule.shift,
+          classHours: targetSchedule.classHours,
+          hasTv: !!targetSchedule.hasTv,
+        },
         details: logDetails,
         timestamp: serverTimestamp(),
       });
@@ -599,11 +634,11 @@ export default function DashboardPage() {
               {/* TROCAR SENHA: ALWAYS OUTSIDE THE SANDWICH (MOBILE & DESKTOP) */}
               <button
                 onClick={() => router.push("/change-password")}
-                className="flex items-center justify-center gap-1.5 h-10 w-10 sm:w-auto sm:px-4 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-blue-700 dark:hover:text-blue-400 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl transition-all shadow-2xs active:scale-95 shrink-0"
+                className="flex items-center justify-center gap-1.5 h-9 w-9 sm:w-auto sm:px-3.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-blue-700 dark:hover:text-blue-400 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl transition-all shadow-2xs active:scale-95 shrink-0"
                 title="Alterar Senha"
                 data-tour-id="tour-password"
               >
-                <LockKeyhole className="w-5 h-5 sm:w-4 sm:h-4 text-gray-600 dark:text-gray-300" />
+                <LockKeyhole className="w-4 h-4 text-gray-600 dark:text-gray-300 shrink-0" />
                 <span className="hidden sm:inline">Trocar Senha</span>
               </button>
 
@@ -616,27 +651,27 @@ export default function DashboardPage() {
               <div className="hidden md:flex items-center gap-2">
                 <button
                   onClick={() => router.push("/logs")}
-                  className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-emerald-700 dark:hover:text-emerald-400 bg-gray-50 dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-gray-200 dark:border-gray-700 rounded-xl transition-all"
+                  className="flex items-center justify-center gap-1.5 h-9 px-3.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-emerald-700 dark:hover:text-emerald-400 bg-gray-50 dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-gray-200 dark:border-gray-700 rounded-xl transition-all"
                 >
-                  <Clock className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <Clock className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   Histórico & Ranking
                 </button>
 
                 <button
                   onClick={() => router.push("/calendario")}
-                  className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-blue-700 dark:hover:text-blue-400 bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-gray-200 dark:border-gray-700 rounded-xl transition-all"
+                  className="flex items-center justify-center gap-1.5 h-9 px-3.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-blue-700 dark:hover:text-blue-400 bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-gray-200 dark:border-gray-700 rounded-xl transition-all"
                 >
-                  <Globe className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <Globe className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
                   Painel Público
                 </button>
 
                 {user.role === "professor" && (
                   <button
                     onClick={() => setShowTour(true)}
-                    className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-sky-700 dark:hover:text-sky-400 bg-gray-50 dark:bg-gray-800 hover:bg-sky-50 dark:hover:bg-sky-950/40 border border-gray-200 dark:border-gray-700 rounded-xl transition-all"
+                    className="flex items-center justify-center gap-1.5 h-9 px-3.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-sky-700 dark:hover:text-sky-400 bg-gray-50 dark:bg-gray-800 hover:bg-sky-50 dark:hover:bg-sky-950/40 border border-gray-200 dark:border-gray-700 rounded-xl transition-all"
                     title="Reiniciar tour guiado"
                   >
-                    <HelpCircle className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                    <HelpCircle className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0" />
                     Tour Guiado
                   </button>
                 )}
@@ -644,9 +679,9 @@ export default function DashboardPage() {
                 {user.role === "admin" && (
                   <button
                     onClick={() => router.push("/admin")}
-                    className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 border border-amber-200 dark:border-amber-800 rounded-xl transition-all shadow-xs"
+                    className="flex items-center justify-center gap-1.5 h-9 px-3.5 text-xs font-bold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 border border-amber-200 dark:border-amber-800 rounded-xl transition-all shadow-xs"
                   >
-                    <ShieldAlert className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                    <ShieldAlert className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
                     Painel do Coordenador
                   </button>
                 )}
@@ -658,10 +693,10 @@ export default function DashboardPage() {
 
                 <button
                   onClick={handleLogout}
-                  className="p-2 text-red-500 hover:text-red-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-colors text-xs font-bold flex items-center gap-1"
+                  className="h-9 px-3 text-red-500 hover:text-red-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-colors text-xs font-bold flex items-center justify-center gap-1.5"
                   title="Sair"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-4 h-4 shrink-0" />
                   <span>Sair</span>
                 </button>
               </div>
@@ -670,14 +705,14 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={`md:hidden h-10 w-10 flex items-center justify-center rounded-xl border transition-all active:scale-95 shrink-0 ${
+                className={`md:hidden h-9 w-9 flex items-center justify-center rounded-xl border transition-all active:scale-95 shrink-0 ${
                   isMobileMenuOpen
                     ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800"
                     : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                 }`}
                 aria-label="Abrir menu de navegação"
               >
-                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
               </button>
             </div>
           </div>

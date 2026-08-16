@@ -25,6 +25,7 @@ import {
   Users,
   LockKeyhole,
   Download,
+  ShieldAlert,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -33,7 +34,24 @@ import * as XLSX from "xlsx";
 interface LogEntry {
   id: string;
   professorName: string;
-  action: "create" | "cancel";
+  professorId?: string;
+  action: "create" | "cancel" | "settings_update" | "user_authorization_create" | "user_authorization_bulk" | "user_authorization_revoke" | "user_delete" | string;
+  performedBy?: {
+    uid: string;
+    name: string;
+    role: string;
+  };
+  targetProfessorId?: string | null;
+  targetProfessorName?: string;
+  targetDate?: string;
+  laboratory?: string;
+  shift?: string;
+  classHours?: number[];
+  hoursCount?: number;
+  hasTv?: boolean;
+  isSecretaryOverride?: boolean;
+  cancelledScheduleSnapshot?: Record<string, unknown>;
+  changes?: Record<string, unknown>;
   details: string;
   timestamp: { toDate?: () => Date } | null;
 }
@@ -133,7 +151,72 @@ export default function LogsPage() {
       // 2. Create workbook
       const wb = XLSX.utils.book_new();
 
-      // 3. Format data for the general sheet
+      // 3. Compute summary count of classes and bookings per professor
+      const profStatsMap = new Map<string, {
+        professor: string;
+        totalHours: number;
+        totalBookings: number;
+        labTecHours: number;
+        manutecHours: number;
+        roboticaHours: number;
+        tvBookings: number;
+      }>();
+
+      sortedSchedules.forEach((s) => {
+        const profName = s.professorName?.trim() || "Não informado";
+        const hoursCount = s.classHours?.length || 1;
+
+        const stat = profStatsMap.get(profName) || {
+          professor: profName,
+          totalHours: 0,
+          totalBookings: 0,
+          labTecHours: 0,
+          manutecHours: 0,
+          roboticaHours: 0,
+          tvBookings: 0,
+        };
+
+        stat.totalHours += hoursCount;
+        stat.totalBookings += 1;
+        if (s.laboratory === "LabTec") stat.labTecHours += hoursCount;
+        else if (s.laboratory === "Manutec") stat.manutecHours += hoursCount;
+        else if (s.laboratory === "Robotica") stat.roboticaHours += hoursCount;
+
+        if (s.hasTv) stat.tvBookings += 1;
+
+        profStatsMap.set(profName, stat);
+      });
+
+      // Sort professors by total classes/hours descending, then bookings
+      const sortedProfStats = Array.from(profStatsMap.values()).sort((a, b) => {
+        if (b.totalHours !== a.totalHours) return b.totalHours - a.totalHours;
+        return b.totalBookings - a.totalBookings;
+      });
+
+      const profStatsData = sortedProfStats.map((p) => ({
+        "Professor": p.professor,
+        "Total de Aulas (Horas)": p.totalHours,
+        "Total de Agendamentos (Reservas)": p.totalBookings,
+        "Aulas no LabTec": p.labTecHours,
+        "Aulas no Manutec": p.manutecHours,
+        "Aulas na Robótica": p.roboticaHours,
+        "Agendamentos c/ TV": p.tvBookings,
+      }));
+
+      // Sheet 1: "Total por Professor" (Consolidated count requested)
+      const wsProfStats = XLSX.utils.json_to_sheet(profStatsData);
+      wsProfStats["!cols"] = [
+        { wch: 26 }, // Professor
+        { wch: 22 }, // Total de Aulas (Horas)
+        { wch: 30 }, // Total de Agendamentos (Reservas)
+        { wch: 16 }, // Aulas no LabTec
+        { wch: 16 }, // Aulas no Manutec
+        { wch: 18 }, // Aulas na Robótica
+        { wch: 18 }, // Agendamentos c/ TV
+      ];
+      XLSX.utils.book_append_sheet(wb, wsProfStats, "Total por Professor");
+
+      // Sheet 2: Format data for the general sheet (All bookings line by line)
       const generalData = sortedSchedules.map((s) => {
         const [year, month, day] = s.date.split("-");
         const formattedDate = `${day}/${month}/${year}`;
@@ -158,7 +241,7 @@ export default function LogsPage() {
       ];
       XLSX.utils.book_append_sheet(wb, wsGeneral, "Resumo Geral");
 
-      // 4. Group by date and create tabs for each day
+      // Sheet 3+: Group by date and create tabs for each day
       interface ExportedDayRow {
         "Laboratório": string;
         "Turno": string;
@@ -307,10 +390,10 @@ export default function LogsPage() {
               {/* TROCAR SENHA: ALWAYS OUTSIDE */}
               <button
                 onClick={() => router.push("/change-password")}
-                className="flex items-center justify-center gap-1.5 h-10 w-10 sm:w-auto sm:px-4 text-xs font-bold text-gray-700 dark:text-gray-250 hover:text-emerald-700 dark:hover:text-emerald-400 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl transition-all shadow-2xs active:scale-95 shrink-0"
+                className="flex items-center justify-center gap-1.5 h-9 w-9 sm:w-auto sm:px-3.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-emerald-700 dark:hover:text-emerald-400 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl transition-all shadow-2xs active:scale-95 shrink-0"
                 title="Alterar Senha"
               >
-                <LockKeyhole className="w-5 h-5 sm:w-4 sm:h-4 text-gray-600 dark:text-gray-300" />
+                <LockKeyhole className="w-4 h-4 text-gray-600 dark:text-gray-300 shrink-0" />
                 <span className="hidden sm:inline">Trocar Senha</span>
               </button>
 
@@ -318,9 +401,10 @@ export default function LogsPage() {
 
               <button
                 onClick={() => router.back()}
-                className="flex items-center justify-center gap-1.5 h-10 w-10 sm:w-auto sm:px-4 text-xs font-bold text-gray-700 dark:text-gray-250 hover:text-emerald-700 dark:hover:text-emerald-400 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl transition-all active:scale-95 shrink-0 shadow-2xs"
+                className="flex items-center justify-center gap-1.5 h-9 w-9 sm:w-auto sm:px-3.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-emerald-700 dark:hover:text-emerald-400 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl transition-all active:scale-95 shrink-0 shadow-2xs"
+                title="Voltar ao Painel"
               >
-                <ArrowLeft className="w-5 h-5 sm:w-4 sm:h-4" />
+                <ArrowLeft className="w-4 h-4 text-gray-600 dark:text-gray-300 shrink-0" />
                 <span className="hidden sm:inline">Voltar</span>
               </button>
             </div>
@@ -435,44 +519,88 @@ export default function LogsPage() {
                             <div className="absolute left-[1.125rem] top-10 bottom-[-1.5rem] w-px bg-gray-100 dark:bg-gray-800 group-last:hidden"></div>
                           )}
 
-                          <div
-                            className={`
-                              relative z-10 w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-xs border
-                              ${
-                                log.action === "create"
-                                  ? "bg-blue-50 dark:bg-blue-950/80 border-blue-100 dark:border-blue-800 text-blue-600 dark:text-blue-400"
-                                  : "bg-red-50 dark:bg-red-950/80 border-red-100 dark:border-red-800 text-red-600 dark:text-red-400"
+                          {(() => {
+                            const meta = (() => {
+                              switch (log.action) {
+                                case "create":
+                                  return {
+                                    label: "Agendou",
+                                    badgeClass: "bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800",
+                                    iconBgClass: "bg-blue-50 dark:bg-blue-950/80 border-blue-100 dark:border-blue-800 text-blue-600 dark:text-blue-400",
+                                    icon: <History className="w-4 h-4" />,
+                                  };
+                                case "cancel":
+                                  return {
+                                    label: "Cancelou",
+                                    badgeClass: "bg-red-100 dark:bg-red-950/80 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800",
+                                    iconBgClass: "bg-red-50 dark:bg-red-950/80 border-red-100 dark:border-red-800 text-red-600 dark:text-red-400",
+                                    icon: <Clock className="w-4 h-4" />,
+                                  };
+                                case "settings_update":
+                                  return {
+                                    label: "Configurações",
+                                    badgeClass: "bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800",
+                                    iconBgClass: "bg-amber-50 dark:bg-amber-950/80 border-amber-100 dark:border-amber-800 text-amber-600 dark:text-amber-400",
+                                    icon: <ShieldAlert className="w-4 h-4" />,
+                                  };
+                                case "user_authorization_create":
+                                case "user_authorization_bulk":
+                                  return {
+                                    label: "Autorização",
+                                    badgeClass: "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
+                                    iconBgClass: "bg-emerald-50 dark:bg-emerald-950/80 border-emerald-100 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400",
+                                    icon: <Users className="w-4 h-4" />,
+                                  };
+                                case "user_authorization_revoke":
+                                case "user_delete":
+                                  return {
+                                    label: "Revogação",
+                                    badgeClass: "bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-800",
+                                    iconBgClass: "bg-purple-50 dark:bg-purple-950/80 border-purple-100 dark:border-purple-800 text-purple-600 dark:text-purple-400",
+                                    icon: <ShieldAlert className="w-4 h-4" />,
+                                  };
+                                default:
+                                  return {
+                                    label: log.action,
+                                    badgeClass: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700",
+                                    iconBgClass: "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400",
+                                    icon: <Clock className="w-4 h-4" />,
+                                  };
                               }
-                            `}
-                          >
-                            {log.action === "create" ? <History className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
-                          </div>
+                            })();
 
-                          <div className="flex-1 pt-1 pb-2">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-bold text-gray-900 dark:text-white">{log.professorName}</span>
-                                <span
-                                  className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
-                                    log.action === "create"
-                                      ? "bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
-                                      : "bg-red-100 dark:bg-red-950/80 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800"
-                                  }`}
+                            return (
+                              <>
+                                <div
+                                  className={`relative z-10 w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-xs border ${meta.iconBgClass}`}
                                 >
-                                  {log.action === "create" ? "Agendou" : "Cancelou"}
-                                </span>
-                              </div>
-                              <span className="text-xs font-medium text-gray-400 dark:text-gray-500 flex items-center gap-1">
-                                <Clock className="w-3 h-3" />{" "}
-                                {log.timestamp && log.timestamp.toDate
-                                  ? format(log.timestamp.toDate(), "HH:mm:ss")
-                                  : "--:--"}
-                              </span>
-                            </div>
-                            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
-                              {formatLogText(log)}
-                            </p>
-                          </div>
+                                  {meta.icon}
+                                </div>
+
+                                <div className="flex-1 pt-1 pb-2">
+                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-sm font-bold text-gray-900 dark:text-white">{log.professorName}</span>
+                                      <span
+                                        className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${meta.badgeClass}`}
+                                      >
+                                        {meta.label}
+                                      </span>
+                                    </div>
+                                    <span className="text-xs font-medium text-gray-400 dark:text-gray-500 flex items-center gap-1">
+                                      <Clock className="w-3 h-3" />{" "}
+                                      {log.timestamp && log.timestamp.toDate
+                                        ? format(log.timestamp.toDate(), "HH:mm:ss")
+                                        : "--:--"}
+                                    </span>
+                                  </div>
+                                  <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
+                                    {formatLogText(log)}
+                                  </p>
+                                </div>
+                              </>
+                            );
+                          })()}
                         </div>
                       </div>
                     );
