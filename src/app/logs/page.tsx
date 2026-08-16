@@ -24,9 +24,11 @@ import {
   Flame,
   Users,
   LockKeyhole,
+  Download,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import * as XLSX from "xlsx";
 
 interface LogEntry {
   id: string;
@@ -109,6 +111,98 @@ export default function LogsPage() {
       unsubSchedules();
     };
   }, []);
+
+  const handleExportToExcel = () => {
+    if (!schedules || schedules.length === 0) {
+      alert("Nenhum agendamento encontrado para exportar.");
+      return;
+    }
+
+    try {
+      // 1. Sort schedules chronologically by date, then laboratory, then shift
+      const sortedSchedules = [...schedules].sort((a, b) => {
+        const dateCompare = a.date.localeCompare(b.date);
+        if (dateCompare !== 0) return dateCompare;
+        
+        const labCompare = a.laboratory.localeCompare(b.laboratory);
+        if (labCompare !== 0) return labCompare;
+        
+        return a.shift.localeCompare(b.shift);
+      });
+
+      // 2. Create workbook
+      const wb = XLSX.utils.book_new();
+
+      // 3. Format data for the general sheet
+      const generalData = sortedSchedules.map((s) => {
+        const [year, month, day] = s.date.split("-");
+        const formattedDate = `${day}/${month}/${year}`;
+        return {
+          "Data": formattedDate,
+          "Laboratório": s.laboratory,
+          "Turno": s.shift,
+          "Aulas / Horários": s.classHours ? s.classHours.map((h) => `${h}º`).join(", ") : "",
+          "Professor": s.professorName || "Não informado",
+          "Uso de TV?": s.hasTv ? "Sim" : "Não"
+        };
+      });
+
+      const wsGeneral = XLSX.utils.json_to_sheet(generalData);
+      wsGeneral["!cols"] = [
+        { wch: 12 }, // Data
+        { wch: 15 }, // Laboratório
+        { wch: 12 }, // Turno
+        { wch: 18 }, // Aulas / Horários
+        { wch: 25 }, // Professor
+        { wch: 12 }  // Uso de TV?
+      ];
+      XLSX.utils.book_append_sheet(wb, wsGeneral, "Resumo Geral");
+
+      // 4. Group by date and create tabs for each day
+      interface ExportedDayRow {
+        "Laboratório": string;
+        "Turno": string;
+        "Aulas / Horários": string;
+        "Professor": string;
+        "Uso de TV?": string;
+      }
+      const schedulesByDate = new Map<string, ExportedDayRow[]>();
+      sortedSchedules.forEach((s) => {
+        const [year, month, day] = s.date.split("-");
+        const dateKey = `${day}-${month}-${year}`; // e.g. "14-08-2026"
+        
+        const list = schedulesByDate.get(dateKey) || [];
+        list.push({
+          "Laboratório": s.laboratory,
+          "Turno": s.shift,
+          "Aulas / Horários": s.classHours ? s.classHours.map((h) => `${h}º`).join(", ") : "",
+          "Professor": s.professorName || "Não informado",
+          "Uso de TV?": s.hasTv ? "Sim" : "Não"
+        });
+        schedulesByDate.set(dateKey, list);
+      });
+
+      // Append each day's sheet to the workbook
+      schedulesByDate.forEach((dayRows, dateKey) => {
+        const wsDay = XLSX.utils.json_to_sheet(dayRows);
+        wsDay["!cols"] = [
+          { wch: 15 }, // Laboratório
+          { wch: 12 }, // Turno
+          { wch: 18 }, // Aulas / Horários
+          { wch: 25 }, // Professor
+          { wch: 12 }  // Uso de TV?
+        ];
+        XLSX.utils.book_append_sheet(wb, wsDay, dateKey);
+      });
+
+      // 5. Generate filename and save workbook
+      const todayStr = format(new Date(), "dd-MM-yyyy_HHmm");
+      XLSX.writeFile(wb, `agendamentos_laboratorios_${todayStr}.xlsx`);
+    } catch (err) {
+      console.error("Erro ao exportar planilha:", err);
+      alert("Ocorreu um erro ao exportar a planilha.");
+    }
+  };
 
   const formatLogText = (log: LogEntry) => {
     const timeStr = log.timestamp?.toDate
@@ -267,12 +361,23 @@ export default function LogsPage() {
             </button>
           </div>
 
-          <div className="hidden md:flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1.5 rounded-full border border-emerald-100 dark:border-emerald-800">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            Atualização em Tempo Real
+          <div className="flex items-center gap-2.5">
+            <div className="hidden md:flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1.5 rounded-full border border-emerald-100 dark:border-emerald-800">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              Atualização em Tempo Real
+            </div>
+
+            <button
+              type="button"
+              onClick={handleExportToExcel}
+              className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 dark:bg-emerald-700 hover:bg-emerald-700 dark:hover:bg-emerald-600 text-white rounded-xl text-[11px] sm:text-xs font-bold transition-all active:scale-95 shadow-md shadow-emerald-600/10 cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-white" />
+              <span>Exportar Planilha</span>
+            </button>
           </div>
         </div>
 
