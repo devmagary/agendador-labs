@@ -49,6 +49,7 @@ import {
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Tour } from "@/components/Tour";
 import type { TourStep } from "@/components/Tour";
+import { PwaInstallButton } from "@/components/PwaInstallButton";
 
 type Laboratory = "LabTec" | "Manutec" | "Robotica";
 type Shift = "Matutino" | "Vespertino" | "Noturno";
@@ -825,6 +826,9 @@ export default function DashboardPage() {
                 <ChevronRight className="w-4 h-4 text-amber-700 dark:text-amber-400" />
               </button>
             )}
+
+            {/* PWA INSTALL BUTTON */}
+            <PwaInstallButton />
 
             <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
               <button

@@ -32,6 +32,7 @@ import {
   Bot
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { PwaInstallButton } from "@/components/PwaInstallButton";
 
 interface AllowedUser {
   id: string; // The username (matricula)
@@ -593,7 +594,7 @@ export default function AdminPage() {
                 setIsMobileMenuOpen(false);
                 router.push("/calendario");
               }}
-              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-850 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors border border-indigo-200 dark:border-gray-800"
+              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors border border-indigo-200 dark:border-gray-800"
             >
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 rounded-lg">
@@ -603,6 +604,11 @@ export default function AdminPage() {
               </div>
               <ChevronRight className="w-4 h-4 text-gray-400" />
             </button>
+
+            {/* PWA INSTALL BUTTON */}
+            <div className="pt-1">
+              <PwaInstallButton />
+            </div>
           </div>
         )}
       </header>
