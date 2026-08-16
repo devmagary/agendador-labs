@@ -136,8 +136,14 @@ export default function DashboardPage() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [monthSchedules, setMonthSchedules] = useState<Schedule[]>([]);
 
-  // Dynamic Weekly Quota from Firestore (defaults to 4)
+  // Dynamic Weekly Quota & Per-Lab Quota from Firestore
   const [maxWeeklyHours, setMaxWeeklyHours] = useState<number>(4);
+  const [usePerLabQuota, setUsePerLabQuota] = useState<boolean>(false);
+  const [quotaPerLab, setQuotaPerLab] = useState<{ [key in Laboratory]?: number }>({
+    LabTec: 2,
+    Manutec: 2,
+    Robotica: 2,
+  });
   const [hideWeekends, setHideWeekends] = useState<boolean>(false);
   const [secretaryQuotaOverride, setSecretaryQuotaOverride] = useState<boolean>(true);
 
@@ -190,6 +196,16 @@ export default function DashboardPage() {
         const data = docSnap.data();
         if (typeof data.weeklyQuota === "number" && data.weeklyQuota > 0) {
           setMaxWeeklyHours(data.weeklyQuota);
+        }
+        if (typeof data.usePerLabQuota === "boolean") {
+          setUsePerLabQuota(data.usePerLabQuota);
+        }
+        if (data.quotaPerLab && typeof data.quotaPerLab === "object") {
+          setQuotaPerLab({
+            LabTec: Number(data.quotaPerLab.LabTec) || 2,
+            Manutec: Number(data.quotaPerLab.Manutec) || 2,
+            Robotica: Number(data.quotaPerLab.Robotica) || 2,
+          });
         }
         if (typeof data.hideWeekends === "boolean") {
           setHideWeekends(data.hideWeekends);
@@ -342,8 +358,12 @@ export default function DashboardPage() {
   }, [user, targetProfessorName]);
 
   const weeklyUsage = useMemo(() => {
+    const currentMax = usePerLabQuota
+      ? (Number(quotaPerLab[selectedLab]) || 2)
+      : maxWeeklyHours;
+
     if (!selectedDate || !effectiveProfName) {
-      return { used: 0, schedules: [], weekStartFormatted: "", weekEndFormatted: "" };
+      return { used: 0, maxLimit: currentMax, schedules: [], weekStartFormatted: "", weekEndFormatted: "" };
     }
     const weekStart = format(startOfWeek(selectedDate, { weekStartsOn: 1 }), "yyyy-MM-dd");
     const weekEnd = format(endOfWeek(selectedDate, { weekStartsOn: 1 }), "yyyy-MM-dd");
@@ -354,17 +374,19 @@ export default function DashboardPage() {
       const isProf =
         (s.professorName && s.professorName.toLowerCase() === profLower) ||
         (user?.role === "professor" && s.professorId === user.uid);
-      return inWeek && isProf;
+      const isCurrentLab = usePerLabQuota ? s.laboratory === selectedLab : true;
+      return inWeek && isProf && isCurrentLab;
     });
 
     const usedHours = profWeekSchedules.reduce((acc, curr) => acc + (curr.classHours?.length || 0), 0);
     return {
       used: usedHours,
+      maxLimit: currentMax,
       schedules: profWeekSchedules,
       weekStartFormatted: format(startOfWeek(selectedDate, { weekStartsOn: 1 }), "dd/MM"),
       weekEndFormatted: format(endOfWeek(selectedDate, { weekStartsOn: 1 }), "dd/MM"),
     };
-  }, [selectedDate, effectiveProfName, monthSchedules, user]);
+  }, [selectedDate, effectiveProfName, monthSchedules, user, usePerLabQuota, selectedLab, quotaPerLab, maxWeeklyHours]);
 
   // Filter suggestions when user types in the input box
   const professorSuggestions = useMemo(() => {
@@ -407,26 +429,30 @@ export default function DashboardPage() {
       finalProfName = targetProfessorName.trim();
     }
 
-    // Weekly limit validation using dynamic maxWeeklyHours
+    // Weekly limit validation using dynamic maxLimit (isolated per lab or global)
+    const currentMaxLimit = weeklyUsage.maxLimit;
     const totalAfterBooking = weeklyUsage.used + selectedClasses.length;
-    if (user.role === "professor" && totalAfterBooking > maxWeeklyHours) {
+    const labNameStr = usePerLabQuota ? `no ${selectedLab}` : "em todos os laboratórios";
+
+    if (user.role === "professor" && totalAfterBooking > currentMaxLimit) {
       alert(
-        `Limite Semanal Excedido!\n\nCada professor pode agendar no máximo ${maxWeeklyHours} aulas por semana.\n` +
-        `Você já utilizou ${weeklyUsage.used} de ${maxWeeklyHours} aulas na semana (${weeklyUsage.weekStartFormatted} a ${weeklyUsage.weekEndFormatted}) e está tentando agendar mais ${selectedClasses.length} ${selectedClasses.length === 1 ? "aula" : "aulas"}.`
+        `Limite Semanal ${usePerLabQuota ? `no ${selectedLab}` : "Global"} Excedido!\n\n` +
+        `Cada professor pode agendar no máximo ${currentMaxLimit} ${currentMaxLimit === 1 ? "aula" : "aulas"} por semana ${labNameStr}.\n` +
+        `Você já utilizou ${weeklyUsage.used} de ${currentMaxLimit} aulas na semana (${weeklyUsage.weekStartFormatted} a ${weeklyUsage.weekEndFormatted}) e está tentando agendar mais ${selectedClasses.length} ${selectedClasses.length === 1 ? "aula" : "aulas"}.`
       );
       return;
     }
 
-    if (isSec && totalAfterBooking > maxWeeklyHours) {
+    if (isSec && totalAfterBooking > currentMaxLimit) {
       const canOverride = secretaryQuotaOverride && allowSecretaryOverride;
       if (!canOverride) {
         alert(
           secretaryQuotaOverride
-            ? `Limite Semanal Excedido para o Prof. ${finalProfName}!\n\n` +
-              `O professor já possui ${weeklyUsage.used} de ${maxWeeklyHours} aulas agendadas nesta semana (${weeklyUsage.weekStartFormatted} a ${weeklyUsage.weekEndFormatted}).\n` +
+            ? `Limite Semanal ${usePerLabQuota ? `no ${selectedLab}` : ""} Excedido para o Prof. ${finalProfName}!\n\n` +
+              `O professor já possui ${weeklyUsage.used} de ${currentMaxLimit} aulas agendadas ${labNameStr} nesta semana (${weeklyUsage.weekStartFormatted} a ${weeklyUsage.weekEndFormatted}).\n` +
               `Para liberar essa reserva como exceção, marque a opção "Autorização Especial da Secretaria".`
-            : `Limite Semanal Excedido para o Prof. ${finalProfName}!\n\n` +
-              `O professor já possui ${weeklyUsage.used} de ${maxWeeklyHours} aulas agendadas nesta semana (${weeklyUsage.weekStartFormatted} a ${weeklyUsage.weekEndFormatted}).\n` +
+            : `Limite Semanal ${usePerLabQuota ? `no ${selectedLab}` : ""} Excedido para o Prof. ${finalProfName}!\n\n` +
+              `O professor já possui ${weeklyUsage.used} de ${currentMaxLimit} aulas agendadas ${labNameStr} nesta semana (${weeklyUsage.weekStartFormatted} a ${weeklyUsage.weekEndFormatted}).\n` +
               `A autorização da secretaria para ultrapassar a cota dos professores está desativada pelo coordenador.`
         );
         return;
@@ -955,11 +981,11 @@ export default function DashboardPage() {
             {targetProfessorName.trim() && (
               <div className="pt-2 border-t border-purple-200/60 dark:border-purple-800/60 flex flex-wrap items-center justify-between gap-3">
                 <div className="text-xs text-purple-900 dark:text-purple-200 font-semibold">
-                  Cota de <strong>{targetProfessorName}</strong> nesta semana ({weeklyUsage.weekStartFormatted} a {weeklyUsage.weekEndFormatted}):{" "}
+                  Cota de <strong>{targetProfessorName}</strong> {usePerLabQuota ? `no ${selectedLab}` : "nesta semana"} ({weeklyUsage.weekStartFormatted} a {weeklyUsage.weekEndFormatted}):{" "}
                   <span className={`px-2 py-0.5 rounded-full font-bold ${
-                    weeklyUsage.used >= maxWeeklyHours ? "bg-red-100 dark:bg-red-950/70 text-red-700 dark:text-red-300" : "bg-purple-200 dark:bg-purple-900/70 text-purple-900 dark:text-purple-200"
+                    weeklyUsage.used >= weeklyUsage.maxLimit ? "bg-red-100 dark:bg-red-950/70 text-red-700 dark:text-red-300" : "bg-purple-200 dark:bg-purple-900/70 text-purple-900 dark:text-purple-200"
                   }`}>
-                    {weeklyUsage.used} / {maxWeeklyHours} {maxWeeklyHours === 1 ? "aula utilizada" : "aulas utilizadas"}
+                    {weeklyUsage.used} / {weeklyUsage.maxLimit} {weeklyUsage.maxLimit === 1 ? "aula utilizada" : "aulas utilizadas"}
                   </span>
                 </div>
 
@@ -1142,19 +1168,25 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* PROFESSOR WEEKLY QUOTA WIDGET (4 HOURS LIMIT) */}
+        {/* PROFESSOR WEEKLY QUOTA WIDGET */}
         {(user.role === "professor" || (user.role === "secretario" && targetProfessorName.trim())) && (
           <section className="bg-white dark:bg-gray-900 rounded-3xl p-5 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-800 transition-colors">
             <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Cota Semanal de Agendamentos</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    {usePerLabQuota ? `Cota Semanal - ${selectedLab}` : "Cota Semanal Global"}
+                  </span>
                   <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-400">
                     (Semana: {weeklyUsage.weekStartFormatted} a {weeklyUsage.weekEndFormatted})
                   </span>
                 </div>
                 <h3 className="text-sm font-bold text-gray-900 dark:text-white">
-                  {user.role === "secretario" ? `Uso do(a) Prof. ${effectiveProfName}` : "Seu Limite Semanal"}
+                  {user.role === "secretario"
+                    ? `Uso do(a) Prof. ${effectiveProfName} ${usePerLabQuota ? `no ${selectedLab}` : ""}`
+                    : usePerLabQuota
+                    ? `Seu Limite no ${selectedLab}`
+                    : "Seu Limite Semanal"}
                 </h3>
               </div>
 
@@ -1163,14 +1195,14 @@ export default function DashboardPage() {
                   <span className="text-gray-500 dark:text-gray-400">Aulas Utilizadas:</span>
                   <span
                     className={`text-sm ${
-                      weeklyUsage.used >= maxWeeklyHours
+                      weeklyUsage.used >= weeklyUsage.maxLimit
                         ? "text-red-600 dark:text-red-400 font-extrabold"
-                        : weeklyUsage.used >= maxWeeklyHours - 1
+                        : weeklyUsage.used >= weeklyUsage.maxLimit - 1
                         ? "text-amber-600 dark:text-amber-400"
                         : "text-emerald-600 dark:text-emerald-400"
                     }`}
                   >
-                    {weeklyUsage.used} / {maxWeeklyHours}
+                    {weeklyUsage.used} / {weeklyUsage.maxLimit}
                   </span>
                 </div>
 
@@ -1178,23 +1210,23 @@ export default function DashboardPage() {
                 <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-3 overflow-hidden p-0.5 border border-gray-200 dark:border-gray-700">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${
-                      weeklyUsage.used >= maxWeeklyHours
+                      weeklyUsage.used >= weeklyUsage.maxLimit
                         ? "bg-red-500"
-                        : weeklyUsage.used >= maxWeeklyHours - 1
+                        : weeklyUsage.used >= weeklyUsage.maxLimit - 1
                         ? "bg-amber-500"
                         : "bg-emerald-500"
                     }`}
-                    style={{ width: `${Math.min(100, (weeklyUsage.used / maxWeeklyHours) * 100)}%` }}
+                    style={{ width: `${Math.min(100, (weeklyUsage.used / weeklyUsage.maxLimit) * 100)}%` }}
                   />
                 </div>
 
-                {weeklyUsage.used >= maxWeeklyHours ? (
+                {weeklyUsage.used >= weeklyUsage.maxLimit ? (
                   <p className="text-[11px] text-red-600 dark:text-red-400 font-bold flex items-center gap-1">
-                    <AlertCircle className="w-3.5 h-3.5" /> Limite semanal atingido!
+                    <AlertCircle className="w-3.5 h-3.5" /> Limite semanal {usePerLabQuota ? `no ${selectedLab}` : ""} atingido!
                   </p>
                 ) : (
                   <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium">
-                    {maxWeeklyHours - weeklyUsage.used} {maxWeeklyHours - weeklyUsage.used === 1 ? "aula disponível" : "aulas disponíveis"}
+                    {weeklyUsage.maxLimit - weeklyUsage.used} {weeklyUsage.maxLimit - weeklyUsage.used === 1 ? "aula disponível" : "aulas disponíveis"} {usePerLabQuota ? `no ${selectedLab}` : ""}
                   </p>
                 )}
               </div>

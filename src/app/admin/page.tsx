@@ -26,7 +26,10 @@ import {
   X, 
   LockKeyhole, 
   ChevronRight,
-  Globe
+  Globe,
+  Monitor,
+  Wrench,
+  Bot
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -57,15 +60,54 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<"single" | "bulk">("single");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // System Settings state (Weekly Quota)
+  // System Settings state (Weekly Quota & Per-Lab Quotas)
   const [weeklyQuotaInput, setWeeklyQuotaInput] = useState<number>(4);
   const [savedWeeklyQuota, setSavedWeeklyQuota] = useState<number>(4);
+  const [usePerLabQuotaInput, setUsePerLabQuotaInput] = useState<boolean>(false);
+  const [savedUsePerLabQuota, setSavedUsePerLabQuota] = useState<boolean>(false);
+  const [labQuotasInput, setLabQuotasInput] = useState<{ LabTec: number; Manutec: number; Robotica: number }>({
+    LabTec: 2,
+    Manutec: 2,
+    Robotica: 2,
+  });
+  const [savedLabQuotas, setSavedLabQuotas] = useState<{ LabTec: number; Manutec: number; Robotica: number }>({
+    LabTec: 2,
+    Manutec: 2,
+    Robotica: 2,
+  });
   const [hideWeekendsInput, setHideWeekendsInput] = useState<boolean>(false);
   const [savedHideWeekends, setSavedHideWeekends] = useState<boolean>(false);
   const [secretaryOverrideInput, setSecretaryOverrideInput] = useState<boolean>(true);
   const [savedSecretaryOverride, setSavedSecretaryOverride] = useState<boolean>(true);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [settingsMsg, setSettingsMsg] = useState("");
+
+  const isSettingsDirty = useMemo(() => {
+    if (usePerLabQuotaInput !== savedUsePerLabQuota) return true;
+    if (usePerLabQuotaInput) {
+      if (
+        labQuotasInput.LabTec !== savedLabQuotas.LabTec ||
+        labQuotasInput.Manutec !== savedLabQuotas.Manutec ||
+        labQuotasInput.Robotica !== savedLabQuotas.Robotica
+      ) return true;
+    } else {
+      if (weeklyQuotaInput !== savedWeeklyQuota) return true;
+    }
+    if (hideWeekendsInput !== savedHideWeekends) return true;
+    if (secretaryOverrideInput !== savedSecretaryOverride) return true;
+    return false;
+  }, [
+    usePerLabQuotaInput,
+    savedUsePerLabQuota,
+    labQuotasInput,
+    savedLabQuotas,
+    weeklyQuotaInput,
+    savedWeeklyQuota,
+    hideWeekendsInput,
+    savedHideWeekends,
+    secretaryOverrideInput,
+    savedSecretaryOverride,
+  ]);
 
   // Single form states
   const [newUsername, setNewUsername] = useState("");
@@ -97,6 +139,17 @@ export default function AdminPage() {
         if (typeof data.weeklyQuota === "number") {
           setWeeklyQuotaInput(data.weeklyQuota);
           setSavedWeeklyQuota(data.weeklyQuota);
+        }
+        if (typeof data.usePerLabQuota === "boolean") {
+          setUsePerLabQuotaInput(data.usePerLabQuota);
+          setSavedUsePerLabQuota(data.usePerLabQuota);
+        }
+        if (data.quotaPerLab && typeof data.quotaPerLab === "object") {
+          const qLabTec = Number(data.quotaPerLab.LabTec) || 2;
+          const qManutec = Number(data.quotaPerLab.Manutec) || 2;
+          const qRobotica = Number(data.quotaPerLab.Robotica) || 2;
+          setLabQuotasInput({ LabTec: qLabTec, Manutec: qManutec, Robotica: qRobotica });
+          setSavedLabQuotas({ LabTec: qLabTec, Manutec: qManutec, Robotica: qRobotica });
         }
         if (typeof data.hideWeekends === "boolean") {
           setHideWeekendsInput(data.hideWeekends);
@@ -153,9 +206,15 @@ export default function AdminPage() {
   // Handler to update global system settings
   const handleSaveSettings = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (weeklyQuotaInput < 1) {
-      setError("A cota semanal deve ser de pelo menos 1 aula.");
+    if (!usePerLabQuotaInput && weeklyQuotaInput < 1) {
+      setError("A cota semanal global deve ser de pelo menos 1 aula.");
       return;
+    }
+    if (usePerLabQuotaInput) {
+      if (labQuotasInput.LabTec < 1 || labQuotasInput.Manutec < 1 || labQuotasInput.Robotica < 1) {
+        setError("A cota de cada laboratório deve ser de pelo menos 1 aula.");
+        return;
+      }
     }
     setIsSavingSettings(true);
     setSettingsMsg("");
@@ -163,6 +222,12 @@ export default function AdminPage() {
     try {
       await setDoc(doc(db, "settings", "general"), {
         weeklyQuota: Number(weeklyQuotaInput),
+        usePerLabQuota: usePerLabQuotaInput,
+        quotaPerLab: {
+          LabTec: Number(labQuotasInput.LabTec),
+          Manutec: Number(labQuotasInput.Manutec),
+          Robotica: Number(labQuotasInput.Robotica),
+        },
         hideWeekends: hideWeekendsInput,
         secretaryQuotaOverride: secretaryOverrideInput,
         updatedAt: serverTimestamp(),
@@ -170,6 +235,10 @@ export default function AdminPage() {
       }, { merge: true });
 
       if (user) {
+        const quotaSummary = usePerLabQuotaInput
+          ? `Cotas Isoladas por Lab (LabTec: ${labQuotasInput.LabTec}, Manutec: ${labQuotasInput.Manutec}, Robótica: ${labQuotasInput.Robotica})`
+          : `Cota Global: ${weeklyQuotaInput} aulas`;
+
         await addDoc(collection(db, "logs"), {
           professorId: user.uid,
           professorName: user.name,
@@ -179,9 +248,11 @@ export default function AdminPage() {
             name: user.name,
             role: user.role,
           },
-          details: `alterou as configurações do sistema (Cota Semanal: ${weeklyQuotaInput} aulas, Ocultar Fins de Semana: ${hideWeekendsInput ? "Sim" : "Não"})`,
+          details: `alterou as configurações do sistema (${quotaSummary}, Ocultar Fins de Semana: ${hideWeekendsInput ? "Sim" : "Não"})`,
           changes: {
             weeklyQuota: Number(weeklyQuotaInput),
+            usePerLabQuota: usePerLabQuotaInput,
+            quotaPerLab: labQuotasInput,
             hideWeekends: hideWeekendsInput,
             secretaryQuotaOverride: secretaryOverrideInput,
           },
@@ -541,22 +612,50 @@ export default function AdminPage() {
         {/* GLOBAL SYSTEM SETTINGS CARD */}
         <section className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200/80 dark:border-gray-800 overflow-hidden transition-colors">
           <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent dark:from-amber-950/40 dark:via-amber-950/20 dark:to-transparent p-6 sm:p-8 border-b border-gray-100 dark:border-gray-800">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="space-y-1.5 max-w-2xl">
-                <div className="flex items-center gap-2">
+            <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+              <div className="space-y-3 max-w-2xl flex-1">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 dark:bg-amber-950/90 text-amber-900 dark:text-amber-300 border border-amber-200 dark:border-amber-700">
                     <SlidersHorizontal className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" /> Configuração Geral do Sistema
                   </span>
                   <span className="text-xs text-gray-600 dark:text-gray-300 font-medium">
-                    Ativo agora: <strong className="text-gray-900 dark:text-white font-bold">{savedWeeklyQuota} aulas/semana</strong>
+                    Ativo agora:{" "}
+                    <strong className="text-gray-900 dark:text-white font-bold">
+                      {savedUsePerLabQuota
+                        ? `Cotas Isoladas (LabTec: ${savedLabQuotas.LabTec}, Manutec: ${savedLabQuotas.Manutec}, Robótica: ${savedLabQuotas.Robotica} aulas/sem)`
+                        : `${savedWeeklyQuota} aulas/semana (Global)`}
+                    </strong>
                   </span>
                 </div>
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">
-                  Limite Geral de Aulas Semanais por Professor
+                  Limite e Regras de Agendamento por Professor
                 </h2>
                 <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                  Defina a quantidade máxima de aulas que cada professor poderá agendar semanalmente (de segunda a domingo) somando todos os laboratórios. Quando alterado aqui, todos os painéis e regras são atualizados instantaneamente em tempo real.
+                  Controle a quantidade máxima de aulas que cada professor poderá reservar semanalmente (de segunda a domingo). Ao salvar, as alterações são aplicadas instantaneamente em tempo real para todos os professores e secretaria.
                 </p>
+
+                {/* OPTION 1: PER-LAB QUOTA TOGGLE */}
+                <div className="border-t border-gray-100 dark:border-gray-800 pt-4 mt-4 space-y-2">
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+                    Modo de Contabilização das Cotas
+                  </h3>
+                  <label className="flex items-center gap-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={usePerLabQuotaInput}
+                      onChange={(e) => setUsePerLabQuotaInput(e.target.checked)}
+                      className="w-4 h-4 text-amber-600 rounded focus:ring-amber-500 border-gray-300 dark:border-gray-600 cursor-pointer"
+                    />
+                    <span>Ativar cotas semanais isoladas por laboratório</span>
+                  </label>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
+                    {usePerLabQuotaInput
+                      ? "✅ Cotas Isoladas Ativas: Cada laboratório possui um limite semanal próprio. Agendar uma aula no LabTec consumirá apenas a cota do LabTec, sem diminuir o saldo do Manutec ou da Robótica."
+                      : "ℹ️ Cota Global Unificada: A cota semanal é compartilhada entre todos os laboratórios somados."}
+                  </p>
+                </div>
+
+                {/* OPTION 2: CALENDAR WEEKENDS */}
                 <div className="border-t border-gray-100 dark:border-gray-800 pt-4 mt-4 space-y-2">
                   <h3 className="text-sm font-bold text-gray-900 dark:text-white">
                     Visualização do Calendário
@@ -574,6 +673,8 @@ export default function AdminPage() {
                     Ao marcar esta opção, os sábados e domingos serão removidos das grades do calendário mensal (no painel do professor e no painel público), otimizando o espaço da tela em dispositivos móveis.
                   </p>
                 </div>
+
+                {/* OPTION 3: SECRETARY OVERRIDE */}
                 <div className="border-t border-gray-100 dark:border-gray-800 pt-4 mt-4 space-y-2">
                   <h3 className="text-sm font-bold text-gray-900 dark:text-white">
                     Autorização da Secretaria
@@ -593,75 +694,240 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              {/* QUOTA CONTROLLER */}
-              <div className="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col items-center gap-4 min-w-[280px]">
-                <span className="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Cota Semanal Global</span>
+              {/* QUOTA CONTROLLER CONTAINER */}
+              <div className="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col gap-5 min-w-[300px] lg:max-w-[380px] w-full">
                 
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setWeeklyQuotaInput((prev) => Math.max(1, prev - 1))}
-                    className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 font-bold text-lg flex items-center justify-center transition-colors shadow-sm"
-                    title="Diminuir cota"
-                  >
-                    -
-                  </button>
-
-                  <div className="text-center px-4">
-                    <div className="text-3xl font-black text-amber-600 dark:text-amber-400 tracking-tight">
-                      {weeklyQuotaInput}
+                {/* 1. SE COTA ISOLADA POR LAB ESTIVER ATIVA */}
+                {usePerLabQuotaInput ? (
+                  <div className="space-y-4">
+                    <div className="border-b border-gray-100 dark:border-gray-700 pb-2">
+                      <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block">
+                        Cotas Isoladas por Laboratório
+                      </span>
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                        Defina o limite semanal individual para cada espaço:
+                      </p>
                     </div>
-                    <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-400 uppercase tracking-wider">aulas/sem</span>
+
+                    {/* LABTEC INPUT */}
+                    <div className="p-3 rounded-xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-blue-950 dark:text-blue-200 flex items-center gap-1.5">
+                          <Monitor className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" /> LabTec
+                        </span>
+                        <span className="text-xs font-black text-blue-600 dark:text-blue-400">
+                          {labQuotasInput.LabTec} {labQuotasInput.LabTec === 1 ? "aula" : "aulas"}/sem
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setLabQuotasInput(prev => ({ ...prev, LabTec: Math.max(1, prev.LabTec - 1) }))}
+                            className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 font-bold text-sm flex items-center justify-center hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                          >
+                            -
+                          </button>
+                          <span className="w-7 text-center font-bold text-sm text-gray-900 dark:text-white">
+                            {labQuotasInput.LabTec}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setLabQuotasInput(prev => ({ ...prev, LabTec: Math.min(20, prev.LabTec + 1) }))}
+                            className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 font-bold text-sm flex items-center justify-center hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                          >
+                            +
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {[1, 2, 3, 4].map(n => (
+                            <button
+                              key={n}
+                              type="button"
+                              onClick={() => setLabQuotasInput(prev => ({ ...prev, LabTec: n }))}
+                              className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
+                                labQuotasInput.LabTec === n
+                                  ? "bg-blue-600 text-white"
+                                  : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-blue-50"
+                              }`}
+                            >
+                              {n}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* MANUTEC INPUT */}
+                    <div className="p-3 rounded-xl bg-amber-50/60 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/50 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-amber-950 dark:text-amber-200 flex items-center gap-1.5">
+                          <Wrench className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" /> Manutec
+                        </span>
+                        <span className="text-xs font-black text-amber-600 dark:text-amber-400">
+                          {labQuotasInput.Manutec} {labQuotasInput.Manutec === 1 ? "aula" : "aulas"}/sem
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setLabQuotasInput(prev => ({ ...prev, Manutec: Math.max(1, prev.Manutec - 1) }))}
+                            className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 font-bold text-sm flex items-center justify-center hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors"
+                          >
+                            -
+                          </button>
+                          <span className="w-7 text-center font-bold text-sm text-gray-900 dark:text-white">
+                            {labQuotasInput.Manutec}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setLabQuotasInput(prev => ({ ...prev, Manutec: Math.min(20, prev.Manutec + 1) }))}
+                            className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 font-bold text-sm flex items-center justify-center hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors"
+                          >
+                            +
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {[1, 2, 3, 4].map(n => (
+                            <button
+                              key={n}
+                              type="button"
+                              onClick={() => setLabQuotasInput(prev => ({ ...prev, Manutec: n }))}
+                              className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
+                                labQuotasInput.Manutec === n
+                                  ? "bg-amber-600 text-white"
+                                  : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-amber-50"
+                              }`}
+                            >
+                              {n}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ROBOTICA INPUT */}
+                    <div className="p-3 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
+                          <Bot className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Robótica
+                        </span>
+                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">
+                          {labQuotasInput.Robotica} {labQuotasInput.Robotica === 1 ? "aula" : "aulas"}/sem
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setLabQuotasInput(prev => ({ ...prev, Robotica: Math.max(1, prev.Robotica - 1) }))}
+                            className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 font-bold text-sm flex items-center justify-center hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors"
+                          >
+                            -
+                          </button>
+                          <span className="w-7 text-center font-bold text-sm text-gray-900 dark:text-white">
+                            {labQuotasInput.Robotica}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setLabQuotasInput(prev => ({ ...prev, Robotica: Math.min(20, prev.Robotica + 1) }))}
+                            className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 font-bold text-sm flex items-center justify-center hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors"
+                          >
+                            +
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {[1, 2, 3, 4].map(n => (
+                            <button
+                              key={n}
+                              type="button"
+                              onClick={() => setLabQuotasInput(prev => ({ ...prev, Robotica: n }))}
+                              className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
+                                labQuotasInput.Robotica === n
+                                  ? "bg-emerald-600 text-white"
+                                  : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-emerald-50"
+                              }`}
+                            >
+                              {n}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </div>
+                ) : (
+                  /* 2. SE COTA GLOBAL UNIFICADA ESTIVER ATIVA */
+                  <div className="flex flex-col items-center gap-4">
+                    <span className="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Cota Semanal Global</span>
+                    
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setWeeklyQuotaInput((prev) => Math.max(1, prev - 1))}
+                        className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 font-bold text-lg flex items-center justify-center transition-colors shadow-sm"
+                        title="Diminuir cota"
+                      >
+                        -
+                      </button>
 
-                  <button
-                    type="button"
-                    onClick={() => setWeeklyQuotaInput((prev) => Math.min(30, prev + 1))}
-                    className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 font-bold text-lg flex items-center justify-center transition-colors shadow-sm"
-                    title="Aumentar cota"
-                  >
-                    +
-                  </button>
-                </div>
+                      <div className="text-center px-4">
+                        <div className="text-3xl font-black text-amber-600 dark:text-amber-400 tracking-tight">
+                          {weeklyQuotaInput}
+                        </div>
+                        <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-400 uppercase tracking-wider">aulas/sem</span>
+                      </div>
 
-                {/* QUICK PRESETS */}
-                <div className="flex items-center gap-1.5">
-                  {[2, 4, 6, 8, 10].map((num) => (
-                    <button
-                      key={num}
-                      type="button"
-                      onClick={() => setWeeklyQuotaInput(num)}
-                      className={`px-2 py-1 text-xs font-bold rounded-md transition-all ${
-                        weeklyQuotaInput === num
-                          ? "bg-amber-600 text-white shadow-xs"
-                          : "bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600"
-                      }`}
-                    >
-                      {num} {num === 1 ? "aula" : "aulas"}
-                    </button>
-                  ))}
-                </div>
+                      <button
+                        type="button"
+                        onClick={() => setWeeklyQuotaInput((prev) => Math.min(30, prev + 1))}
+                        className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 font-bold text-lg flex items-center justify-center transition-colors shadow-sm"
+                        title="Aumentar cota"
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    {/* QUICK PRESETS */}
+                    <div className="flex items-center gap-1.5">
+                      {[2, 4, 6, 8, 10].map((num) => (
+                        <button
+                          key={num}
+                          type="button"
+                          onClick={() => setWeeklyQuotaInput(num)}
+                          className={`px-2 py-1 text-xs font-bold rounded-md transition-all ${
+                            weeklyQuotaInput === num
+                              ? "bg-amber-600 text-white shadow-xs"
+                              : "bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600"
+                          }`}
+                        >
+                          {num} {num === 1 ? "aula" : "aulas"}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* SAVE BUTTON */}
                 <button
                   type="button"
                   onClick={() => handleSaveSettings()}
-                  disabled={isSavingSettings || (weeklyQuotaInput === savedWeeklyQuota && hideWeekendsInput === savedHideWeekends && secretaryOverrideInput === savedSecretaryOverride)}
+                  disabled={isSavingSettings || !isSettingsDirty}
                   className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm ${
-                    (weeklyQuotaInput === savedWeeklyQuota && hideWeekendsInput === savedHideWeekends && secretaryOverrideInput === savedSecretaryOverride)
+                    !isSettingsDirty
                       ? "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-400 cursor-not-allowed border border-gray-200 dark:border-gray-600"
                       : "bg-amber-600 hover:bg-amber-700 active:scale-[0.98] text-white shadow-amber-600/20 shadow-md cursor-pointer"
                   }`}
                 >
                   {isSavingSettings ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : (weeklyQuotaInput === savedWeeklyQuota && hideWeekendsInput === savedHideWeekends && secretaryOverrideInput === savedSecretaryOverride) ? (
+                  ) : !isSettingsDirty ? (
                     <>
                       <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> Configurações em Vigor
                     </>
                   ) : (
                     <>
-                      <Save className="w-4 h-4" /> Salvar Configurações
+                      <Save className="w-4 h-4" /> Salvar Novas Configurações
                     </>
                   )}
                 </button>
