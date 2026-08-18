@@ -147,6 +147,7 @@ export default function DashboardPage() {
   });
   const [hideWeekends, setHideWeekends] = useState<boolean>(false);
   const [secretaryQuotaOverride, setSecretaryQuotaOverride] = useState<boolean>(true);
+  const [customQuotasMap, setCustomQuotasMap] = useState<Map<string, { weeklyQuota?: number; quotaPerLab?: { [key in Laboratory]?: number } }>>(new Map());
 
   const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
   const [selectedClasses, setSelectedClasses] = useState<number[]>([]);
@@ -217,7 +218,24 @@ export default function DashboardPage() {
       }
     });
 
-    return () => unsubSettings();
+    // Listen to custom_quotas collection
+    const unsubCustom = onSnapshot(collection(db, "custom_quotas"), (snapshot) => {
+      const map = new Map<string, { weeklyQuota?: number; quotaPerLab?: { [key in Laboratory]?: number } }>();
+      snapshot.forEach((docSnap) => {
+        const val = docSnap.data();
+        const key = (val.professorName || docSnap.id).toLowerCase().trim();
+        map.set(key, {
+          weeklyQuota: typeof val.weeklyQuota === "number" ? val.weeklyQuota : undefined,
+          quotaPerLab: val.quotaPerLab && typeof val.quotaPerLab === "object" ? val.quotaPerLab : undefined,
+        });
+      });
+      setCustomQuotasMap(map);
+    });
+
+    return () => {
+      unsubSettings();
+      unsubCustom();
+    };
   }, []);
 
   // Load ALL professors list (from allowed_users and active users) for secretary/admin
@@ -359,21 +377,35 @@ export default function DashboardPage() {
   }, [user, targetProfessorName]);
 
   const weeklyUsage = useMemo(() => {
-    const currentMax = usePerLabQuota
-      ? (Number(quotaPerLab[selectedLab]) || 2)
-      : maxWeeklyHours;
+    const profLower = effectiveProfName ? effectiveProfName.toLowerCase().trim() : "";
+    const custom = profLower ? customQuotasMap.get(profLower) : null;
+    const isCustomQuota = Boolean(custom);
+
+    let currentMax = maxWeeklyHours;
+    if (usePerLabQuota) {
+      if (custom?.quotaPerLab && typeof custom.quotaPerLab[selectedLab] === "number") {
+        currentMax = Number(custom.quotaPerLab[selectedLab]);
+      } else {
+        currentMax = Number(quotaPerLab[selectedLab]) || 2;
+      }
+    } else {
+      if (typeof custom?.weeklyQuota === "number") {
+        currentMax = custom.weeklyQuota;
+      } else {
+        currentMax = maxWeeklyHours;
+      }
+    }
 
     if (!selectedDate || !effectiveProfName) {
-      return { used: 0, maxLimit: currentMax, schedules: [], weekStartFormatted: "", weekEndFormatted: "" };
+      return { used: 0, maxLimit: currentMax, isCustomQuota, schedules: [], weekStartFormatted: "", weekEndFormatted: "" };
     }
     const weekStart = format(startOfWeek(selectedDate, { weekStartsOn: 1 }), "yyyy-MM-dd");
     const weekEnd = format(endOfWeek(selectedDate, { weekStartsOn: 1 }), "yyyy-MM-dd");
 
-    const profLower = effectiveProfName.toLowerCase();
     const profWeekSchedules = monthSchedules.filter((s) => {
       const inWeek = s.date >= weekStart && s.date <= weekEnd;
       const isProf =
-        (s.professorName && s.professorName.toLowerCase() === profLower) ||
+        (s.professorName && s.professorName.toLowerCase().trim() === profLower) ||
         (user?.role === "professor" && s.professorId === user.uid);
       const isCurrentLab = usePerLabQuota ? s.laboratory === selectedLab : true;
       return inWeek && isProf && isCurrentLab;
@@ -383,11 +415,12 @@ export default function DashboardPage() {
     return {
       used: usedHours,
       maxLimit: currentMax,
+      isCustomQuota,
       schedules: profWeekSchedules,
       weekStartFormatted: format(startOfWeek(selectedDate, { weekStartsOn: 1 }), "dd/MM"),
       weekEndFormatted: format(endOfWeek(selectedDate, { weekStartsOn: 1 }), "dd/MM"),
     };
-  }, [selectedDate, effectiveProfName, monthSchedules, user, usePerLabQuota, selectedLab, quotaPerLab, maxWeeklyHours]);
+  }, [selectedDate, effectiveProfName, monthSchedules, user, usePerLabQuota, selectedLab, quotaPerLab, maxWeeklyHours, customQuotasMap]);
 
   // Filter suggestions when user types in the input box
   const professorSuggestions = useMemo(() => {
@@ -984,13 +1017,20 @@ export default function DashboardPage() {
 
             {targetProfessorName.trim() && (
               <div className="pt-2 border-t border-purple-200/60 dark:border-purple-800/60 flex flex-wrap items-center justify-between gap-3">
-                <div className="text-xs text-purple-900 dark:text-purple-200 font-semibold">
-                  Cota de <strong>{targetProfessorName}</strong> {usePerLabQuota ? `no ${selectedLab}` : "nesta semana"} ({weeklyUsage.weekStartFormatted} a {weeklyUsage.weekEndFormatted}):{" "}
+                <div className="text-xs text-purple-900 dark:text-purple-200 font-semibold flex flex-wrap items-center gap-2">
+                  <span>
+                    Cota de <strong>{targetProfessorName}</strong> {usePerLabQuota ? `no ${selectedLab}` : "nesta semana"} ({weeklyUsage.weekStartFormatted} a {weeklyUsage.weekEndFormatted}):{" "}
+                  </span>
                   <span className={`px-2 py-0.5 rounded-full font-bold ${
                     weeklyUsage.used >= weeklyUsage.maxLimit ? "bg-red-100 dark:bg-red-950/70 text-red-700 dark:text-red-300" : "bg-purple-200 dark:bg-purple-900/70 text-purple-900 dark:text-purple-200"
                   }`}>
                     {weeklyUsage.used} / {weeklyUsage.maxLimit} {weeklyUsage.maxLimit === 1 ? "aula utilizada" : "aulas utilizadas"}
                   </span>
+                  {weeklyUsage.isCustomQuota && (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                      ⭐ Cota Personalizada
+                    </span>
+                  )}
                 </div>
 
                 {secretaryQuotaOverride ? (
@@ -1177,10 +1217,15 @@ export default function DashboardPage() {
           <section className="bg-white dark:bg-gray-900 rounded-3xl p-5 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-800 transition-colors">
             <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center justify-between gap-4">
               <div className="space-y-1">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                     {usePerLabQuota ? `Cota Semanal - ${selectedLab}` : "Cota Semanal Global"}
                   </span>
+                  {weeklyUsage.isCustomQuota && (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                      ⭐ Cota Personalizada
+                    </span>
+                  )}
                   <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-400">
                     (Semana: {weeklyUsage.weekStartFormatted} a {weeklyUsage.weekEndFormatted})
                   </span>

@@ -29,7 +29,11 @@ import {
   Globe,
   Monitor,
   Wrench,
-  Bot
+  Bot,
+  Star,
+  UserCheck,
+  RotateCcw,
+  Edit3
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { PwaInstallButton } from "@/components/PwaInstallButton";
@@ -44,6 +48,19 @@ interface UserDoc {
   id: string; // The Firebase UID
   name: string;
   role: string;
+}
+
+interface CustomQuotaDoc {
+  id: string;
+  professorName: string;
+  weeklyQuota?: number;
+  quotaPerLab?: {
+    LabTec?: number;
+    Manutec?: number;
+    Robotica?: number;
+  };
+  updatedAt?: unknown;
+  updatedBy?: string;
 }
 
 interface ParsedBulkUser {
@@ -82,6 +99,18 @@ export default function AdminPage() {
   const [savedSecretaryOverride, setSavedSecretaryOverride] = useState<boolean>(true);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [settingsMsg, setSettingsMsg] = useState("");
+
+  // Custom Per-Teacher Individual Quotas State
+  const [customQuotasList, setCustomQuotasList] = useState<CustomQuotaDoc[]>([]);
+  const [targetCustomProfName, setTargetCustomProfName] = useState("");
+  const [customWeeklyQuotaInput, setCustomWeeklyQuotaInput] = useState<number>(4);
+  const [customLabQuotasInput, setCustomLabQuotasInput] = useState<{ LabTec: number; Manutec: number; Robotica: number }>({
+    LabTec: 2,
+    Manutec: 2,
+    Robotica: 2,
+  });
+  const [isSavingCustomQuota, setIsSavingCustomQuota] = useState(false);
+  const [customQuotaMsg, setCustomQuotaMsg] = useState("");
 
   const isSettingsDirty = useMemo(() => {
     if (usePerLabQuotaInput !== savedUsePerLabQuota) return true;
@@ -197,12 +226,136 @@ export default function AdminPage() {
       return unsubAll;
     });
 
+    // Listen to custom_quotas collection
+    const unsubCustomQuotas = onSnapshot(collection(db, "custom_quotas"), (snapshot) => {
+      const list: CustomQuotaDoc[] = [];
+      snapshot.forEach((docSnap) => {
+        const val = docSnap.data();
+        list.push({
+          id: docSnap.id,
+          professorName: val.professorName || docSnap.id,
+          weeklyQuota: typeof val.weeklyQuota === "number" ? val.weeklyQuota : undefined,
+          quotaPerLab: val.quotaPerLab && typeof val.quotaPerLab === "object" ? val.quotaPerLab : undefined,
+          updatedAt: val.updatedAt,
+          updatedBy: val.updatedBy,
+        });
+      });
+      setCustomQuotasList(list);
+    });
+
     return () => {
       unsubSettings();
       unsubAllowed();
       unsubRegistered();
-    }
+      unsubCustomQuotas();
+    };
   }, [user]);
+  const allProfessorsList = useMemo(() => {
+    const combined = new Map<string, string>();
+    allowedUsers.forEach(u => combined.set(u.name.toLowerCase().trim(), u.name.trim()));
+    registeredUsers.forEach(u => combined.set(u.name.toLowerCase().trim(), u.name.trim()));
+    return Array.from(combined.values()).sort((a, b) => a.localeCompare(b, "pt-BR"));
+  }, [allowedUsers, registeredUsers]);
+
+  const existingCustomQuotaForSelected = useMemo(() => {
+    if (!targetCustomProfName.trim()) return null;
+    const targetLower = targetCustomProfName.trim().toLowerCase();
+    return customQuotasList.find(c => c.professorName.toLowerCase() === targetLower || c.id === targetLower) || null;
+  }, [targetCustomProfName, customQuotasList]);
+
+  // When a professor is selected for custom quota, load their current values into form
+  const handleSelectProfForCustomQuota = (profName: string) => {
+    setTargetCustomProfName(profName);
+    const existing = customQuotasList.find(c => c.professorName.toLowerCase() === profName.toLowerCase() || c.id === profName.toLowerCase());
+    if (existing) {
+      if (typeof existing.weeklyQuota === "number") setCustomWeeklyQuotaInput(existing.weeklyQuota);
+      if (existing.quotaPerLab) {
+        setCustomLabQuotasInput({
+          LabTec: Number(existing.quotaPerLab.LabTec) || 2,
+          Manutec: Number(existing.quotaPerLab.Manutec) || 2,
+          Robotica: Number(existing.quotaPerLab.Robotica) || 2,
+        });
+      }
+    } else {
+      setCustomWeeklyQuotaInput(weeklyQuotaInput);
+      setCustomLabQuotasInput(labQuotasInput);
+    }
+  };
+
+  const handleSaveCustomQuota = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const profNameClean = targetCustomProfName.trim();
+    if (!profNameClean) {
+      setError("Por favor, selecione ou informe o nome do professor.");
+      return;
+    }
+    const docId = profNameClean.toLowerCase();
+
+    setIsSavingCustomQuota(true);
+    setCustomQuotaMsg("");
+    setError("");
+
+    try {
+      await setDoc(doc(db, "custom_quotas", docId), {
+        professorName: profNameClean,
+        weeklyQuota: Number(customWeeklyQuotaInput),
+        quotaPerLab: {
+          LabTec: Number(customLabQuotasInput.LabTec),
+          Manutec: Number(customLabQuotasInput.Manutec),
+          Robotica: Number(customLabQuotasInput.Robotica),
+        },
+        updatedAt: serverTimestamp(),
+        updatedBy: user?.name || "Coordenador",
+      });
+
+      if (user) {
+        const detailsStr = usePerLabQuotaInput
+          ? `(LabTec: ${customLabQuotasInput.LabTec}, Manutec: ${customLabQuotasInput.Manutec}, Robótica: ${customLabQuotasInput.Robotica})`
+          : `(${customWeeklyQuotaInput} aulas/sem)`;
+
+        await addDoc(collection(db, "logs"), {
+          professorId: user.uid,
+          professorName: user.name,
+          action: "custom_quota_update",
+          performedBy: { uid: user.uid, name: user.name, role: user.role },
+          details: `definiu cota personalizada para o Prof. ${profNameClean} ${detailsStr}`,
+          timestamp: serverTimestamp(),
+        });
+      }
+
+      setCustomQuotaMsg(`Cota personalizada salva com sucesso para ${profNameClean}!`);
+      setTimeout(() => setCustomQuotaMsg(""), 4000);
+    } catch {
+      setError("Erro ao salvar cota personalizada no banco de dados.");
+    } finally {
+      setIsSavingCustomQuota(false);
+    }
+  };
+
+  const handleRemoveCustomQuota = async (docId: string, profName: string) => {
+    if (!confirm(`Tem certeza que deseja restaurar a cota de ${profName} para o padrão do sistema?`)) return;
+    setError("");
+    try {
+      await deleteDoc(doc(db, "custom_quotas", docId));
+      if (user) {
+        await addDoc(collection(db, "logs"), {
+          professorId: user.uid,
+          professorName: user.name,
+          action: "custom_quota_remove",
+          performedBy: { uid: user.uid, name: user.name, role: user.role },
+          details: `restaurou a cota do Prof. ${profName} para o padrão do sistema`,
+          timestamp: serverTimestamp(),
+        });
+      }
+      if (targetCustomProfName.trim().toLowerCase() === docId || targetCustomProfName.trim() === profName) {
+        setTargetCustomProfName("");
+      }
+      setCustomQuotaMsg(`Cota de ${profName} restaurada para o padrão!`);
+      setTimeout(() => setCustomQuotaMsg(""), 4000);
+    } catch {
+      setError("Erro ao remover cota personalizada.");
+    }
+  };
 
   // Handler to update global system settings
   const handleSaveSettings = async (e?: React.FormEvent) => {
@@ -945,6 +1098,307 @@ export default function AdminPage() {
                 )}
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* INDIVIDUAL CUSTOM QUOTAS CARD */}
+        <section className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200/80 dark:border-gray-800 overflow-hidden transition-colors">
+          <div className="bg-gradient-to-r from-indigo-500/10 via-indigo-500/5 to-transparent dark:from-indigo-950/40 dark:via-indigo-950/20 dark:to-transparent p-6 sm:p-8 border-b border-gray-100 dark:border-gray-800">
+            <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+              <div className="space-y-3 max-w-2xl flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-100 dark:bg-indigo-950/90 text-indigo-900 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700">
+                    <Star className="w-3.5 h-3.5 text-indigo-700 dark:text-indigo-400" /> Cotas Individuais por Professor
+                  </span>
+                  <span className="text-xs text-gray-600 dark:text-gray-300 font-medium">
+                    Exceções ativas: <strong className="text-indigo-600 dark:text-indigo-400 font-bold">{customQuotasList.length} professores</strong>
+                  </span>
+                </div>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">
+                  Definir Limites Personalizados para Professores Específicos
+                </h2>
+                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                  Defina regras de cota diferenciadas para professores de turmas especiais, projetos ou contraturnos. Professores sem cota individual continuam seguindo a Cota Padrão da escola.
+                </p>
+
+                {/* PROFESSOR SELECTOR INPUT */}
+                <div className="border-t border-gray-100 dark:border-gray-800 pt-4 mt-4 space-y-2">
+                  <label className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                    <UserCheck className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                    <span>Selecione ou busque o professor:</span>
+                  </label>
+
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        list="all-professors-list"
+                        value={targetCustomProfName}
+                        onChange={(e) => handleSelectProfForCustomQuota(e.target.value)}
+                        placeholder="Digite ou selecione o nome do professor..."
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
+                      />
+                      <datalist id="all-professors-list">
+                        {allProfessorsList.map((prof) => (
+                          <option key={prof} value={prof} />
+                        ))}
+                      </datalist>
+                    </div>
+
+                    {existingCustomQuotaForSelected && (
+                      <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-300 border border-amber-200 dark:border-amber-800 shrink-0">
+                        <Star className="w-3.5 h-3.5 text-amber-600 fill-amber-500" /> Cota Personalizada Ativa
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* CUSTOM QUOTA FORM CONTROLLER */}
+              <div className="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col gap-5 min-w-[300px] lg:max-w-[380px] w-full">
+                
+                {targetCustomProfName.trim() ? (
+                  <>
+                    <div className="border-b border-gray-100 dark:border-gray-700 pb-2">
+                      <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider block">
+                        Cota de {targetCustomProfName}
+                      </span>
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                        {usePerLabQuotaInput
+                          ? "Modo atual: Cotas Isoladas por Laboratório"
+                          : "Modo atual: Cota Semanal Global"}
+                      </p>
+                    </div>
+
+                    {usePerLabQuotaInput ? (
+                      /* ISOLATED PER LAB INPUTS FOR SPECIFIC PROFESSOR */
+                      <div className="space-y-3">
+                        {/* LABTEC */}
+                        <div className="p-3 rounded-xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 flex items-center justify-between">
+                          <span className="text-xs font-bold text-blue-950 dark:text-blue-200 flex items-center gap-1.5">
+                            <Monitor className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" /> LabTec
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setCustomLabQuotasInput(prev => ({ ...prev, LabTec: Math.max(1, prev.LabTec - 1) }))}
+                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 font-bold text-sm flex items-center justify-center hover:bg-blue-100"
+                            >
+                              -
+                            </button>
+                            <span className="w-6 text-center font-black text-sm text-gray-900 dark:text-white">
+                              {customLabQuotasInput.LabTec}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setCustomLabQuotasInput(prev => ({ ...prev, LabTec: Math.min(20, prev.LabTec + 1) }))}
+                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 font-bold text-sm flex items-center justify-center hover:bg-blue-100"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* MANUTEC */}
+                        <div className="p-3 rounded-xl bg-amber-50/60 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/50 flex items-center justify-between">
+                          <span className="text-xs font-bold text-amber-950 dark:text-amber-200 flex items-center gap-1.5">
+                            <Wrench className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" /> Manutec
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setCustomLabQuotasInput(prev => ({ ...prev, Manutec: Math.max(1, prev.Manutec - 1) }))}
+                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 font-bold text-sm flex items-center justify-center hover:bg-amber-100"
+                            >
+                              -
+                            </button>
+                            <span className="w-6 text-center font-black text-sm text-gray-900 dark:text-white">
+                              {customLabQuotasInput.Manutec}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setCustomLabQuotasInput(prev => ({ ...prev, Manutec: Math.min(20, prev.Manutec + 1) }))}
+                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 font-bold text-sm flex items-center justify-center hover:bg-amber-100"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* ROBOTICA */}
+                        <div className="p-3 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 flex items-center justify-between">
+                          <span className="text-xs font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
+                            <Bot className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Robótica
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setCustomLabQuotasInput(prev => ({ ...prev, Robotica: Math.max(1, prev.Robotica - 1) }))}
+                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 font-bold text-sm flex items-center justify-center hover:bg-emerald-100"
+                            >
+                              -
+                            </button>
+                            <span className="w-6 text-center font-black text-sm text-gray-900 dark:text-white">
+                              {customLabQuotasInput.Robotica}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setCustomLabQuotasInput(prev => ({ ...prev, Robotica: Math.min(20, prev.Robotica + 1) }))}
+                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 font-bold text-sm flex items-center justify-center hover:bg-emerald-100"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      /* GLOBAL INPUT FOR SPECIFIC PROFESSOR */
+                      <div className="flex flex-col items-center gap-3 py-2">
+                        <span className="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Cota Semanal Individual</span>
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setCustomWeeklyQuotaInput(prev => Math.max(1, prev - 1))}
+                            className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700 font-bold text-base flex items-center justify-center text-gray-800 dark:text-gray-100"
+                          >
+                            -
+                          </button>
+                          <div className="text-center px-3">
+                            <div className="text-2xl font-black text-indigo-600 dark:text-indigo-400">
+                              {customWeeklyQuotaInput}
+                            </div>
+                            <span className="text-[10px] font-bold text-gray-400">aulas/sem</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setCustomWeeklyQuotaInput(prev => Math.min(30, prev + 1))}
+                            className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700 font-bold text-base flex items-center justify-center text-gray-800 dark:text-gray-100"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                      <button
+                        type="button"
+                        onClick={() => handleSaveCustomQuota()}
+                        disabled={isSavingCustomQuota}
+                        className="w-full py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/20 active:scale-[0.98] cursor-pointer"
+                      >
+                        {isSavingCustomQuota ? (
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4" /> Salvar Cota de {targetCustomProfName}
+                          </>
+                        )}
+                      </button>
+
+                      {existingCustomQuotaForSelected && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveCustomQuota(existingCustomQuotaForSelected.id, existingCustomQuotaForSelected.professorName)}
+                          className="w-full py-2 px-4 rounded-xl text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 border border-red-200 dark:border-red-900/50 flex items-center justify-center gap-1.5 transition-colors"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5" /> Restaurar Cota Padrão
+                        </button>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-8 space-y-2">
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto border border-indigo-100 dark:border-indigo-800">
+                      <UserCheck className="w-6 h-6" />
+                    </div>
+                    <p className="text-xs font-bold text-gray-700 dark:text-gray-200">
+                      Nenhum professor selecionado
+                    </p>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed max-w-[240px] mx-auto">
+                      Busque um professor no campo ao lado ou clique em &quot;Editar&quot; na lista de exceções abaixo.
+                    </p>
+                  </div>
+                )}
+
+                {customQuotaMsg && (
+                  <div className="w-full text-center py-1 px-2 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 rounded-lg text-xs font-medium animate-fade-in flex items-center justify-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> {customQuotaMsg}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* TABLE OF ACTIVE CUSTOM QUOTAS */}
+            {customQuotasList.length > 0 && (
+              <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <Star className="w-4 h-4 text-amber-500 fill-amber-400" /> Professores com Cotas Personalizadas Ativas ({customQuotasList.length})
+                  </h3>
+                </div>
+
+                <div className="overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-800">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-gray-50 dark:bg-gray-800/80 text-gray-500 dark:text-gray-400 uppercase font-bold text-[10px] tracking-wider border-b border-gray-200 dark:border-gray-800">
+                      <tr>
+                        <th className="px-4 py-3">Professor</th>
+                        <th className="px-4 py-3">Cota Configurada</th>
+                        <th className="px-4 py-3 hidden sm:table-cell">Registrado por</th>
+                        <th className="px-4 py-3 text-right">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-gray-900">
+                      {customQuotasList.map((cq) => (
+                        <tr key={cq.id} className="hover:bg-gray-50/80 dark:hover:bg-gray-800/50 transition-colors">
+                          <td className="px-4 py-3 font-bold text-gray-900 dark:text-white">
+                            {cq.professorName}
+                          </td>
+                          <td className="px-4 py-3 font-semibold text-indigo-600 dark:text-indigo-400">
+                            {cq.quotaPerLab && usePerLabQuotaInput ? (
+                              <span className="flex flex-wrap items-center gap-1.5">
+                                <span className="px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold">
+                                  LabTec: {cq.quotaPerLab.LabTec ?? 2}
+                                </span>
+                                <span className="px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 font-bold">
+                                  Manutec: {cq.quotaPerLab.Manutec ?? 2}
+                                </span>
+                                <span className="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold">
+                                  Robótica: {cq.quotaPerLab.Robotica ?? 2}
+                                </span>
+                              </span>
+                            ) : (
+                              <span>{cq.weeklyQuota ?? weeklyQuotaInput} aulas/semana</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-gray-500 dark:text-gray-400 hidden sm:table-cell">
+                            {cq.updatedBy || "Coordenador"}
+                          </td>
+                          <td className="px-4 py-3 text-right space-x-2">
+                            <button
+                              type="button"
+                              onClick={() => handleSelectProfForCustomQuota(cq.professorName)}
+                              className="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 font-bold text-[11px] inline-flex items-center gap-1 transition-colors"
+                              title="Editar cota deste professor"
+                            >
+                              <Edit3 className="w-3 h-3" /> Editar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveCustomQuota(cq.id, cq.professorName)}
+                              className="px-2.5 py-1 rounded-lg bg-red-50 dark:bg-red-950/80 text-red-700 dark:text-red-300 hover:bg-red-100 font-bold text-[11px] inline-flex items-center gap-1 transition-colors"
+                              title="Restaurar cota padrão"
+                            >
+                              <RotateCcw className="w-3 h-3" /> Restaurar Padrão
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         </section>
 

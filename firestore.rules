@@ -81,5 +81,13 @@ service cloud.firestore {
       allow create: if isLogged() && request.auth.uid == request.resource.data.professorId;
       allow update, delete: if false;
     }
+
+    // ==========================================
+    // 6. COTAS INDIVIDUAIS POR PROFESSOR (custom_quotas)
+    // ==========================================
+    match /custom_quotas/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
   }
 }
