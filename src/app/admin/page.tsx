@@ -713,7 +713,7 @@ export default function AdminPage() {
                 setIsMobileMenuOpen(false);
                 router.push("/dashboard");
               }}
-              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-850 hover:bg-amber-100/50 dark:hover:bg-amber-950/30 transition-colors border border-amber-200 dark:border-gray-800"
+              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 hover:bg-amber-100/50 dark:hover:bg-amber-950/40 transition-colors border border-amber-200 dark:border-gray-700 shadow-xs"
             >
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400 rounded-lg">
@@ -721,7 +721,7 @@ export default function AdminPage() {
                 </div>
                 <span>Voltar ao Calendário de Reservas</span>
               </div>
-              <ChevronRight className="w-4 h-4 text-gray-400" />
+              <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500" />
             </button>
 
             <button
@@ -730,7 +730,7 @@ export default function AdminPage() {
                 setIsMobileMenuOpen(false);
                 router.push("/logs");
               }}
-              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-850 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors border border-emerald-200 dark:border-gray-800"
+              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors border border-emerald-200 dark:border-gray-700 shadow-xs"
             >
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 rounded-lg">
@@ -738,7 +738,7 @@ export default function AdminPage() {
                 </div>
                 <span>Histórico & Ranking Geral</span>
               </div>
-              <ChevronRight className="w-4 h-4 text-gray-400" />
+              <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500" />
             </button>
 
             <button
@@ -747,7 +747,7 @@ export default function AdminPage() {
                 setIsMobileMenuOpen(false);
                 router.push("/calendario");
               }}
-              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors border border-indigo-200 dark:border-gray-800"
+              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors border border-indigo-200 dark:border-gray-700 shadow-xs"
             >
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 rounded-lg">
@@ -755,7 +755,7 @@ export default function AdminPage() {
                 </div>
                 <span>Painel Público de Horários</span>
               </div>
-              <ChevronRight className="w-4 h-4 text-gray-400" />
+              <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500" />
             </button>
 
             {/* PWA INSTALL BUTTON */}

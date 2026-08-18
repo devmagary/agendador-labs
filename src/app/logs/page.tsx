@@ -26,6 +26,8 @@ import {
   LockKeyhole,
   Download,
   ShieldAlert,
+  Star,
+  RotateCcw,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -550,6 +552,20 @@ export default function LogsPage() {
                                     badgeClass: "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
                                     iconBgClass: "bg-emerald-50 dark:bg-emerald-950/80 border-emerald-100 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400",
                                     icon: <Users className="w-4 h-4" />,
+                                  };
+                                case "custom_quota_update":
+                                  return {
+                                    label: "Cota Personalizada",
+                                    badgeClass: "bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800",
+                                    iconBgClass: "bg-indigo-50 dark:bg-indigo-950/80 border-indigo-100 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400",
+                                    icon: <Star className="w-4 h-4" />,
+                                  };
+                                case "custom_quota_remove":
+                                  return {
+                                    label: "Cota Restaurada",
+                                    badgeClass: "bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800",
+                                    iconBgClass: "bg-amber-50 dark:bg-amber-950/80 border-amber-100 dark:border-amber-800 text-amber-600 dark:text-amber-400",
+                                    icon: <RotateCcw className="w-4 h-4" />,
                                   };
                                 case "user_authorization_revoke":
                                 case "user_delete":
