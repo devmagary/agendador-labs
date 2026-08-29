@@ -496,6 +496,35 @@ export default function DashboardPage() {
       }
     }
 
+    // Check conflict: same professor, same day, same shift, and overlapping classHours on another lab
+    const targetDateStr = format(selectedDate, "yyyy-MM-dd");
+    const profLower = finalProfName.toLowerCase().trim();
+    const conflictSchedule = monthSchedules.find((s) => {
+      const isSameDay = s.date === targetDateStr;
+      const isSameShift = s.shift === selectedShift;
+      const isSameProf =
+        (s.professorName && s.professorName.toLowerCase().trim() === profLower) ||
+        (s.professorId === user.uid && user.role === "professor");
+
+      if (isSameDay && isSameShift && isSameProf) {
+        return s.classHours.some((h) => selectedClasses.includes(h));
+      }
+      return false;
+    });
+
+    if (conflictSchedule) {
+      const conflictHours = conflictSchedule.classHours
+        .filter((h) => selectedClasses.includes(h))
+        .map((h) => `${h}º`)
+        .join(" e ");
+      alert(
+        `Conflito de Horário para o Professor!\n\n` +
+        `O(a) Prof. ${finalProfName} já possui um agendamento no laboratório "${conflictSchedule.laboratory}" no dia ${format(selectedDate, "dd/MM")} (${selectedShift}) no(s) horário(s): ${conflictHours}.\n` +
+        `Não é permitido agendar laboratórios diferentes no mesmo horário.`
+      );
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
