@@ -31,11 +31,12 @@ import {
   Wrench,
   Bot,
   CalendarDays,
+  FlaskConical,
 } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
-type Laboratory = "LabTec" | "Manutec" | "Robotica";
+type Laboratory = "LabTec" | "Manutec" | "Robotica" | "Biologia";
 type Shift = "Matutino" | "Vespertino" | "Noturno";
 
 interface Schedule {
@@ -186,8 +187,8 @@ export default function PublicCalendarPage() {
           Este painel é de visualização pública em tempo real. Os agendamentos são realizados pelo portal dos professores.
         </div>
 
-        {/* LABORATORY SELECTOR (LabTec, Manutec, Robótica) */}
-        <section className="bg-white dark:bg-gray-900 rounded-2xl shadow-xs border border-gray-200 dark:border-gray-800 p-1.5 sm:p-2 grid grid-cols-3 gap-1 sm:gap-2 w-full sm:w-max mx-auto justify-center transition-colors">
+        {/* LABORATORY SELECTOR (LabTec, Manutec, Robótica, Biologia) */}
+        <section className="bg-white dark:bg-gray-900 rounded-2xl shadow-xs border border-gray-200 dark:border-gray-800 p-1.5 sm:p-2 grid grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-2 w-full sm:w-auto mx-auto justify-center transition-colors">
           <button
             onClick={() => setSelectedLab("LabTec")}
             className={`flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-3 sm:px-6 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 outline-none focus:outline-none ${
@@ -217,6 +218,16 @@ export default function PublicCalendarPage() {
             }`}
           >
             <Bot className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" /> <span className="truncate">Robótica</span>
+          </button>
+          <button
+            onClick={() => setSelectedLab("Biologia")}
+            className={`flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-3 sm:px-6 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 outline-none focus:outline-none ${
+              selectedLab === "Biologia"
+                ? "bg-emerald-600 text-white shadow-md transform scale-100"
+                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+            }`}
+          >
+            <FlaskConical className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" /> <span className="truncate">Biologia / Análise</span>
           </button>
         </section>
 

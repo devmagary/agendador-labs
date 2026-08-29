@@ -28,6 +28,7 @@ import {
   ShieldAlert,
   Star,
   RotateCcw,
+  FlaskConical,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -62,7 +63,7 @@ interface ScheduleDoc {
   id: string;
   professorId?: string;
   professorName: string;
-  laboratory: "LabTec" | "Manutec" | "Robotica";
+  laboratory: "LabTec" | "Manutec" | "Robotica" | "Biologia";
   date: string;
   shift: string;
   classHours: number[];
@@ -76,6 +77,7 @@ interface ProfessorRank {
   labTecHours: number;
   manutecHours: number;
   roboticaHours: number;
+  biologiaHours: number;
   tvCount: number;
 }
 
@@ -161,6 +163,7 @@ export default function LogsPage() {
         labTecHours: number;
         manutecHours: number;
         roboticaHours: number;
+        biologiaHours: number;
         tvBookings: number;
       }>();
 
@@ -175,6 +178,7 @@ export default function LogsPage() {
           labTecHours: 0,
           manutecHours: 0,
           roboticaHours: 0,
+          biologiaHours: 0,
           tvBookings: 0,
         };
 
@@ -183,6 +187,7 @@ export default function LogsPage() {
         if (s.laboratory === "LabTec") stat.labTecHours += hoursCount;
         else if (s.laboratory === "Manutec") stat.manutecHours += hoursCount;
         else if (s.laboratory === "Robotica") stat.roboticaHours += hoursCount;
+        else if (s.laboratory === "Biologia") stat.biologiaHours += hoursCount;
 
         if (s.hasTv) stat.tvBookings += 1;
 
@@ -202,6 +207,7 @@ export default function LogsPage() {
         "Aulas no LabTec": p.labTecHours,
         "Aulas no Manutec": p.manutecHours,
         "Aulas na Robótica": p.roboticaHours,
+        "Aulas na Biologia": p.biologiaHours,
         "Agendamentos c/ TV": p.tvBookings,
       }));
 
@@ -214,6 +220,7 @@ export default function LogsPage() {
         { wch: 16 }, // Aulas no LabTec
         { wch: 16 }, // Aulas no Manutec
         { wch: 18 }, // Aulas na Robótica
+        { wch: 18 }, // Aulas na Biologia
         { wch: 18 }, // Agendamentos c/ TV
       ];
       XLSX.utils.book_append_sheet(wb, wsProfStats, "Total por Professor");
@@ -313,6 +320,7 @@ export default function LogsPage() {
         labTecHours: 0,
         manutecHours: 0,
         roboticaHours: 0,
+        biologiaHours: 0,
         tvCount: 0,
       };
 
@@ -321,6 +329,7 @@ export default function LogsPage() {
       if (s.laboratory === "LabTec") existing.labTecHours += hoursCount;
       else if (s.laboratory === "Manutec") existing.manutecHours += hoursCount;
       else if (s.laboratory === "Robotica") existing.roboticaHours += hoursCount;
+      else if (s.laboratory === "Biologia") existing.biologiaHours += hoursCount;
 
       if (s.hasTv) existing.tvCount += 1;
 
@@ -341,6 +350,7 @@ export default function LogsPage() {
           labTecHours: l.details.includes("LabTec") ? 1 : 0,
           manutecHours: l.details.includes("Manutec") ? 1 : 0,
           roboticaHours: l.details.includes("Robotica") || l.details.includes("Robótica") ? 1 : 0,
+          biologiaHours: l.details.includes("Biologia") ? 1 : 0,
           tvCount: l.details.includes("TV") ? 1 : 0,
         });
       }
@@ -847,6 +857,11 @@ export default function LogsPage() {
                                 {p.roboticaHours > 0 && (
                                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-purple-50 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 border border-purple-100 dark:border-purple-800">
                                     <Bot className="w-3 h-3" /> Robótica: {p.roboticaHours} {p.roboticaHours === 1 ? "aula" : "aulas"}
+                                  </span>
+                                )}
+                                {p.biologiaHours > 0 && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-teal-50 dark:bg-teal-950/80 text-teal-700 dark:text-teal-300 border border-teal-100 dark:border-teal-800">
+                                    <FlaskConical className="w-3 h-3" /> Biologia: {p.biologiaHours} {p.biologiaHours === 1 ? "aula" : "aulas"}
                                   </span>
                                 )}
                               </div>

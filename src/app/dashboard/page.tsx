@@ -45,13 +45,14 @@ import {
   LogOut,
   Users,
   HelpCircle,
+  FlaskConical,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Tour } from "@/components/Tour";
 import type { TourStep } from "@/components/Tour";
 import { PwaInstallButton } from "@/components/PwaInstallButton";
 
-type Laboratory = "LabTec" | "Manutec" | "Robotica";
+type Laboratory = "LabTec" | "Manutec" | "Robotica" | "Biologia";
 type Shift = "Matutino" | "Vespertino" | "Noturno";
 
 interface Schedule {
@@ -144,6 +145,7 @@ export default function DashboardPage() {
     LabTec: 2,
     Manutec: 2,
     Robotica: 2,
+    Biologia: 2,
   });
   const [hideWeekends, setHideWeekends] = useState<boolean>(false);
   const [secretaryQuotaOverride, setSecretaryQuotaOverride] = useState<boolean>(true);
@@ -207,6 +209,7 @@ export default function DashboardPage() {
             LabTec: Number(data.quotaPerLab.LabTec) || 2,
             Manutec: Number(data.quotaPerLab.Manutec) || 2,
             Robotica: Number(data.quotaPerLab.Robotica) || 2,
+            Biologia: Number(data.quotaPerLab.Biologia) || 2,
           });
         }
         if (typeof data.hideWeekends === "boolean") {
@@ -891,8 +894,8 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* LABORATORY SELECTOR TABS (GRID 3 COLUMNS ON MOBILE & DESKTOP) */}
-        <section data-tour-id="tour-labs" className="bg-white dark:bg-gray-900 p-1.5 sm:p-2 rounded-2xl shadow-xs border border-gray-200 dark:border-gray-800 grid grid-cols-3 gap-1 sm:gap-2 transition-colors">
+        {/* LABORATORY SELECTOR TABS */}
+        <section data-tour-id="tour-labs" className="bg-white dark:bg-gray-900 p-1.5 sm:p-2 rounded-2xl shadow-xs border border-gray-200 dark:border-gray-800 grid grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-2 transition-colors">
           <button
             type="button"
             onClick={() => { setSelectedLab("LabTec"); setSelectedClasses([]); setSelectedShift(null); }}
@@ -930,6 +933,19 @@ export default function DashboardPage() {
           >
             <Bot className="w-4 h-4 shrink-0" />
             <span className="truncate">Robótica</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setSelectedLab("Biologia"); setSelectedClasses([]); setSelectedShift(null); }}
+            className={`py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-center ${
+              selectedLab === "Biologia"
+                ? "bg-emerald-600 text-white shadow-md shadow-emerald-500/20 scale-[1.01]"
+                : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
+            }`}
+          >
+            <FlaskConical className="w-4 h-4 shrink-0" />
+            <span className="truncate">Biologia / Análise</span>
           </button>
         </section>
 

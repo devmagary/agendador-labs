@@ -33,7 +33,8 @@ import {
   Star,
   UserCheck,
   RotateCcw,
-  Edit3
+  Edit3,
+  FlaskConical,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { PwaInstallButton } from "@/components/PwaInstallButton";
@@ -58,6 +59,7 @@ interface CustomQuotaDoc {
     LabTec?: number;
     Manutec?: number;
     Robotica?: number;
+    Biologia?: number;
   };
   updatedAt?: unknown;
   updatedBy?: string;
@@ -83,15 +85,17 @@ export default function AdminPage() {
   const [savedWeeklyQuota, setSavedWeeklyQuota] = useState<number>(4);
   const [usePerLabQuotaInput, setUsePerLabQuotaInput] = useState<boolean>(false);
   const [savedUsePerLabQuota, setSavedUsePerLabQuota] = useState<boolean>(false);
-  const [labQuotasInput, setLabQuotasInput] = useState<{ LabTec: number; Manutec: number; Robotica: number }>({
+  const [labQuotasInput, setLabQuotasInput] = useState<{ LabTec: number; Manutec: number; Robotica: number; Biologia: number }>({
     LabTec: 2,
     Manutec: 2,
     Robotica: 2,
+    Biologia: 2,
   });
-  const [savedLabQuotas, setSavedLabQuotas] = useState<{ LabTec: number; Manutec: number; Robotica: number }>({
+  const [savedLabQuotas, setSavedLabQuotas] = useState<{ LabTec: number; Manutec: number; Robotica: number; Biologia: number }>({
     LabTec: 2,
     Manutec: 2,
     Robotica: 2,
+    Biologia: 2,
   });
   const [hideWeekendsInput, setHideWeekendsInput] = useState<boolean>(false);
   const [savedHideWeekends, setSavedHideWeekends] = useState<boolean>(false);
@@ -104,10 +108,11 @@ export default function AdminPage() {
   const [customQuotasList, setCustomQuotasList] = useState<CustomQuotaDoc[]>([]);
   const [targetCustomProfName, setTargetCustomProfName] = useState("");
   const [customWeeklyQuotaInput, setCustomWeeklyQuotaInput] = useState<number>(4);
-  const [customLabQuotasInput, setCustomLabQuotasInput] = useState<{ LabTec: number; Manutec: number; Robotica: number }>({
+  const [customLabQuotasInput, setCustomLabQuotasInput] = useState<{ LabTec: number; Manutec: number; Robotica: number; Biologia: number }>({
     LabTec: 2,
     Manutec: 2,
     Robotica: 2,
+    Biologia: 2,
   });
   const [isSavingCustomQuota, setIsSavingCustomQuota] = useState(false);
   const [customQuotaMsg, setCustomQuotaMsg] = useState("");
@@ -178,8 +183,9 @@ export default function AdminPage() {
           const qLabTec = Number(data.quotaPerLab.LabTec) || 2;
           const qManutec = Number(data.quotaPerLab.Manutec) || 2;
           const qRobotica = Number(data.quotaPerLab.Robotica) || 2;
-          setLabQuotasInput({ LabTec: qLabTec, Manutec: qManutec, Robotica: qRobotica });
-          setSavedLabQuotas({ LabTec: qLabTec, Manutec: qManutec, Robotica: qRobotica });
+          const qBiologia = Number(data.quotaPerLab.Biologia) || 2;
+          setLabQuotasInput({ LabTec: qLabTec, Manutec: qManutec, Robotica: qRobotica, Biologia: qBiologia });
+          setSavedLabQuotas({ LabTec: qLabTec, Manutec: qManutec, Robotica: qRobotica, Biologia: qBiologia });
         }
         if (typeof data.hideWeekends === "boolean") {
           setHideWeekendsInput(data.hideWeekends);
@@ -265,8 +271,8 @@ export default function AdminPage() {
 
   // When a professor is selected for custom quota, load their current values into form
   const handleSelectProfForCustomQuota = (profName: string) => {
-    setTargetCustomProfName(profName);
     const existing = customQuotasList.find(c => c.professorName.toLowerCase() === profName.toLowerCase() || c.id === profName.toLowerCase());
+    setTargetCustomProfName(profName);
     if (existing) {
       if (typeof existing.weeklyQuota === "number") setCustomWeeklyQuotaInput(existing.weeklyQuota);
       if (existing.quotaPerLab) {
@@ -274,6 +280,7 @@ export default function AdminPage() {
           LabTec: Number(existing.quotaPerLab.LabTec) || 2,
           Manutec: Number(existing.quotaPerLab.Manutec) || 2,
           Robotica: Number(existing.quotaPerLab.Robotica) || 2,
+          Biologia: Number(existing.quotaPerLab.Biologia) || 2,
         });
       }
     } else {
@@ -303,6 +310,7 @@ export default function AdminPage() {
           LabTec: Number(customLabQuotasInput.LabTec),
           Manutec: Number(customLabQuotasInput.Manutec),
           Robotica: Number(customLabQuotasInput.Robotica),
+          Biologia: Number(customLabQuotasInput.Biologia),
         },
         updatedAt: serverTimestamp(),
         updatedBy: user?.name || "Coordenador",
@@ -310,7 +318,7 @@ export default function AdminPage() {
 
       if (user) {
         const detailsStr = usePerLabQuotaInput
-          ? `(LabTec: ${customLabQuotasInput.LabTec}, Manutec: ${customLabQuotasInput.Manutec}, Robótica: ${customLabQuotasInput.Robotica})`
+          ? `(LabTec: ${customLabQuotasInput.LabTec}, Manutec: ${customLabQuotasInput.Manutec}, Robótica: ${customLabQuotasInput.Robotica}, Biologia: ${customLabQuotasInput.Biologia})`
           : `(${customWeeklyQuotaInput} aulas/sem)`;
 
         await addDoc(collection(db, "logs"), {
@@ -365,7 +373,7 @@ export default function AdminPage() {
       return;
     }
     if (usePerLabQuotaInput) {
-      if (labQuotasInput.LabTec < 1 || labQuotasInput.Manutec < 1 || labQuotasInput.Robotica < 1) {
+      if (labQuotasInput.LabTec < 1 || labQuotasInput.Manutec < 1 || labQuotasInput.Robotica < 1 || labQuotasInput.Biologia < 1) {
         setError("A cota de cada laboratório deve ser de pelo menos 1 aula.");
         return;
       }
@@ -381,6 +389,7 @@ export default function AdminPage() {
           LabTec: Number(labQuotasInput.LabTec),
           Manutec: Number(labQuotasInput.Manutec),
           Robotica: Number(labQuotasInput.Robotica),
+          Biologia: Number(labQuotasInput.Biologia),
         },
         hideWeekends: hideWeekendsInput,
         secretaryQuotaOverride: secretaryOverrideInput,
@@ -390,7 +399,7 @@ export default function AdminPage() {
 
       if (user) {
         const quotaSummary = usePerLabQuotaInput
-          ? `Cotas Isoladas por Lab (LabTec: ${labQuotasInput.LabTec}, Manutec: ${labQuotasInput.Manutec}, Robótica: ${labQuotasInput.Robotica})`
+          ? `Cotas Isoladas por Lab (LabTec: ${labQuotasInput.LabTec}, Manutec: ${labQuotasInput.Manutec}, Robótica: ${labQuotasInput.Robotica}, Biologia: ${labQuotasInput.Biologia})`
           : `Cota Global: ${weeklyQuotaInput} aulas`;
 
         await addDoc(collection(db, "logs"), {
@@ -1014,6 +1023,55 @@ export default function AdminPage() {
                         </div>
                       </div>
                     </div>
+
+                    {/* BIOLOGIA INPUT */}
+                    <div className="p-3 rounded-xl bg-teal-50/60 dark:bg-teal-950/30 border border-teal-100 dark:border-teal-900/50 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-teal-950 dark:text-teal-200 flex items-center gap-1.5">
+                          <FlaskConical className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" /> Biologia / Análise
+                        </span>
+                        <span className="text-xs font-black text-teal-600 dark:text-teal-400">
+                          {labQuotasInput.Biologia} {labQuotasInput.Biologia === 1 ? "aula" : "aulas"}/sem
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setLabQuotasInput(prev => ({ ...prev, Biologia: Math.max(1, prev.Biologia - 1) }))}
+                            className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-teal-200 dark:border-teal-800 text-teal-700 dark:text-teal-300 font-bold text-sm flex items-center justify-center hover:bg-teal-100 dark:hover:bg-teal-900/50 transition-colors"
+                          >
+                            -
+                          </button>
+                          <span className="w-7 text-center font-bold text-sm text-gray-900 dark:text-white">
+                            {labQuotasInput.Biologia}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setLabQuotasInput(prev => ({ ...prev, Biologia: Math.min(20, prev.Biologia + 1) }))}
+                            className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-teal-200 dark:border-teal-800 text-teal-700 dark:text-teal-300 font-bold text-sm flex items-center justify-center hover:bg-teal-100 dark:hover:bg-teal-900/50 transition-colors"
+                          >
+                            +
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {[1, 2, 3, 4].map(n => (
+                            <button
+                              key={n}
+                              type="button"
+                              onClick={() => setLabQuotasInput(prev => ({ ...prev, Biologia: n }))}
+                              className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
+                                labQuotasInput.Biologia === n
+                                  ? "bg-teal-600 text-white"
+                                  : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-teal-50"
+                              }`}
+                            >
+                              {n}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   /* 2. SE COTA GLOBAL UNIFICADA ESTIVER ATIVA */
@@ -1250,6 +1308,32 @@ export default function AdminPage() {
                             </button>
                           </div>
                         </div>
+
+                        {/* BIOLOGIA */}
+                        <div className="p-3 rounded-xl bg-teal-50/60 dark:bg-teal-950/30 border border-teal-100 dark:border-teal-900/50 flex items-center justify-between">
+                          <span className="text-xs font-bold text-teal-950 dark:text-teal-200 flex items-center gap-1.5">
+                            <FlaskConical className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" /> Biologia / Análise
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setCustomLabQuotasInput(prev => ({ ...prev, Biologia: Math.max(1, prev.Biologia - 1) }))}
+                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-teal-200 dark:border-teal-800 text-teal-700 dark:text-teal-300 font-bold text-sm flex items-center justify-center hover:bg-teal-100"
+                            >
+                              -
+                            </button>
+                            <span className="w-6 text-center font-black text-sm text-gray-900 dark:text-white">
+                              {customLabQuotasInput.Biologia}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setCustomLabQuotasInput(prev => ({ ...prev, Biologia: Math.min(20, prev.Biologia + 1) }))}
+                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-teal-200 dark:border-teal-800 text-teal-700 dark:text-teal-300 font-bold text-sm flex items-center justify-center hover:bg-teal-100"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     ) : (
                       /* GLOBAL INPUT FOR SPECIFIC PROFESSOR */
@@ -1365,6 +1449,9 @@ export default function AdminPage() {
                                 </span>
                                 <span className="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold">
                                   Robótica: {cq.quotaPerLab.Robotica ?? 2}
+                                </span>
+                                <span className="px-2 py-0.5 rounded bg-teal-50 dark:bg-teal-950 text-teal-700 dark:text-teal-300 font-bold">
+                                  Biologia: {cq.quotaPerLab.Biologia ?? 2}
                                 </span>
                               </span>
                             ) : (
