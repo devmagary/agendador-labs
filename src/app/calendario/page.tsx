@@ -3,7 +3,6 @@
 export const dynamic = "force-dynamic";
 
 import { useEffect, useState, useMemo } from "react";
-import Link from "next/link";
 import { collection, query, where, onSnapshot, doc } from "firebase/firestore";
 import {
   format,
@@ -22,19 +21,16 @@ import {
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
-  Calendar as CalendarIcon,
   Clock,
   ShieldAlert,
   ChevronLeft,
   ChevronRight,
-  Monitor,
-  Wrench,
-  Bot,
   CalendarDays,
-  FlaskConical,
 } from "lucide-react";
 import { db } from "@/lib/firebase";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { Header } from "@/components/Header";
+import { LabSelector } from "@/components/LabSelector";
+import { getLabDotClass } from "@/constants/laboratories";
 
 type Laboratory = "LabTec" | "Manutec" | "Robotica" | "Biologia";
 type Shift = "Matutino" | "Vespertino" | "Noturno";
@@ -147,40 +143,8 @@ export default function PublicCalendarPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-20 transition-colors">
-      <header className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 sticky top-0 z-30 shadow-xs">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20">
-            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-              <div className="bg-indigo-600 p-2 sm:p-2.5 rounded-xl sm:rounded-2xl text-white shadow-md shadow-indigo-500/20 shrink-0">
-                <CalendarIcon className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-base sm:text-xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight truncate">Painel Público</h1>
-                <p className="text-[11px] sm:text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wide truncate">Agendamento de Labs</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-              <button
-                onClick={() => (window.location.href = "/logs")}
-                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1.5 sm:py-2 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 rounded-xl text-xs sm:text-sm font-bold transition-colors whitespace-nowrap border border-emerald-200 dark:border-emerald-800 shadow-2xs active:scale-95"
-              >
-                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 dark:text-emerald-400" />
-                <span className="hidden sm:inline">Histórico & Ranking</span>
-                <span className="sm:hidden">Ranking</span>
-              </button>
-
-              <ThemeToggle variant="icon" />
-
-              <Link
-                href="/"
-                className="px-2.5 sm:px-4 py-1.5 sm:py-2 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl text-xs sm:text-sm font-bold transition-colors text-gray-800 dark:text-gray-200 shadow-2xs active:scale-95 whitespace-nowrap"
-              >
-                Login
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* HEADER */}
+      <Header currentRoute="/calendario" />
 
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-8 space-y-6 sm:space-y-8">
         <div className="bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-800/60 text-indigo-800 dark:text-indigo-300 p-3.5 sm:p-4 rounded-2xl text-center font-medium text-xs sm:text-sm shadow-2xs">
@@ -188,48 +152,10 @@ export default function PublicCalendarPage() {
         </div>
 
         {/* LABORATORY SELECTOR (LabTec, Manutec, Robótica, Biologia) */}
-        <section className="bg-white dark:bg-gray-900 rounded-2xl shadow-xs border border-gray-200 dark:border-gray-800 p-1.5 sm:p-2 grid grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-2 w-full sm:w-auto mx-auto justify-center transition-colors">
-          <button
-            onClick={() => setSelectedLab("LabTec")}
-            className={`flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-3 sm:px-6 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 outline-none focus:outline-none ${
-              selectedLab === "LabTec"
-                ? "bg-indigo-600 text-white shadow-md transform scale-100"
-                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-            }`}
-          >
-            <Monitor className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" /> <span className="truncate">LabTec</span>
-          </button>
-          <button
-            onClick={() => setSelectedLab("Manutec")}
-            className={`flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-3 sm:px-6 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 outline-none focus:outline-none ${
-              selectedLab === "Manutec"
-                ? "bg-amber-500 text-white shadow-md transform scale-100"
-                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-            }`}
-          >
-            <Wrench className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" /> <span className="truncate">Manutec</span>
-          </button>
-          <button
-            onClick={() => setSelectedLab("Robotica")}
-            className={`flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-3 sm:px-6 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 outline-none focus:outline-none ${
-              selectedLab === "Robotica"
-                ? "bg-purple-600 text-white shadow-md transform scale-100"
-                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-            }`}
-          >
-            <Bot className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" /> <span className="truncate">Robótica</span>
-          </button>
-          <button
-            onClick={() => setSelectedLab("Biologia")}
-            className={`flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-3 sm:px-6 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 outline-none focus:outline-none ${
-              selectedLab === "Biologia"
-                ? "bg-emerald-600 text-white shadow-md transform scale-100"
-                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-            }`}
-          >
-            <FlaskConical className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" /> <span className="truncate">Biologia / Análise</span>
-          </button>
-        </section>
+        <LabSelector
+          selectedLab={selectedLab}
+          onSelectLab={(lab) => setSelectedLab(lab)}
+        />
 
         {/* MONTHLY CALENDAR VIEW */}
         <section className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden transition-colors">
@@ -350,13 +276,7 @@ export default function PublicCalendarPage() {
                       {hasSchedules ? (
                         <div className="flex items-center gap-1">
                           <span
-                            className={`w-2 h-2 rounded-full ${
-                              selectedLab === "LabTec"
-                                ? "bg-indigo-500"
-                                : selectedLab === "Manutec"
-                                ? "bg-amber-500"
-                                : "bg-purple-500"
-                            }`}
+                            className={`w-2 h-2 rounded-full ${getLabDotClass(selectedLab)}`}
                           />
                           <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300 hidden sm:inline">
                             {dayLabSchedules.length} {dayLabSchedules.length === 1 ? "reserva" : "reservas"}
@@ -445,15 +365,6 @@ export default function PublicCalendarPage() {
         </section>
       </main>
 
-      <style jsx global>{`
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .hide-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
     </div>
   );
 }

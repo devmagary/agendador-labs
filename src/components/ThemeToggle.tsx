@@ -19,7 +19,7 @@ export function ThemeToggle({ variant = "icon", className = "" }: ThemeTogglePro
         onClick={toggleTheme}
         className={`w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold transition-all border ${
           isDark
-            ? "bg-gray-800 text-amber-300 border-gray-700 hover:bg-gray-750"
+            ? "bg-gray-800 text-amber-300 border-gray-700 hover:bg-gray-700"
             : "bg-amber-50/80 text-amber-900 border-amber-200 hover:bg-amber-100"
         } ${className}`}
       >

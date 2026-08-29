@@ -9,7 +9,6 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
   Clock,
-  ArrowLeft,
   History,
   CalendarDays,
   Trophy,
@@ -23,15 +22,12 @@ import {
   BarChart3,
   Flame,
   Users,
-  LockKeyhole,
   Download,
-  ShieldAlert,
-  Star,
-  RotateCcw,
   FlaskConical,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { useAuth } from "@/contexts/AuthContext";
+import { Header } from "@/components/Header";
+import { AuditBadge, getAuditMeta } from "@/components/AuditBadge";
 import * as XLSX from "xlsx";
 
 interface LogEntry {
@@ -82,12 +78,12 @@ interface ProfessorRank {
 }
 
 export default function LogsPage() {
+  const { user } = useAuth();
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [schedules, setSchedules] = useState<ScheduleDoc[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"timeline" | "ranking">("timeline");
   const [searchQuery, setSearchQuery] = useState("");
-  const router = useRouter();
 
   // Listen to logs collection
   useEffect(() => {
@@ -381,51 +377,17 @@ export default function LogsPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col transition-colors">
       {/* HEADER */}
-      <header className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 sticky top-0 z-30 shadow-xs">
-        <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20">
-            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-              <div className="bg-emerald-600 p-2 sm:p-2.5 rounded-xl sm:rounded-2xl text-white shadow-md shadow-emerald-600/20 shrink-0">
-                <History className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-base sm:text-xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight truncate">
-                  Central de Transparência & Ranking
-                </h1>
-                <p className="text-[11px] sm:text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide truncate">
-                  Histórico de Agendamentos
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-              {/* TROCAR SENHA: ALWAYS OUTSIDE */}
-              <button
-                onClick={() => router.push("/change-password")}
-                className="flex items-center justify-center gap-1.5 h-9 w-9 sm:w-auto sm:px-3.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-emerald-700 dark:hover:text-emerald-400 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl transition-all shadow-2xs active:scale-95 shrink-0"
-                title="Alterar Senha"
-              >
-                <LockKeyhole className="w-4 h-4 text-gray-600 dark:text-gray-300 shrink-0" />
-                <span className="hidden sm:inline">Trocar Senha</span>
-              </button>
-
-              <ThemeToggle variant="icon" />
-
-              <button
-                onClick={() => router.back()}
-                className="flex items-center justify-center gap-1.5 h-9 w-9 sm:w-auto sm:px-3.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-emerald-700 dark:hover:text-emerald-400 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl transition-all active:scale-95 shrink-0 shadow-2xs"
-                title="Voltar ao Painel"
-              >
-                <ArrowLeft className="w-4 h-4 text-gray-600 dark:text-gray-300 shrink-0" />
-                <span className="hidden sm:inline">Voltar</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header
+        currentRoute="/logs"
+        title="Central de Transparência & Ranking"
+        subtitle="Histórico de Agendamentos"
+        user={user}
+        showBack
+        backHref="/dashboard"
+      />
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-6 space-y-5 sm:space-y-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-6 space-y-5 sm:space-y-6">
         
         {/* TABS NAVIGATION */}
         <div className="flex items-center justify-between flex-wrap gap-3 bg-white dark:bg-gray-900 p-1.5 sm:p-2 rounded-2xl shadow-xs border border-gray-200 dark:border-gray-800 transition-colors">
@@ -532,86 +494,22 @@ export default function LogsPage() {
                           )}
 
                           {(() => {
-                            const meta = (() => {
-                              switch (log.action) {
-                                case "create":
-                                  return {
-                                    label: "Agendou",
-                                    badgeClass: "bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800",
-                                    iconBgClass: "bg-blue-50 dark:bg-blue-950/80 border-blue-100 dark:border-blue-800 text-blue-600 dark:text-blue-400",
-                                    icon: <History className="w-4 h-4" />,
-                                  };
-                                case "cancel":
-                                  return {
-                                    label: "Cancelou",
-                                    badgeClass: "bg-red-100 dark:bg-red-950/80 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800",
-                                    iconBgClass: "bg-red-50 dark:bg-red-950/80 border-red-100 dark:border-red-800 text-red-600 dark:text-red-400",
-                                    icon: <Clock className="w-4 h-4" />,
-                                  };
-                                case "settings_update":
-                                  return {
-                                    label: "Configurações",
-                                    badgeClass: "bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800",
-                                    iconBgClass: "bg-amber-50 dark:bg-amber-950/80 border-amber-100 dark:border-amber-800 text-amber-600 dark:text-amber-400",
-                                    icon: <ShieldAlert className="w-4 h-4" />,
-                                  };
-                                case "user_authorization_create":
-                                case "user_authorization_bulk":
-                                  return {
-                                    label: "Autorização",
-                                    badgeClass: "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
-                                    iconBgClass: "bg-emerald-50 dark:bg-emerald-950/80 border-emerald-100 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400",
-                                    icon: <Users className="w-4 h-4" />,
-                                  };
-                                case "custom_quota_update":
-                                  return {
-                                    label: "Cota Personalizada",
-                                    badgeClass: "bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800",
-                                    iconBgClass: "bg-indigo-50 dark:bg-indigo-950/80 border-indigo-100 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400",
-                                    icon: <Star className="w-4 h-4" />,
-                                  };
-                                case "custom_quota_remove":
-                                  return {
-                                    label: "Cota Restaurada",
-                                    badgeClass: "bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800",
-                                    iconBgClass: "bg-amber-50 dark:bg-amber-950/80 border-amber-100 dark:border-amber-800 text-amber-600 dark:text-amber-400",
-                                    icon: <RotateCcw className="w-4 h-4" />,
-                                  };
-                                case "user_authorization_revoke":
-                                case "user_delete":
-                                  return {
-                                    label: "Revogação",
-                                    badgeClass: "bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-800",
-                                    iconBgClass: "bg-purple-50 dark:bg-purple-950/80 border-purple-100 dark:border-purple-800 text-purple-600 dark:text-purple-400",
-                                    icon: <ShieldAlert className="w-4 h-4" />,
-                                  };
-                                default:
-                                  return {
-                                    label: log.action,
-                                    badgeClass: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700",
-                                    iconBgClass: "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400",
-                                    icon: <Clock className="w-4 h-4" />,
-                                  };
-                              }
-                            })();
+                            const meta = getAuditMeta(log.action);
+                            const ActionIcon = meta.icon;
 
                             return (
                               <>
                                 <div
                                   className={`relative z-10 w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-xs border ${meta.iconBgClass}`}
                                 >
-                                  {meta.icon}
+                                  <ActionIcon className="w-4 h-4" />
                                 </div>
 
                                 <div className="flex-1 pt-1 pb-2">
                                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
                                     <div className="flex items-center gap-2">
                                       <span className="text-sm font-bold text-gray-900 dark:text-white">{log.professorName}</span>
-                                      <span
-                                        className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${meta.badgeClass}`}
-                                      >
-                                        {meta.label}
-                                      </span>
+                                      <AuditBadge action={log.action} size="xs" />
                                     </div>
                                     <span className="text-xs font-medium text-gray-400 dark:text-gray-500 flex items-center gap-1">
                                       <Clock className="w-3 h-3" />{" "}
@@ -697,7 +595,7 @@ export default function LogsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end max-w-4xl mx-auto">
                   {/* 2nd PLACE (SILVER) */}
                   {professorRanking[1] && (
-                    <div className="order-2 md:order-1 bg-white/5 backdrop-blur-xs border border-white/10 rounded-3xl p-5 text-center flex flex-col items-center relative hover:bg-white/10 transition-all">
+                    <div className="order-2 md:order-1 bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-5 text-center flex flex-col items-center relative hover:bg-white/10 transition-all">
                       <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-200 to-slate-400 text-gray-900 font-black text-lg flex items-center justify-center shadow-lg mb-3">
                         2º
                       </div>
@@ -729,7 +627,7 @@ export default function LogsPage() {
 
                   {/* 3rd PLACE (BRONZE) */}
                   {professorRanking[2] && (
-                    <div className="order-3 md:order-3 bg-white/5 backdrop-blur-xs border border-white/10 rounded-3xl p-5 text-center flex flex-col items-center relative hover:bg-white/10 transition-all">
+                    <div className="order-3 md:order-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-5 text-center flex flex-col items-center relative hover:bg-white/10 transition-all">
                       <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-600 to-amber-800 text-white font-black text-lg flex items-center justify-center shadow-lg mb-3">
                         3º
                       </div>
@@ -850,7 +748,7 @@ export default function LogsPage() {
                                   </span>
                                 )}
                                 {p.manutecHours > 0 && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border border-amber-100 dark:border-amber-800">
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
                                     <Wrench className="w-3 h-3" /> Manutec: {p.manutecHours} {p.manutecHours === 1 ? "aula" : "aulas"}
                                   </span>
                                 )}
@@ -860,7 +758,7 @@ export default function LogsPage() {
                                   </span>
                                 )}
                                 {p.biologiaHours > 0 && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-teal-50 dark:bg-teal-950/80 text-teal-700 dark:text-teal-300 border border-teal-100 dark:border-teal-800">
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                                     <FlaskConical className="w-3 h-3" /> Biologia: {p.biologiaHours} {p.biologiaHours === 1 ? "aula" : "aulas"}
                                   </span>
                                 )}

@@ -3,18 +3,251 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
+  /* Legacy / Base variables */
   --background: #f9fafb;
   --foreground: #111827;
+
+  /* =========================================
+     1. SURFACES & BACKGROUNDS
+     ========================================= */
+  --bg-primary: #f9fafb;             /* gray-50 */
+  --bg-secondary: #f3f4f6;           /* gray-100 */
+  --bg-card: #ffffff;                /* white */
+  --bg-muted: #f3f4f6;               /* gray-100 */
+  --bg-app: #f9fafb;                 /* gray-50 */
+  --bg-surface: #ffffff;             /* white */
+  --bg-surface-raised: #ffffff;      /* white cards */
+  --bg-surface-muted: #f3f4f6;       /* gray-100 */
+  --bg-surface-subtle: #f9fafb;      /* gray-50 */
+  --bg-overlay: rgba(15, 23, 42, 0.65); /* backdrop */
+
+  /* =========================================
+     2. BORDERS & DIVIDERS
+     ========================================= */
+  --border-subtle: #f3f4f6;          /* gray-100 */
+  --border-default: #e5e7eb;         /* gray-200 */
+  --border-strong: #d1d5db;          /* gray-300 */
+  --border-focus: #3b82f6;           /* blue-500 */
+
+  /* =========================================
+     3. TEXT HIERARCHY
+     ========================================= */
+  --text-primary: #111827;           /* gray-900 */
+  --text-secondary: #4b5563;         /* gray-600 */
+  --text-muted: #6b7280;             /* gray-500 */
+  --text-disabled: #9ca3af;          /* gray-400 */
+  --text-inverse: #ffffff;           /* white */
+
+  /* =========================================
+     4. SEMANTIC ROLES
+     ========================================= */
+  --role-professor: #2563eb;         /* blue-600 */
+  --role-professor-bg: #eff6ff;      /* blue-50 */
+  --role-professor-border: #bfdbfe;  /* blue-200 */
+  --role-professor-text: #1e3a8a;    /* blue-900 */
+
+  --role-admin: #d97706;             /* amber-600 */
+  --role-admin-bg: #fffbeb;          /* amber-50 */
+  --role-admin-border: #fde68a;      /* amber-200 */
+  --role-admin-text: #78350f;        /* amber-900 */
+
+  --role-secretaria: #9333ea;        /* purple-600 */
+  --role-secretaria-bg: #faf5ff;     /* purple-50 */
+  --role-secretaria-border: #e9d5ff; /* purple-200 */
+  --role-secretaria-text: #581c87;   /* purple-900 */
+
+  --role-public: #4b5563;            /* gray-600 */
+  --role-public-bg: #f3f4f6;         /* gray-100 */
+  --role-public-border: #e5e7eb;     /* gray-200 */
+  --role-public-text: #1f2937;       /* gray-800 */
+
+  /* =========================================
+     5. LABORATORIES
+     ========================================= */
+  --lab-labtec: #2563eb;             /* blue-600 */
+  --lab-labtec-bg: #eff6ff;
+  --lab-labtec-border: #bfdbfe;
+  --lab-labtec-text: #1d4ed8;
+
+  --lab-manutec: #d97706;            /* amber-600 */
+  --lab-manutec-bg: #fffbeb;
+  --lab-manutec-border: #fde68a;
+  --lab-manutec-text: #92400e;
+
+  --lab-robotica: #9333ea;           /* purple-600 */
+  --lab-robotica-bg: #faf5ff;
+  --lab-robotica-border: #e9d5ff;
+  --lab-robotica-text: #6b21a8;
+
+  --lab-biologia: #059669;           /* emerald-600 */
+  --lab-biologia-bg: #ecfdf5;
+  --lab-biologia-border: #a7f3d0;
+  --lab-biologia-text: #065f46;
+
+  /* =========================================
+     6. STATUS & FEEDBACK
+     ========================================= */
+  --status-success: #059669;         /* emerald-600 */
+  --status-success-bg: #ecfdf5;
+  --status-success-border: #a7f3d0;
+  --status-success-text: #065f46;
+
+  --status-danger: #dc2626;          /* red-600 */
+  --status-danger-bg: #fef2f2;
+  --status-danger-border: #fecaca;
+  --status-danger-text: #991b1b;
+
+  --status-warning: #d97706;         /* amber-600 */
+  --status-warning-bg: #fffbeb;
+  --status-warning-border: #fde68a;
+  --status-warning-text: #92400e;
+
+  --status-info: #4f46e5;            /* indigo-600 */
+  --status-info-bg: #eef2ff;
+  --status-info-border: #c7d2fe;
+  --status-info-text: #3730a3;
 }
 
 .dark {
+  /* Legacy / Base variables */
   --background: #030712;
   --foreground: #f9fafb;
+
+  /* =========================================
+     1. SURFACES & BACKGROUNDS (DARK)
+     ========================================= */
+  --bg-primary: #030712;             /* gray-950 */
+  --bg-secondary: #111827;           /* gray-900 */
+  --bg-card: #111827;                /* gray-900 */
+  --bg-muted: #1f2937;               /* gray-800 */
+  --bg-app: #030712;                 /* gray-950 */
+  --bg-surface: #111827;             /* gray-900 */
+  --bg-surface-raised: #1f2937;      /* gray-800 */
+  --bg-surface-muted: #1f2937;       /* gray-800 */
+  --bg-surface-subtle: #0f172a;      /* slate-900 / gray-900 */
+  --bg-overlay: rgba(3, 7, 18, 0.85);
+
+  /* =========================================
+     2. BORDERS & DIVIDERS (DARK)
+     ========================================= */
+  --border-subtle: #111827;          /* gray-900 */
+  --border-default: #1f2937;         /* gray-800 */
+  --border-strong: #374151;          /* gray-700 */
+  --border-focus: #60a5fa;           /* blue-400 */
+
+  /* =========================================
+     3. TEXT HIERARCHY (DARK)
+     ========================================= */
+  --text-primary: #f9fafb;           /* gray-50 */
+  --text-secondary: #d1d5db;         /* gray-300 */
+  --text-muted: #9ca3af;             /* gray-400 */
+  --text-disabled: #6b7280;          /* gray-500 */
+  --text-inverse: #111827;           /* gray-900 */
+
+  /* =========================================
+     4. SEMANTIC ROLES (DARK)
+     ========================================= */
+  --role-professor: #3b82f6;         /* blue-500 */
+  --role-professor-bg: rgba(30, 58, 138, 0.35); /* blue-950/60 */
+  --role-professor-border: #1e40af;  /* blue-800 */
+  --role-professor-text: #93c5fd;    /* blue-300 */
+
+  --role-admin: #f59e0b;             /* amber-500 */
+  --role-admin-bg: rgba(120, 53, 15, 0.35); /* amber-950/60 */
+  --role-admin-border: #92400e;      /* amber-800 */
+  --role-admin-text: #fcd34d;        /* amber-300 */
+
+  --role-secretaria: #a855f7;        /* purple-500 */
+  --role-secretaria-bg: rgba(88, 28, 135, 0.35); /* purple-950/60 */
+  --role-secretaria-border: #6b21a8; /* purple-800 */
+  --role-secretaria-text: #d8b4fe;   /* purple-300 */
+
+  --role-public: #9ca3af;            /* gray-400 */
+  --role-public-bg: rgba(31, 41, 55, 0.5); /* gray-800/50 */
+  --role-public-border: #374151;     /* gray-700 */
+  --role-public-text: #e5e7eb;       /* gray-200 */
+
+  /* =========================================
+     5. LABORATORIES (DARK)
+     ========================================= */
+  --lab-labtec: #3b82f6;
+  --lab-labtec-bg: rgba(30, 58, 138, 0.4);
+  --lab-labtec-border: #1e40af;
+  --lab-labtec-text: #93c5fd;
+
+  --lab-manutec: #f59e0b;
+  --lab-manutec-bg: rgba(120, 53, 15, 0.4);
+  --lab-manutec-border: #92400e;
+  --lab-manutec-text: #fcd34d;
+
+  --lab-robotica: #a855f7;
+  --lab-robotica-bg: rgba(88, 28, 135, 0.4);
+  --lab-robotica-border: #6b21a8;
+  --lab-robotica-text: #d8b4fe;
+
+  --lab-biologia: #10b981;
+  --lab-biologia-bg: rgba(6, 95, 70, 0.4);
+  --lab-biologia-border: #065f46;
+  --lab-biologia-text: #6ee7b7;
+
+  /* =========================================
+     6. STATUS & FEEDBACK (DARK)
+     ========================================= */
+  --status-success: #10b981;
+  --status-success-bg: rgba(6, 95, 70, 0.4);
+  --status-success-border: #065f46;
+  --status-success-text: #6ee7b7;
+
+  --status-danger: #ef4444;
+  --status-danger-bg: rgba(153, 27, 27, 0.35);
+  --status-danger-border: rgba(185, 28, 28, 0.6);
+  --status-danger-text: #fca5a5;
+
+  --status-warning: #f59e0b;
+  --status-warning-bg: rgba(120, 53, 15, 0.4);
+  --status-warning-border: #92400e;
+  --status-warning-text: #fcd34d;
+
+  --status-info: #6366f1;
+  --status-info-bg: rgba(55, 48, 163, 0.4);
+  --status-info-border: #3730a3;
+  --status-info-text: #a5b4fc;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-card: var(--bg-card);
+  --color-bg-muted: var(--bg-muted);
+  --color-bg-app: var(--bg-app);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-surface-raised: var(--bg-surface-raised);
+  --color-bg-surface-muted: var(--bg-surface-muted);
+  --color-bg-surface-subtle: var(--bg-surface-subtle);
+
+  --color-border-subtle: var(--border-subtle);
+  --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
+  --color-border-focus: var(--border-focus);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-disabled: var(--text-disabled);
+  --color-text-inverse: var(--text-inverse);
+
+  --color-role-professor: var(--role-professor);
+  --color-role-admin: var(--role-admin);
+  --color-role-secretaria: var(--role-secretaria);
+  --color-role-public: var(--role-public);
+
+  --color-lab-labtec: var(--lab-labtec);
+  --color-lab-manutec: var(--lab-manutec);
+  --color-lab-robotica: var(--lab-robotica);
+  --color-lab-biologia: var(--lab-biologia);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -23,6 +256,19 @@ body {
   background: var(--background);
   color: var(--foreground);
   transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* =========================================
+   ANIMATIONS
+   ========================================= */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes tour-fade-in {
@@ -35,10 +281,32 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.25s ease-out;
+}
+
 .animate-tour-fade {
   animation: tour-fade-in 0.25s ease-out;
 }
 
 .animate-tour-fade-up {
   animation: tour-fade-in-up 0.3s ease-out;
+}
+
+/* =========================================
+   SCROLLBAR UTILITIES
+   ========================================= */
+.hide-scrollbar::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar,
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

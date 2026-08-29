@@ -8,13 +8,10 @@ import { useEffect, useState, useMemo } from "react";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, setDoc, doc, deleteDoc, writeBatch, serverTimestamp, addDoc } from "firebase/firestore";
 import { 
-  ShieldAlert, 
   Users, 
   Plus, 
   Trash2, 
-  ArrowLeft, 
   Building2, 
-  Clock, 
   FileText, 
   CheckCircle2, 
   Sparkles, 
@@ -22,22 +19,17 @@ import {
   SlidersHorizontal, 
   Save, 
   Check, 
-  Menu, 
-  X, 
-  LockKeyhole, 
-  ChevronRight,
-  Globe,
-  Monitor,
-  Wrench,
-  Bot,
-  Star,
-  UserCheck,
-  RotateCcw,
-  Edit3,
-  FlaskConical,
+  Monitor, 
+  Wrench, 
+  Bot, 
+  Star, 
+  UserCheck, 
+  RotateCcw, 
+  Edit3, 
+  FlaskConical, 
 } from "lucide-react";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { PwaInstallButton } from "@/components/PwaInstallButton";
+import { Header } from "@/components/Header";
+import { RoleBadge } from "@/components/RoleBadge";
 
 interface AllowedUser {
   id: string; // The username (matricula)
@@ -78,7 +70,6 @@ export default function AdminPage() {
   const [registeredUsers, setRegisteredUsers] = useState<UserDoc[]>([]);
 
   const [activeTab, setActiveTab] = useState<"single" | "bulk">("single");
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // System Settings state (Weekly Quota & Per-Lab Quotas)
   const [weeklyQuotaInput, setWeeklyQuotaInput] = useState<number>(4);
@@ -639,142 +630,14 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-20 transition-colors">
-      <header className="bg-amber-50/90 dark:bg-gray-900/90 border-b border-amber-200 dark:border-gray-800 sticky top-0 z-40 shadow-xs backdrop-blur-xs">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20">
-            
-            {/* LOGO & TITLE */}
-            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-              <div className="bg-amber-600 p-2 sm:p-2.5 rounded-xl text-white shrink-0 shadow-md shadow-amber-600/20">
-                <ShieldAlert className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-base sm:text-xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight truncate">
-                  Painel do Coordenador
-                </h1>
-                <p className="text-[11px] sm:text-xs font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wide truncate">
-                  Gestão & Regras
-                </p>
-              </div>
-            </div>
-
-            {/* ACTION BUTTONS */}
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-              
-              {/* TROCAR SENHA: ALWAYS OUTSIDE THE SANDWICH */}
-              <button
-                onClick={() => router.push("/change-password")}
-                className="flex items-center justify-center gap-1.5 h-9 w-9 sm:w-auto sm:px-3.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-amber-800 dark:hover:text-amber-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-amber-300/80 dark:border-gray-700 rounded-xl transition-all shadow-2xs active:scale-95 shrink-0"
-                title="Alterar Senha"
-              >
-                <LockKeyhole className="w-4 h-4 text-gray-600 dark:text-gray-300 shrink-0" />
-                <span className="hidden sm:inline">Trocar Senha</span>
-              </button>
-
-              {/* MOBILE THEME TOGGLE: ALWAYS OUTSIDE THE SANDWICH (MD:HIDDEN) */}
-              <span className="md:hidden">
-                <ThemeToggle variant="icon" />
-              </span>
-
-              {/* DESKTOP NAVIGATION BUTTONS */}
-              <div className="hidden md:flex items-center gap-2">
-                <button 
-                  onClick={() => router.push("/logs")}
-                  className="flex items-center justify-center gap-1.5 h-9 px-3.5 hover:bg-emerald-100/70 dark:hover:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded-xl text-xs font-bold transition-colors text-emerald-800 dark:text-emerald-300 bg-white dark:bg-gray-800"
-                >
-                  <Clock className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" /> Histórico & Ranking
-                </button>
-                <button 
-                  onClick={() => router.push("/dashboard")}
-                  className="flex items-center justify-center gap-1.5 h-9 px-3.5 hover:bg-amber-100 dark:hover:bg-amber-950/40 border border-amber-300 dark:border-amber-800 rounded-xl text-xs font-bold transition-colors text-amber-900 dark:text-amber-300 bg-white dark:bg-gray-800 shadow-2xs"
-                >
-                  <ArrowLeft className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0" /> Voltar ao Calendário
-                </button>
-                <ThemeToggle variant="icon" />
-              </div>
-
-              {/* MOBILE HAMBURGER BUTTON (MD:HIDDEN) */}
-              <button
-                type="button"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={`md:hidden h-9 w-9 flex items-center justify-center rounded-xl border transition-all active:scale-95 shrink-0 ${
-                  isMobileMenuOpen
-                    ? "bg-amber-200 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border-amber-400 dark:border-amber-700"
-                    : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-amber-200 dark:border-gray-700 hover:bg-amber-100 dark:hover:bg-gray-700"
-                }`}
-                aria-label="Menu do Coordenador"
-              >
-                {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* MOBILE SLIDE-DOWN DRAWER / SANDWICH MENU */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-amber-200 dark:border-gray-800 bg-amber-50/98 dark:bg-gray-900/98 backdrop-blur-md px-4 py-3 space-y-2.5 animate-fade-in shadow-xl">
-            <span className="text-[11px] font-bold text-amber-900/60 dark:text-amber-400/60 uppercase tracking-wider block mb-1">
-              Menu do Coordenador
-            </span>
-
-            <button
-              type="button"
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                router.push("/dashboard");
-              }}
-              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 hover:bg-amber-100/50 dark:hover:bg-amber-950/40 transition-colors border border-amber-200 dark:border-gray-700 shadow-xs"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400 rounded-lg">
-                  <ArrowLeft className="w-4 h-4" />
-                </div>
-                <span>Voltar ao Calendário de Reservas</span>
-              </div>
-              <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                router.push("/logs");
-              }}
-              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors border border-emerald-200 dark:border-gray-700 shadow-xs"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 rounded-lg">
-                  <Clock className="w-4 h-4" />
-                </div>
-                <span>Histórico & Ranking Geral</span>
-              </div>
-              <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                router.push("/calendario");
-              }}
-              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors border border-indigo-200 dark:border-gray-700 shadow-xs"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 rounded-lg">
-                  <Globe className="w-4 h-4" />
-                </div>
-                <span>Painel Público de Horários</span>
-              </div>
-              <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-            </button>
-
-            {/* PWA INSTALL BUTTON */}
-            <div className="pt-1">
-              <PwaInstallButton />
-            </div>
-          </div>
-        )}
-      </header>
+      <Header
+        currentRoute="/admin"
+        title="Painel do Coordenador"
+        subtitle="Gestão & Regras"
+        user={user}
+        showBack
+        backHref="/dashboard"
+      />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
         
@@ -977,12 +840,12 @@ export default function AdminPage() {
                     </div>
 
                     {/* ROBOTICA INPUT */}
-                    <div className="p-3 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 space-y-2">
+                    <div className="p-3 rounded-xl bg-purple-50/60 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-900/50 space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
-                          <Bot className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Robótica
+                        <span className="text-xs font-bold text-purple-950 dark:text-purple-200 flex items-center gap-1.5">
+                          <Bot className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" /> Robótica
                         </span>
-                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">
+                        <span className="text-xs font-black text-purple-600 dark:text-purple-400">
                           {labQuotasInput.Robotica} {labQuotasInput.Robotica === 1 ? "aula" : "aulas"}/sem
                         </span>
                       </div>
@@ -991,7 +854,7 @@ export default function AdminPage() {
                           <button
                             type="button"
                             onClick={() => setLabQuotasInput(prev => ({ ...prev, Robotica: Math.max(1, prev.Robotica - 1) }))}
-                            className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 font-bold text-sm flex items-center justify-center hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors"
+                            className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 font-bold text-sm flex items-center justify-center hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
                           >
                             -
                           </button>
@@ -1001,7 +864,7 @@ export default function AdminPage() {
                           <button
                             type="button"
                             onClick={() => setLabQuotasInput(prev => ({ ...prev, Robotica: Math.min(20, prev.Robotica + 1) }))}
-                            className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 font-bold text-sm flex items-center justify-center hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors"
+                            className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 font-bold text-sm flex items-center justify-center hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
                           >
                             +
                           </button>
@@ -1014,8 +877,8 @@ export default function AdminPage() {
                               onClick={() => setLabQuotasInput(prev => ({ ...prev, Robotica: n }))}
                               className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
                                 labQuotasInput.Robotica === n
-                                  ? "bg-emerald-600 text-white"
-                                  : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-emerald-50"
+                                  ? "bg-purple-600 text-white"
+                                  : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-purple-50"
                               }`}
                             >
                               {n}
@@ -1026,12 +889,12 @@ export default function AdminPage() {
                     </div>
 
                     {/* BIOLOGIA INPUT */}
-                    <div className="p-3 rounded-xl bg-teal-50/60 dark:bg-teal-950/30 border border-teal-100 dark:border-teal-900/50 space-y-2">
+                    <div className="p-3 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-teal-950 dark:text-teal-200 flex items-center gap-1.5">
-                          <FlaskConical className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" /> Biologia / Análise
+                        <span className="text-xs font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
+                          <FlaskConical className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Biologia / Análise
                         </span>
-                        <span className="text-xs font-black text-teal-600 dark:text-teal-400">
+                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">
                           {labQuotasInput.Biologia} {labQuotasInput.Biologia === 1 ? "aula" : "aulas"}/sem
                         </span>
                       </div>
@@ -1040,7 +903,7 @@ export default function AdminPage() {
                           <button
                             type="button"
                             onClick={() => setLabQuotasInput(prev => ({ ...prev, Biologia: Math.max(1, prev.Biologia - 1) }))}
-                            className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-teal-200 dark:border-teal-800 text-teal-700 dark:text-teal-300 font-bold text-sm flex items-center justify-center hover:bg-teal-100 dark:hover:bg-teal-900/50 transition-colors"
+                            className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 font-bold text-sm flex items-center justify-center hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors"
                           >
                             -
                           </button>
@@ -1050,7 +913,7 @@ export default function AdminPage() {
                           <button
                             type="button"
                             onClick={() => setLabQuotasInput(prev => ({ ...prev, Biologia: Math.min(20, prev.Biologia + 1) }))}
-                            className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-teal-200 dark:border-teal-800 text-teal-700 dark:text-teal-300 font-bold text-sm flex items-center justify-center hover:bg-teal-100 dark:hover:bg-teal-900/50 transition-colors"
+                            className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 font-bold text-sm flex items-center justify-center hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors"
                           >
                             +
                           </button>
@@ -1063,8 +926,8 @@ export default function AdminPage() {
                               onClick={() => setLabQuotasInput(prev => ({ ...prev, Biologia: n }))}
                               className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
                                 labQuotasInput.Biologia === n
-                                  ? "bg-teal-600 text-white"
-                                  : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-teal-50"
+                                  ? "bg-emerald-600 text-white"
+                                  : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-emerald-50"
                               }`}
                             >
                               {n}
@@ -1241,7 +1104,7 @@ export default function AdminPage() {
                             <button
                               type="button"
                               onClick={() => setCustomLabQuotasInput(prev => ({ ...prev, LabTec: Math.max(1, prev.LabTec - 1) }))}
-                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 font-bold text-sm flex items-center justify-center hover:bg-blue-100"
+                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 font-bold text-sm flex items-center justify-center hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
                             >
                               -
                             </button>
@@ -1251,7 +1114,7 @@ export default function AdminPage() {
                             <button
                               type="button"
                               onClick={() => setCustomLabQuotasInput(prev => ({ ...prev, LabTec: Math.min(20, prev.LabTec + 1) }))}
-                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 font-bold text-sm flex items-center justify-center hover:bg-blue-100"
+                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 font-bold text-sm flex items-center justify-center hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
                             >
                               +
                             </button>
@@ -1267,7 +1130,7 @@ export default function AdminPage() {
                             <button
                               type="button"
                               onClick={() => setCustomLabQuotasInput(prev => ({ ...prev, Manutec: Math.max(1, prev.Manutec - 1) }))}
-                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 font-bold text-sm flex items-center justify-center hover:bg-amber-100"
+                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 font-bold text-sm flex items-center justify-center hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors"
                             >
                               -
                             </button>
@@ -1277,7 +1140,7 @@ export default function AdminPage() {
                             <button
                               type="button"
                               onClick={() => setCustomLabQuotasInput(prev => ({ ...prev, Manutec: Math.min(20, prev.Manutec + 1) }))}
-                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 font-bold text-sm flex items-center justify-center hover:bg-amber-100"
+                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 font-bold text-sm flex items-center justify-center hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors"
                             >
                               +
                             </button>
@@ -1285,15 +1148,15 @@ export default function AdminPage() {
                         </div>
 
                         {/* ROBOTICA */}
-                        <div className="p-3 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 flex items-center justify-between">
-                          <span className="text-xs font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
-                            <Bot className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Robótica
+                        <div className="p-3 rounded-xl bg-purple-50/60 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-900/50 flex items-center justify-between">
+                          <span className="text-xs font-bold text-purple-950 dark:text-purple-200 flex items-center gap-1.5">
+                            <Bot className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" /> Robótica
                           </span>
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
                               onClick={() => setCustomLabQuotasInput(prev => ({ ...prev, Robotica: Math.max(1, prev.Robotica - 1) }))}
-                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 font-bold text-sm flex items-center justify-center hover:bg-emerald-100"
+                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 font-bold text-sm flex items-center justify-center hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
                             >
                               -
                             </button>
@@ -1303,7 +1166,7 @@ export default function AdminPage() {
                             <button
                               type="button"
                               onClick={() => setCustomLabQuotasInput(prev => ({ ...prev, Robotica: Math.min(20, prev.Robotica + 1) }))}
-                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 font-bold text-sm flex items-center justify-center hover:bg-emerald-100"
+                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 font-bold text-sm flex items-center justify-center hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
                             >
                               +
                             </button>
@@ -1311,15 +1174,15 @@ export default function AdminPage() {
                         </div>
 
                         {/* BIOLOGIA */}
-                        <div className="p-3 rounded-xl bg-teal-50/60 dark:bg-teal-950/30 border border-teal-100 dark:border-teal-900/50 flex items-center justify-between">
-                          <span className="text-xs font-bold text-teal-950 dark:text-teal-200 flex items-center gap-1.5">
-                            <FlaskConical className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" /> Biologia / Análise
+                        <div className="p-3 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 flex items-center justify-between">
+                          <span className="text-xs font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
+                            <FlaskConical className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Biologia / Análise
                           </span>
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
                               onClick={() => setCustomLabQuotasInput(prev => ({ ...prev, Biologia: Math.max(1, prev.Biologia - 1) }))}
-                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-teal-200 dark:border-teal-800 text-teal-700 dark:text-teal-300 font-bold text-sm flex items-center justify-center hover:bg-teal-100"
+                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 font-bold text-sm flex items-center justify-center hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors"
                             >
                               -
                             </button>
@@ -1329,7 +1192,7 @@ export default function AdminPage() {
                             <button
                               type="button"
                               onClick={() => setCustomLabQuotasInput(prev => ({ ...prev, Biologia: Math.min(20, prev.Biologia + 1) }))}
-                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-teal-200 dark:border-teal-800 text-teal-700 dark:text-teal-300 font-bold text-sm flex items-center justify-center hover:bg-teal-100"
+                              className="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 font-bold text-sm flex items-center justify-center hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors"
                             >
                               +
                             </button>
@@ -1344,7 +1207,7 @@ export default function AdminPage() {
                           <button
                             type="button"
                             onClick={() => setCustomWeeklyQuotaInput(prev => Math.max(1, prev - 1))}
-                            className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700 font-bold text-base flex items-center justify-center text-gray-800 dark:text-gray-100"
+                            className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 font-bold text-base flex items-center justify-center text-gray-800 dark:text-gray-100 transition-colors"
                           >
                             -
                           </button>
@@ -1357,7 +1220,7 @@ export default function AdminPage() {
                           <button
                             type="button"
                             onClick={() => setCustomWeeklyQuotaInput(prev => Math.min(30, prev + 1))}
-                            className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700 font-bold text-base flex items-center justify-center text-gray-800 dark:text-gray-100"
+                            className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 font-bold text-base flex items-center justify-center text-gray-800 dark:text-gray-100 transition-colors"
                           >
                             +
                           </button>
@@ -1448,10 +1311,10 @@ export default function AdminPage() {
                                 <span className="px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 font-bold">
                                   Manutec: {cq.quotaPerLab.Manutec ?? 2}
                                 </span>
-                                <span className="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold">
+                                <span className="px-2 py-0.5 rounded bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-bold">
                                   Robótica: {cq.quotaPerLab.Robotica ?? 2}
                                 </span>
-                                <span className="px-2 py-0.5 rounded bg-teal-50 dark:bg-teal-950 text-teal-700 dark:text-teal-300 font-bold">
+                                <span className="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold">
                                   Biologia: {cq.quotaPerLab.Biologia ?? 2}
                                 </span>
                               </span>
@@ -1466,7 +1329,7 @@ export default function AdminPage() {
                             <button
                               type="button"
                               onClick={() => handleSelectProfForCustomQuota(cq.professorName)}
-                              className="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 font-bold text-[11px] inline-flex items-center gap-1 transition-colors"
+                              className="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 font-bold text-[11px] inline-flex items-center gap-1 transition-colors"
                               title="Editar cota deste professor"
                             >
                               <Edit3 className="w-3 h-3" /> Editar
@@ -1474,7 +1337,7 @@ export default function AdminPage() {
                             <button
                               type="button"
                               onClick={() => handleRemoveCustomQuota(cq.id, cq.professorName)}
-                              className="px-2.5 py-1 rounded-lg bg-red-50 dark:bg-red-950/80 text-red-700 dark:text-red-300 hover:bg-red-100 font-bold text-[11px] inline-flex items-center gap-1 transition-colors"
+                              className="px-2.5 py-1 rounded-lg bg-red-50 dark:bg-red-950/80 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/60 font-bold text-[11px] inline-flex items-center gap-1 transition-colors"
                               title="Restaurar cota padrão"
                             >
                               <RotateCcw className="w-3 h-3" /> Restaurar Padrão
@@ -1690,12 +1553,10 @@ export default function AdminPage() {
                                           <td className="px-6 py-4 font-bold text-indigo-600 dark:text-indigo-400">{u.id}</td>
                                           <td className="px-6 py-4 text-gray-600 dark:text-gray-200">{u.name}</td>
                                           <td className="px-6 py-4">
-                                             <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${u.role === 'secretario' ? 'bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300' : 'bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300'}`}>
-                                               {u.role === 'secretario' ? 'Secretário(a)' : 'Professor(a)'}
-                                             </span>
+                                             <RoleBadge role={u.role} size="xs" />
                                           </td>
                                           <td className="px-6 py-4 text-right">
-                                              <button onClick={() => handleRevokeAllowed(u.id)} className="text-red-500 dark:text-red-400 hover:text-red-700 font-medium px-3 py-1 bg-red-50 dark:bg-red-950/50 rounded-md">
+                                              <button onClick={() => handleRevokeAllowed(u.id)} className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium px-3 py-1 bg-red-50 dark:bg-red-950/50 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-md transition-colors">
                                                  Revogar
                                               </button>
                                           </td>
@@ -1736,9 +1597,7 @@ export default function AdminPage() {
                                       <tr key={u.id} className="border-b border-gray-50 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors">
                                           <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">{u.name}</td>
                                           <td className="px-6 py-4">
-                                             <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${u.role === 'secretario' ? 'bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300' : 'bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300'}`}>
-                                               {u.role === 'secretario' ? 'Secretário(a)' : 'Professor(a)'}
-                                             </span>
+                                             <RoleBadge role={u.role} size="xs" />
                                           </td>
                                           <td className="px-6 py-4 text-emerald-600 dark:text-emerald-400 font-medium text-xs">Ativo e Autenticado</td>
                                           <td className="px-6 py-4 text-right">

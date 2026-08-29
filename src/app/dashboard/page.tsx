@@ -26,31 +26,22 @@ import {
 import { ptBR } from "date-fns/locale";
 import {
   Calendar as CalendarIcon,
-  Monitor,
-  Wrench,
-  Bot,
   Clock,
   Check,
-  ShieldAlert,
   CheckCircle2,
-  LockKeyhole,
-  Globe,
   Trash2,
   ChevronLeft,
   ChevronRight,
   Tv,
   AlertCircle,
-  Menu,
-  X,
-  LogOut,
   Users,
-  HelpCircle,
-  FlaskConical,
 } from "lucide-react";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { Header } from "@/components/Header";
+import { LabSelector } from "@/components/LabSelector";
+import { QuotaCard } from "@/components/QuotaCard";
 import { Tour } from "@/components/Tour";
 import type { TourStep } from "@/components/Tour";
-import { PwaInstallButton } from "@/components/PwaInstallButton";
+import { getLabBadgeClass, getLabDotClass } from "@/constants/laboratories";
 
 type Laboratory = "LabTec" | "Manutec" | "Robotica" | "Biologia";
 type Shift = "Matutino" | "Vespertino" | "Noturno";
@@ -160,7 +151,6 @@ export default function DashboardPage() {
   const [targetProfessorName, setTargetProfessorName] = useState("");
   const [professorsList, setProfessorsList] = useState<{ id: string; name: string }[]>([]);
   const [allowSecretaryOverride, setAllowSecretaryOverride] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showTour, setShowTour] = useState(false);
 
   useEffect(() => {
@@ -668,249 +658,21 @@ export default function DashboardPage() {
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  const roleBadge = () => {
-    switch (user.role) {
-      case "admin":
-        return (
-          <span className="bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 text-xs px-2.5 py-0.5 rounded-full font-bold border border-amber-200 dark:border-amber-800">
-            Coordenador / Admin
-          </span>
-        );
-      case "secretario":
-        return (
-          <span className="bg-purple-100 dark:bg-purple-950/60 text-purple-900 dark:text-purple-300 text-xs px-2.5 py-0.5 rounded-full font-bold border border-purple-200 dark:border-purple-800">
-            Secretaria Escolar
-          </span>
-        );
-      default:
-        return (
-          <span className="bg-blue-100 dark:bg-blue-950/60 text-blue-900 dark:text-blue-300 text-xs px-2.5 py-0.5 rounded-full font-bold border border-blue-200 dark:border-blue-800">
-            Professor(a)
-          </span>
-        );
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 transition-colors">
       {/* HEADER */}
-      <header className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40 shadow-xs">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20">
-            
-            {/* LOGO & USER INFO */}
-            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-              <div className="bg-blue-600 p-2 sm:p-2.5 rounded-xl sm:rounded-2xl text-white shadow-md shadow-blue-500/20 shrink-0">
-                <CalendarIcon className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <h1 className="text-base sm:text-xl font-bold text-gray-900 dark:text-white tracking-tight">AgendaLab</h1>
-                  <div className="hidden xs:inline-flex">{roleBadge()}</div>
-                </div>
-                <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium truncate max-w-[130px] sm:max-w-[240px]">
-                  Olá, <strong className="text-gray-700 dark:text-gray-200">{user.name}</strong>
-                </p>
-              </div>
-            </div>
-
-            {/* ACTION BUTTONS CONTAINER */}
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-              
-              {/* TROCAR SENHA: ALWAYS OUTSIDE THE SANDWICH (MOBILE & DESKTOP) */}
-              <button
-                onClick={() => router.push("/change-password")}
-                className="flex items-center justify-center gap-1.5 h-9 w-9 sm:w-auto sm:px-3.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-blue-700 dark:hover:text-blue-400 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl transition-all shadow-2xs active:scale-95 shrink-0"
-                title="Alterar Senha"
-                data-tour-id="tour-password"
-              >
-                <LockKeyhole className="w-4 h-4 text-gray-600 dark:text-gray-300 shrink-0" />
-                <span className="hidden sm:inline">Trocar Senha</span>
-              </button>
-
-              {/* MOBILE THEME TOGGLE: ALWAYS OUTSIDE THE SANDWICH (MD:HIDDEN) */}
-              <span className="md:hidden" data-tour-id="tour-theme">
-                <ThemeToggle variant="icon" />
-              </span>
-
-              {/* DESKTOP NAVIGATION (MD AND UP) */}
-              <div className="hidden md:flex items-center gap-2">
-                <button
-                  onClick={() => router.push("/logs")}
-                  className="flex items-center justify-center gap-1.5 h-9 px-3.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-emerald-700 dark:hover:text-emerald-400 bg-gray-50 dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-gray-200 dark:border-gray-700 rounded-xl transition-all"
-                >
-                  <Clock className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  Histórico & Ranking
-                </button>
-
-                <button
-                  onClick={() => router.push("/calendario")}
-                  className="flex items-center justify-center gap-1.5 h-9 px-3.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-blue-700 dark:hover:text-blue-400 bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-gray-200 dark:border-gray-700 rounded-xl transition-all"
-                >
-                  <Globe className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
-                  Painel Público
-                </button>
-
-                {user.role === "professor" && (
-                  <button
-                    onClick={() => setShowTour(true)}
-                    className="flex items-center justify-center gap-1.5 h-9 px-3.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:text-sky-700 dark:hover:text-sky-400 bg-gray-50 dark:bg-gray-800 hover:bg-sky-50 dark:hover:bg-sky-950/40 border border-gray-200 dark:border-gray-700 rounded-xl transition-all"
-                    title="Reiniciar tour guiado"
-                  >
-                    <HelpCircle className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0" />
-                    Tour Guiado
-                  </button>
-                )}
-
-                {user.role === "admin" && (
-                  <button
-                    onClick={() => router.push("/admin")}
-                    className="flex items-center justify-center gap-1.5 h-9 px-3.5 text-xs font-bold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 border border-amber-200 dark:border-amber-800 rounded-xl transition-all shadow-xs"
-                  >
-                    <ShieldAlert className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                    Painel do Coordenador
-                  </button>
-                )}
-
-                {/* DESKTOP THEME TOGGLE */}
-                <span data-tour-id="tour-theme" className="inline-flex">
-                  <ThemeToggle variant="icon" />
-                </span>
-
-                <button
-                  onClick={handleLogout}
-                  className="h-9 px-3 text-red-500 hover:text-red-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-colors text-xs font-bold flex items-center justify-center gap-1.5"
-                  title="Sair"
-                >
-                  <LogOut className="w-4 h-4 shrink-0" />
-                  <span>Sair</span>
-                </button>
-              </div>
-
-              {/* MOBILE HAMBURGER BUTTON (MD:HIDDEN) */}
-              <button
-                type="button"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={`md:hidden h-9 w-9 flex items-center justify-center rounded-xl border transition-all active:scale-95 shrink-0 ${
-                  isMobileMenuOpen
-                    ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800"
-                    : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                }`}
-                aria-label="Abrir menu de navegação"
-              >
-                {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* MOBILE SLIDE-DOWN DRAWER / SANDWICH MENU */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-100 dark:border-gray-800 bg-white/95 dark:bg-gray-900/98 backdrop-blur-md px-4 py-3 space-y-2.5 animate-fade-in shadow-2xl">
-            <div className="pb-2 mb-1 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-              <span className="text-[11px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider">
-                Menu do Sistema
-              </span>
-              <div>{roleBadge()}</div>
-            </div>
-
-            {user.role === "professor" && (
-              <button
-                type="button"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  setShowTour(true);
-                }}
-                className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-800 dark:text-gray-100 hover:text-sky-700 dark:hover:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-950/40 transition-colors border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xs"
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-sky-100 dark:bg-sky-950/80 text-sky-700 dark:text-sky-300 rounded-lg">
-                    <HelpCircle className="w-4 h-4" />
-                  </div>
-                  <span>Tour Guiado (Como usar)</span>
-                </div>
-                <ChevronRight className="w-4 h-4 text-gray-400" />
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                router.push("/logs");
-              }}
-              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-800 dark:text-gray-100 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xs"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 rounded-lg">
-                  <Clock className="w-4 h-4" />
-                </div>
-                <span>Histórico & Ranking Geral</span>
-              </div>
-              <ChevronRight className="w-4 h-4 text-gray-400" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                router.push("/calendario");
-              }}
-              className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-gray-800 dark:text-gray-100 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xs"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 rounded-lg">
-                  <Globe className="w-4 h-4" />
-                </div>
-                <span>Painel Público de Horários</span>
-              </div>
-              <ChevronRight className="w-4 h-4 text-gray-400" />
-            </button>
-
-            {user.role === "admin" && (
-              <button
-                type="button"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  router.push("/admin");
-                }}
-                className="w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold text-amber-900 dark:text-amber-200 bg-amber-50/70 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 transition-colors border border-amber-200 dark:border-amber-700 shadow-xs"
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-amber-500 text-white rounded-lg">
-                    <ShieldAlert className="w-4 h-4" />
-                  </div>
-                  <span>Painel do Coordenador</span>
-                </div>
-                <ChevronRight className="w-4 h-4 text-amber-700 dark:text-amber-400" />
-              </button>
-            )}
-
-            {/* PWA INSTALL BUTTON */}
-            <PwaInstallButton />
-
-            <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  handleLogout();
-                }}
-                className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors border border-red-100 dark:border-red-900/60"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Sair da Conta</span>
-              </button>
-            </div>
-          </div>
-        )}
-      </header>
+      <Header
+        currentRoute="/dashboard"
+        user={user}
+        onLogout={handleLogout}
+        onStartTour={() => setShowTour(true)}
+      />
 
       {/* MAIN BODY */}
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-8 space-y-5 sm:space-y-6">
@@ -924,59 +686,15 @@ export default function DashboardPage() {
         )}
 
         {/* LABORATORY SELECTOR TABS */}
-        <section data-tour-id="tour-labs" className="bg-white dark:bg-gray-900 p-1.5 sm:p-2 rounded-2xl shadow-xs border border-gray-200 dark:border-gray-800 grid grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-2 transition-colors">
-          <button
-            type="button"
-            onClick={() => { setSelectedLab("LabTec"); setSelectedClasses([]); setSelectedShift(null); }}
-            className={`py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-center ${
-              selectedLab === "LabTec"
-                ? "bg-blue-600 text-white shadow-md shadow-blue-500/20 scale-[1.01]"
-                : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
-            }`}
-          >
-            <Monitor className="w-4 h-4 shrink-0" />
-            <span className="truncate">LabTec</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => { setSelectedLab("Manutec"); setSelectedClasses([]); setSelectedShift(null); }}
-            className={`py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-center ${
-              selectedLab === "Manutec"
-                ? "bg-amber-600 text-white shadow-md shadow-amber-500/20 scale-[1.01]"
-                : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
-            }`}
-          >
-            <Wrench className="w-4 h-4 shrink-0" />
-            <span className="truncate">Manutec</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => { setSelectedLab("Robotica"); setSelectedClasses([]); setSelectedShift(null); }}
-            className={`py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-center ${
-              selectedLab === "Robotica"
-                ? "bg-purple-600 text-white shadow-md shadow-purple-500/20 scale-[1.01]"
-                : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
-            }`}
-          >
-            <Bot className="w-4 h-4 shrink-0" />
-            <span className="truncate">Robótica</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => { setSelectedLab("Biologia"); setSelectedClasses([]); setSelectedShift(null); }}
-            className={`py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-center ${
-              selectedLab === "Biologia"
-                ? "bg-emerald-600 text-white shadow-md shadow-emerald-500/20 scale-[1.01]"
-                : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
-            }`}
-          >
-            <FlaskConical className="w-4 h-4 shrink-0" />
-            <span className="truncate">Biologia / Análise</span>
-          </button>
-        </section>
+        <LabSelector
+          selectedLab={selectedLab}
+          onSelectLab={(lab) => {
+            setSelectedLab(lab);
+            setSelectedClasses([]);
+            setSelectedShift(null);
+          }}
+          dataTourId="tour-labs"
+        />
 
         {/* SECRETARY SPECIAL BOOKING CONTROLS */}
         {user.role === "secretario" && (
@@ -1222,14 +940,10 @@ export default function DashboardPage() {
                       {reservationsCount > 0 ? (
                         <>
                           {/* Desktop Badge com texto completo */}
-                          <span className={`hidden sm:inline-flex text-[10px] font-extrabold px-1.5 py-0.5 rounded-full items-center gap-1 ${
+                          <span className={`hidden sm:inline-flex text-[10px] font-extrabold px-1.5 py-0.5 rounded-full items-center gap-1 border ${
                             isSelected
-                              ? "bg-white/20 text-white"
-                              : selectedLab === "LabTec"
-                              ? "bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-200 border border-blue-200 dark:border-blue-700/60"
-                              : selectedLab === "Manutec"
-                              ? "bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-700/60"
-                              : "bg-purple-100 dark:bg-purple-900/60 text-purple-800 dark:text-purple-200 border border-purple-200 dark:border-purple-700/60"
+                              ? "bg-white/20 text-white border-transparent"
+                              : getLabBadgeClass(selectedLab)
                           }`}>
                             <span className="w-1 h-1 rounded-full bg-current"></span>
                             {reservationsCount} {reservationsCount === 1 ? "reserva" : "reservas"}
@@ -1239,11 +953,7 @@ export default function DashboardPage() {
                           <span className={`sm:hidden w-1.5 h-1.5 rounded-full ${
                             isSelected
                               ? "bg-white"
-                              : selectedLab === "LabTec"
-                              ? "bg-blue-500"
-                              : selectedLab === "Manutec"
-                              ? "bg-amber-500"
-                              : "bg-purple-500"
+                              : getLabDotClass(selectedLab)
                           }`} />
                         </>
                       ) : (
@@ -1259,73 +969,21 @@ export default function DashboardPage() {
 
         {/* PROFESSOR WEEKLY QUOTA WIDGET */}
         {(user.role === "professor" || (user.role === "secretario" && targetProfessorName.trim())) && (
-          <section className="bg-white dark:bg-gray-900 rounded-3xl p-5 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-800 transition-colors">
-            <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    {usePerLabQuota ? `Cota Semanal - ${selectedLab}` : "Cota Semanal Global"}
-                  </span>
-                  {weeklyUsage.isCustomQuota && (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                      ⭐ Cota Personalizada
-                    </span>
-                  )}
-                  <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-400">
-                    (Semana: {weeklyUsage.weekStartFormatted} a {weeklyUsage.weekEndFormatted})
-                  </span>
-                </div>
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white">
-                  {user.role === "secretario"
-                    ? `Uso do(a) Prof. ${effectiveProfName} ${usePerLabQuota ? `no ${selectedLab}` : ""}`
-                    : usePerLabQuota
-                    ? `Seu Limite no ${selectedLab}`
-                    : "Seu Limite Semanal"}
-                </h3>
-              </div>
-
-              <div className="flex flex-col sm:items-end gap-1 min-w-[200px]">
-                <div className="flex items-center justify-between sm:justify-end gap-3 text-xs font-bold">
-                  <span className="text-gray-500 dark:text-gray-400">Aulas Utilizadas:</span>
-                  <span
-                    className={`text-sm ${
-                      weeklyUsage.used >= weeklyUsage.maxLimit
-                        ? "text-red-600 dark:text-red-400 font-extrabold"
-                        : weeklyUsage.used >= weeklyUsage.maxLimit - 1
-                        ? "text-amber-600 dark:text-amber-400"
-                        : "text-emerald-600 dark:text-emerald-400"
-                    }`}
-                  >
-                    {weeklyUsage.used} / {weeklyUsage.maxLimit}
-                  </span>
-                </div>
-
-                {/* PROGRESS BAR */}
-                <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-3 overflow-hidden p-0.5 border border-gray-200 dark:border-gray-700">
-                  <div
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      weeklyUsage.used >= weeklyUsage.maxLimit
-                        ? "bg-red-500"
-                        : weeklyUsage.used >= weeklyUsage.maxLimit - 1
-                        ? "bg-amber-500"
-                        : "bg-emerald-500"
-                    }`}
-                    style={{ width: `${Math.min(100, (weeklyUsage.used / weeklyUsage.maxLimit) * 100)}%` }}
-                  />
-                </div>
-
-                {weeklyUsage.used >= weeklyUsage.maxLimit ? (
-                  <p className="text-[11px] text-red-600 dark:text-red-400 font-bold flex items-center gap-1">
-                    <AlertCircle className="w-3.5 h-3.5" /> Limite semanal {usePerLabQuota ? `no ${selectedLab}` : ""} atingido!
-                  </p>
-                ) : (
-                  <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium">
-                    {weeklyUsage.maxLimit - weeklyUsage.used} {weeklyUsage.maxLimit - weeklyUsage.used === 1 ? "aula disponível" : "aulas disponíveis"} {usePerLabQuota ? `no ${selectedLab}` : ""}
-                  </p>
-                )}
-              </div>
-            </div>
-          </section>
+          <QuotaCard
+            used={weeklyUsage.used}
+            total={weeklyUsage.maxLimit}
+            label={usePerLabQuota ? `Cota Semanal - ${selectedLab}` : "Cota Semanal Global"}
+            title={
+              user.role === "secretario"
+                ? `Uso do(a) Prof. ${effectiveProfName} ${usePerLabQuota ? `no ${selectedLab}` : ""}`
+                : usePerLabQuota
+                ? `Seu Limite no ${selectedLab}`
+                : "Seu Limite Semanal"
+            }
+            periodLabel={`Semana: ${weeklyUsage.weekStartFormatted} a ${weeklyUsage.weekEndFormatted}`}
+            isCustomQuota={weeklyUsage.isCustomQuota}
+            labName={usePerLabQuota ? selectedLab : undefined}
+          />
         )}
 
         {/* TIME SLOTS GRID FOR THE SELECTED DAY */}
