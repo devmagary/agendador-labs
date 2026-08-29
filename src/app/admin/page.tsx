@@ -123,7 +123,8 @@ export default function AdminPage() {
       if (
         labQuotasInput.LabTec !== savedLabQuotas.LabTec ||
         labQuotasInput.Manutec !== savedLabQuotas.Manutec ||
-        labQuotasInput.Robotica !== savedLabQuotas.Robotica
+        labQuotasInput.Robotica !== savedLabQuotas.Robotica ||
+        labQuotasInput.Biologia !== savedLabQuotas.Biologia
       ) return true;
     } else {
       if (weeklyQuotaInput !== savedWeeklyQuota) return true;
@@ -790,7 +791,7 @@ export default function AdminPage() {
                     Ativo agora:{" "}
                     <strong className="text-gray-900 dark:text-white font-bold">
                       {savedUsePerLabQuota
-                        ? `Cotas Isoladas (LabTec: ${savedLabQuotas.LabTec}, Manutec: ${savedLabQuotas.Manutec}, Robótica: ${savedLabQuotas.Robotica} aulas/sem)`
+                        ? `Cotas Isoladas (LabTec: ${savedLabQuotas.LabTec}, Manutec: ${savedLabQuotas.Manutec}, Robótica: ${savedLabQuotas.Robotica}, Biologia: ${savedLabQuotas.Biologia} aulas/sem)`
                         : `${savedWeeklyQuota} aulas/semana (Global)`}
                     </strong>
                   </span>
