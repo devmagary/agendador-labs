@@ -65,9 +65,16 @@ export async function POST(request: Request) {
     } catch (error) {
       if (error instanceof AdminConfigError) {
         console.error("[reset-password] Firebase Admin não configurado:", error.message);
+        const friendlyReason = error.message.includes("não corresponde")
+          ? "O projeto do Firebase Admin não corresponde ao projeto do app."
+          : error.message.includes("Variáveis ausentes")
+            ? `Configuração incompleta: ${error.message
+                .replace("Variáveis ausentes: ", "")
+                .replace(/\.$/, "")}.`
+            : "A chave privada do Firebase Admin é inválida.";
         return json(
           {
-            error: "Serviço de redefinição indisponível no momento.",
+            error: `Serviço de redefinição indisponível. ${friendlyReason}`,
             code: "NOT_CONFIGURED",
           },
           503

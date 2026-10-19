@@ -29,10 +29,26 @@ interface AdminEnvironment {
   privateKey: string;
 }
 
+/**
+ * Normaliza valores colados na Vercel: remove espaços e aspas externas
+ * (comuns ao copiar o valor de um JSON/arquivo .env).
+ */
+function cleanEnvValue(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1).trim();
+  }
+  return trimmed;
+}
+
 function readAdminEnvironment(): AdminEnvironment {
-  const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID?.trim();
-  const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL?.trim();
-  const rawPrivateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
+  const projectId = cleanEnvValue(process.env.FIREBASE_ADMIN_PROJECT_ID);
+  const clientEmail = cleanEnvValue(process.env.FIREBASE_ADMIN_CLIENT_EMAIL);
+  const rawPrivateKey = cleanEnvValue(process.env.FIREBASE_ADMIN_PRIVATE_KEY);
   const privateKey = rawPrivateKey
     ? rawPrivateKey.replace(/\\n/g, "\n").replace(/\r\n/g, "\n").trim()
     : "";
