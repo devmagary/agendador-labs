@@ -237,6 +237,7 @@ FIREBASE_ADMIN_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE K
 4. Produção (Vercel): **Project Settings → Environment Variables** (Production/Preview) e faça **redeploy**. Na private key, use `\n`; o código normaliza as quebras de linha.
 5. `next.config.ts` já declara `serverExternalPackages: ["firebase-admin"]` para o runtime Node.
 6. O `FIREBASE_ADMIN_PROJECT_ID` deve ser igual ao `NEXT_PUBLIC_FIREBASE_PROJECT_ID` do app.
+7. **Compatibilidade:** o projeto usa `firebase-admin@13.x` (Node >=18). A linha 14.x exige Node >=22; em projetos Vercel configurados com Node 18/20 a função cai com HTTP 500. Se for atualizar para 14.x, ajuste o Node do projeto para 22.x.
 
 ### 6.4 Segurança
 
