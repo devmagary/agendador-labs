@@ -10,6 +10,10 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+  {
+    // Arquivos gerados pelo Next/TypeScript não devem ser lintados.
+    ignores: [".next/**", "node_modules/**", "next-env.d.ts", "tsconfig.tsbuildinfo"],
+  },
   ...compat.config({
     extends: ["next/core-web-vitals", "next/typescript"],
   }),

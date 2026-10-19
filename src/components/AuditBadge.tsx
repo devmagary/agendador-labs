@@ -11,6 +11,7 @@ import {
   BookOpen,
   Lock,
   CheckCircle2,
+  KeyRound,
   LucideIcon,
 } from "lucide-react";
 
@@ -126,6 +127,14 @@ const ACTION_CONFIGS: Record<string, AuditActionMeta> = {
     iconBgClass:
       "bg-purple-50 dark:bg-purple-950/80 border-purple-100 dark:border-purple-800 text-purple-600 dark:text-purple-400",
     icon: ShieldAlert,
+  },
+  password_reset: {
+    label: "Senha Redefinida",
+    badgeClass:
+      "bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800",
+    iconBgClass:
+      "bg-rose-50 dark:bg-rose-950/80 border-rose-100 dark:border-rose-800 text-rose-600 dark:text-rose-400",
+    icon: KeyRound,
   },
   secretaria: {
     label: "Secretaria",

@@ -172,6 +172,8 @@ NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=seu_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=seu_app_id
 ```
 
+> A funcionalidade de redefinição de senha pela Coordenação/Secretaria também exige as variáveis **`FIREBASE_ADMIN_*`** (apenas servidor). Veja a seção 6.
+
 ---
 
 ## 5. Fluxo de Uso e Perfis
@@ -189,3 +191,80 @@ NEXT_PUBLIC_FIREBASE_APP_ID=seu_app_id
 4. **Painel Público (`/calendario`) & Central de Transparência (`/logs`)**:
    - Consulta pública de horários ocupados.
    - Visualização do Ranking Geral de docentes e linha do tempo de agendamentos e cancelamentos.
+
+---
+
+## 6. Redefinição de Senha por Coordenação/Secretaria (sem e-mail)
+
+O AgendaLab **não usa e-mail** para redefinir senha. O login é sempre o nome/matrícula, convertido internamente em `<login>@labschool.app` (endereço sintético). Por isso o "Redefinir senha" por e-mail do Firebase não se aplica. A redefinição é feita pelo Coordenador ou pela Secretaria em uma tela própria (`/senhas`), sem autoatendimento.
+
+### 6.1 Quem pode redefinir
+
+| Quem executa | Pode redefinir |
+|---|---|
+| Coordenador (`admin`) | professores e secretarias |
+| Secretaria (`secretario`) | somente professores |
+| Professor | — |
+
+- Contas de Coordenador/Admin **não** são redefinidas pela tela; o próprio usuário usa "Trocar Senha" ou o procedimento manual da seção 6.5.
+- O usuário alvo precisa ter concluído o primeiro acesso (documento em `users` **e** conta no Firebase Auth). Quem ainda está só em `allowed_users` usa a senha padrão no primeiro acesso.
+- Staff com `mustChangePassword: true` (senha padrão pendente) precisa trocar a própria senha antes de redefinir a de terceiros.
+
+### 6.2 Como usar
+
+1. Entre como Coordenador ou Secretaria.
+2. Abra **"Senhas"** no menu (no painel do coordenador também há o atalho "Redefinir senhas").
+3. Busque o usuário, clique em **"Redefinir senha"** e confirme.
+4. Repasse ao usuário o **login** e a **senha temporária `123456`** exibidos na tela.
+5. No próximo acesso, o sistema obriga a criação de uma nova senha em `/change-password`.
+
+O UID, o perfil, as reservas e o histórico do usuário são preservados. A ação é registrada no Histórico & Ranking (`/logs`, ação `password_reset`) e as sessões antigas são revogadas no próximo refresh de token.
+
+### 6.3 Configuração da service account (obrigatória)
+
+A redefinição usa o **Firebase Admin SDK** no servidor. Sem as credenciais abaixo a rota responde `503` ("Serviço de redefinição indisponível").
+
+1. Firebase Console → **Configurações do projeto → Contas de serviço → Gerar nova chave privada**.
+2. Configure as variáveis **apenas no servidor** (nunca com `NEXT_PUBLIC_`):
+
+```env
+FIREBASE_ADMIN_PROJECT_ID=seu-projeto
+FIREBASE_ADMIN_CLIENT_EMAIL=firebase-adminsdk-xxxxx@seu-projeto.iam.gserviceaccount.com
+FIREBASE_ADMIN_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+```
+
+3. Desenvolvimento: coloque no `.env.local` (ignorado pelo Git) e reinicie `npm run dev`.
+4. Produção (Vercel): **Project Settings → Environment Variables** (Production/Preview) e faça **redeploy**. Na private key, use `\n`; o código normaliza as quebras de linha.
+5. `next.config.ts` já declara `serverExternalPackages: ["firebase-admin"]` para o runtime Node.
+6. O `FIREBASE_ADMIN_PROJECT_ID` deve ser igual ao `NEXT_PUBLIC_FIREBASE_PROJECT_ID` do app.
+
+### 6.4 Segurança
+
+- A service account tem privilégios administrativos: mantenha a chave somente em variáveis de ambiente, nunca no repositório. O `.gitignore` já cobre `.env*`, `serviceAccount*.json` e `*.pem`.
+- A rota valida o **ID token** do solicitante e o papel no Firestore; a lista exibida no cliente não é confiável.
+- O log de auditoria **não** grava a senha temporária nem o login.
+- A senha temporária é a mesma do primeiro acesso e a troca é obrigatória; oriente o usuário a sair de outros dispositivos, pois a sessão já emitida pode durar até cerca de 1 hora.
+- Rate limiting e 2FA são melhorias futuras; o histórico cobre a rastreabilidade.
+
+### 6.5 Procedimento manual (fallback)
+
+Use somente quando a tela não puder ser usada: **admin bloqueado**, **conta órfã** (documento em `users` sem conta Auth) ou Admin SDK ainda não configurado.
+
+1. Firebase Console → **Authentication → Users**; localize `<login>@labschool.app`.
+2. **Exclua a conta** (não apenas desative).
+3. No Firestore, remova o documento antigo `users/<uid_antigo>` (no `/admin`, "Excluir Vínculo"; para admin, direto no Console).
+4. Recrie o pré-cadastro `allowed_users/<login>` com `name` e `role` corretos (no `/admin`, "Autorizar Novo Usuário").
+5. O usuário entra com o mesmo login e a senha `123456`; o app recria a conta e exige a troca.
+
+**Atenção:** esse procedimento troca o UID. Reservas antigas continuam contando na cota pelo nome, mas o professor perde o cancelamento das reservas antigas (apenas admin/secretaria conseguem cancelar). Por isso a tela `/senhas` é o caminho recomendado.
+
+### 6.6 Diagnóstico rápido
+
+| Sintoma | Causa provável |
+|---|---|
+| `503` na redefinição | Variáveis `FIREBASE_ADMIN_*` ausentes ou projeto divergente |
+| `401` | Sessão expirada/revogada; entrar novamente |
+| `403` | Papel sem permissão, conta `admin` como alvo ou senha padrão pendente |
+| `404` | Usuário sem documento em `users` ou sem conta Auth (conta órfã) |
+| `409` | Conta desativada no Firebase Auth; reativar no Console |
+| "Acesso não autorizado" no login | Pré-cadastro `allowed_users` ausente após o reset manual |

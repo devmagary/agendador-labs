@@ -34,7 +34,7 @@ interface LogEntry {
   id: string;
   professorName: string;
   professorId?: string;
-  action: "create" | "cancel" | "settings_update" | "user_authorization_create" | "user_authorization_bulk" | "user_authorization_revoke" | "user_delete" | string;
+  action: "create" | "cancel" | "settings_update" | "user_authorization_create" | "user_authorization_bulk" | "user_authorization_revoke" | "user_delete" | "password_reset" | string;
   performedBy?: {
     uid: string;
     name: string;

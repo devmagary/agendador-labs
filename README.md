@@ -48,6 +48,7 @@ O sistema opera com sincronização em **tempo real** via Firebase Firestore. Qu
 ### ⚡ Importação e Gestão de Usuários
 - Cadastro individual ou importação em lote de listas de professores (a partir de PDFs ou relatórios do SIGEduc).
 - Primeiro acesso seguro com fluxo obrigatório de alteração de senha (`/change-password`).
+- **Redefinição de senha pela Coordenação/Secretaria (sem e-mail):** tela `/senhas` com senha temporária `123456` e troca obrigatória no próximo acesso, preservando UID, reservas e histórico.
 
 ### 📱 PWA (Progressive Web App) & Design System Modular
 - **Instalável como App:** Suporte completo a PWA para Android, iOS e Desktop com manifesto e Service Worker.
@@ -63,7 +64,7 @@ O sistema opera com sincronização em **tempo real** via Firebase Firestore. Qu
 * **PWA:** Service Worker nativo, Web App Manifest.
 * **Manipulação de Planilhas:** SheetJS (`xlsx`).
 * **Datas:** Date-fns com localização `pt-BR`.
-* **Back-end & Banco de Dados:** Firebase Firestore (Real-time NoSQL) e Firebase Authentication.
+* **Back-end & Banco de Dados:** Firebase Firestore (Real-time NoSQL) e Firebase Authentication, com Firebase Admin SDK para redefinição de senha no servidor.
 * **Deploy:** Vercel.
 
 ---

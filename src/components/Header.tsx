@@ -9,6 +9,7 @@ import {
   ShieldAlert,
   Globe,
   HelpCircle,
+  KeyRound,
   LockKeyhole,
   LogOut,
   Menu,
@@ -63,6 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
   const isAuthenticated = Boolean(user);
   const isAdmin = user?.role === "admin";
   const isProfessor = user?.role === "professor";
+  const canManagePasswords = user?.role === "admin" || user?.role === "secretario";
 
   const handleBackClick = () => {
     if (onBack) {
@@ -119,6 +121,12 @@ export const Header: React.FC<HeaderProps> = ({
       return {
         Icon: ShieldAlert,
         bgClass: "bg-amber-600 text-white shadow-amber-500/20",
+      };
+    }
+    if (currentRoute === "/senhas") {
+      return {
+        Icon: KeyRound,
+        bgClass: "bg-rose-600 text-white shadow-rose-500/20",
       };
     }
     return {
@@ -237,6 +245,24 @@ export const Header: React.FC<HeaderProps> = ({
                 >
                   <ShieldAlert className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
                   <span>Painel do Coordenador</span>
+                </button>
+              )}
+
+              {/* Password reset for staff (Coordinator/Secretary) */}
+              {canManagePasswords && (
+                <button
+                  type="button"
+                  onClick={() => router.push("/senhas")}
+                  title="Redefinir senhas de usuários"
+                  aria-label="Redefinir senhas de usuários"
+                  className={`flex items-center justify-center gap-1.5 h-9 px-3.5 text-xs font-bold rounded-xl border transition-all ${
+                    currentRoute === "/senhas"
+                      ? "bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-800 shadow-xs"
+                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-rose-50 dark:hover:bg-rose-950/40 border-gray-200 dark:border-gray-700"
+                  }`}
+                >
+                  <KeyRound className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
+                  <span className="hidden xl:inline">Senhas</span>
                 </button>
               )}
 

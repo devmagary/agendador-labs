@@ -51,8 +51,6 @@ export default function ChangePasswordPage() {
        return;
     }
 
-    const wasFirstAccess = user?.mustChangePassword === true;
-
     try {
       if (!auth.currentUser) throw new Error("Não autenticado");
       
@@ -67,8 +65,10 @@ export default function ChangePasswordPage() {
       // Refresh Auth Context
       await refreshUser();
 
-      // Redireciona para o dashboard (com o parâmetro de tour no primeiro acesso)
-      router.push(wasFirstAccess ? "/dashboard?tour=1" : "/dashboard");
+      // Redireciona para o dashboard (o tour de primeiro acesso é controlado
+      // pelo próprio dashboard via localStorage, sem forçar novamente para
+      // quem apenas redefiniu a senha).
+      router.push("/dashboard");
     } catch {
       setError("Erro ao alterar senha. Talvez você precise sair e entrar novamente.");
     } finally {
@@ -99,7 +99,7 @@ export default function ChangePasswordPage() {
           
           <form onSubmit={handleChange} className="p-8 space-y-6">
             <div className="text-sm text-gray-600 dark:text-gray-200 mb-4 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl text-center">
-              Olá, <strong className="text-gray-900 dark:text-white">{user.name}</strong>.<br/> Como este é o seu primeiro acesso, é obrigatório criar uma nova senha por motivos de segurança.
+              Olá, <strong className="text-gray-900 dark:text-white">{user.name}</strong>.<br/> Por motivos de segurança, é obrigatório definir uma nova senha de acesso neste momento.
             </div>
             
             {error && (

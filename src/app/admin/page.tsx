@@ -27,6 +27,7 @@ import {
   RotateCcw, 
   Edit3, 
   FlaskConical, 
+  KeyRound,
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { RoleBadge } from "@/components/RoleBadge";
@@ -1574,9 +1575,20 @@ export default function AdminPage() {
                        <h2 className="text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-widest flex items-center gap-2">
                          <Users className="w-4 h-4 text-green-500 dark:text-emerald-400" /> Usuários Ativos na Escola
                        </h2>
-                       <span className="text-xs font-bold text-emerald-600 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/90 px-2.5 py-1 rounded-full border border-emerald-100 dark:border-emerald-800">
-                         {registeredUsers.length} ativos
-                       </span>
+                       <div className="flex items-center gap-2">
+                         <button
+                           type="button"
+                           onClick={() => router.push("/senhas")}
+                           title="Redefinir senhas de usuários"
+                           className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-50 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 font-bold text-[11px] transition-colors"
+                         >
+                           <KeyRound className="w-3.5 h-3.5" />
+                           <span className="hidden sm:inline">Redefinir senhas</span>
+                         </button>
+                         <span className="text-xs font-bold text-emerald-600 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/90 px-2.5 py-1 rounded-full border border-emerald-100 dark:border-emerald-800">
+                           {registeredUsers.length} ativos
+                         </span>
+                       </div>
                     </div>
                     <div className="p-0">
                         {registeredUsers.length === 0 ? (

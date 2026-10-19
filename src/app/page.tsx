@@ -147,7 +147,7 @@ export default function LoginPage() {
               className="text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-800 w-full p-3 border border-gray-300 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
               placeholder="Sua senha"
             />
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Dica: No primeiro acesso, use a senha padrão &quot;123456&quot;</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Dica: No primeiro acesso ou após uma redefinição, use a senha padrão &quot;123456&quot;</p>
           </div>
 
           <button

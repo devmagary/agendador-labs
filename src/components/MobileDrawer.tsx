@@ -9,6 +9,7 @@ import {
   Clock,
   Globe,
   HelpCircle,
+  KeyRound,
   LockKeyhole,
   LogOut,
   ChevronRight,
@@ -72,6 +73,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
   const isAuthenticated = Boolean(user);
   const isAdmin = user?.role === "admin";
   const isProfessor = user?.role === "professor";
+  const canManagePasswords = user?.role === "admin" || user?.role === "secretario";
 
   return (
     <div
@@ -142,6 +144,33 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
               <span>Painel do Coordenador</span>
             </div>
             <ChevronRight className="w-4 h-4 text-amber-700 dark:text-amber-400" />
+          </button>
+        )}
+
+        {/* Password reset for staff (Coordinator/Secretary) */}
+        {canManagePasswords && (
+          <button
+            type="button"
+            onClick={() => handleNavigation("/senhas")}
+            className={`w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold transition-all border ${
+              currentRoute === "/senhas"
+                ? "bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-800 shadow-xs"
+                : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-rose-50 dark:hover:bg-rose-950/40 border-gray-200 dark:border-gray-700"
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              <div
+                className={`p-2 rounded-lg ${
+                  currentRoute === "/senhas"
+                    ? "bg-rose-600 text-white"
+                    : "bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300"
+                }`}
+              >
+                <KeyRound className="w-4 h-4" />
+              </div>
+              <span>Redefinir Senhas de Usuários</span>
+            </div>
+            <ChevronRight className="w-4 h-4 text-gray-400" />
           </button>
         )}
 
