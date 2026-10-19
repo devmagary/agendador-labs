@@ -8,14 +8,31 @@ import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { CalendarClock } from "lucide-react";
+import { CalendarClock, X, Info, MessageCircle } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+
+// WhatsApp do Prof. Thauan Silva para solicitações de redefinição de senha
+const WHATSAPP_THAUAN_NUMBER = "5575998645730";
+
+const buildWhatsAppLink = (username: string) => {
+  const name = username.trim();
+  const message = [
+    "Olá, Prof. Thauan Silva!",
+    "",
+    "Esqueci minha senha de acesso ao sistema de Agendamento de Labs e gostaria de solicitar a redefinição.",
+    name ? `Meu usuário/matrícula: ${name}` : "Meu usuário/matrícula: (informar)",
+    "",
+    "Desde já, obrigado(a)!",
+  ].join("\n");
+  return `https://wa.me/${WHATSAPP_THAUAN_NUMBER}?text=${encodeURIComponent(message)}`;
+};
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loadingAction, setLoadingAction] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -148,6 +165,15 @@ export default function LoginPage() {
               placeholder="Sua senha"
             />
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Dica: No primeiro acesso ou após uma redefinição, use a senha padrão &quot;123456&quot;</p>
+            <div className="text-right">
+              <button
+                type="button"
+                onClick={() => setShowForgotPassword(true)}
+                className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-colors"
+              >
+                Esqueci minha senha
+              </button>
+            </div>
           </div>
 
           <button
@@ -160,6 +186,90 @@ export default function LoginPage() {
           </button>
         </form>
       </div>
+
+      {showForgotPassword && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          onClick={() => setShowForgotPassword(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="forgot-password-title"
+            className="w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 p-6 transition-colors"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-950/60 flex items-center justify-center shrink-0">
+                  <Info className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h2 id="forgot-password-title" className="text-lg font-bold text-gray-900 dark:text-white">
+                  Esqueci minha senha
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowForgotPassword(false)}
+                aria-label="Fechar"
+                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+              Para recuperar ou redefinir sua senha, entre em contato com o professor responsável ou procure a Recepção da Secretária.
+            </p>
+
+            <ul className="mt-4 space-y-3">
+              <li className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/60 rounded-xl p-3">
+                <span className="mt-0.5 font-bold text-blue-600 dark:text-blue-400">1.</span>
+                <span>
+                  Contacte o{" "}
+                  <a
+                    href={buildWhatsAppLink(username)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold text-green-600 dark:text-green-400 underline decoration-green-500/50 underline-offset-2 hover:text-green-700 dark:hover:text-green-300 hover:decoration-green-500 transition-colors"
+                    title="Enviar mensagem pelo WhatsApp"
+                  >
+                    Prof. Thauan Silva
+                  </a>
+                  {" "}
+                  <span className="text-xs text-gray-500 dark:text-gray-400">(abre o WhatsApp com a mensagem de solicitação)</span>
+                </span>
+              </li>
+              <li className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/60 rounded-xl p-3">
+                <span className="mt-0.5 font-bold text-blue-600 dark:text-blue-400">2.</span>
+                <span>Ou vá até a <strong className="text-gray-900 dark:text-white">Recepção da Secretária</strong> para resetar a senha</span>
+              </li>
+            </ul>
+
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-4">
+              Após a redefinição, utilize a senha temporária padrão &quot;123456&quot; e crie uma nova senha no primeiro acesso.
+            </p>
+
+            <a
+              href={buildWhatsAppLink(username)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-6 w-full py-3 bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+            >
+              <MessageCircle className="w-5 h-5" />
+              Solicitar redefinição pelo WhatsApp
+            </a>
+
+            <button
+              type="button"
+              onClick={() => setShowForgotPassword(false)}
+              className="mt-3 w-full py-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-[0.98] text-gray-700 dark:text-gray-200 font-bold rounded-xl transition-all"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
