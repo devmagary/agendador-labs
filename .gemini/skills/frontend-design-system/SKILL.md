@@ -115,7 +115,7 @@ A instituição possui 6 laboratórios padronizados. Toda a estilização e dado
 | **`Manutec`** | Laboratório de Manutenção e Suporte | Manutec | `Wrench` | Âmbar (`amber-600`) | `bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800` |
 | **`Robotica`**| Laboratório de Robótica Educacional | Robótica | `Bot` | Roxo (`purple-600`) | `bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-800` |
 | **`Biologia`**| Laboratório de Biologia / Análise Clínica | Biologia / Análise | `FlaskConical` | Esmeralda (`emerald-600`) | `bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800` |
-| **`Nutricao`**| Laboratório de Nutrição | Nutrição | `Salad` | Rosa (`rose-600`) | `bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800` |
+| **`Nutricao`**| Laboratório de Nutrição | Nutrição | `Salad` | Verde-limão (`lime-600`) | `bg-lime-100 dark:bg-lime-950/80 text-lime-800 dark:text-lime-300 border-lime-200 dark:border-lime-800` |
 | **`SegurancaTrabalho`**| Laboratório de Segurança do Trabalho | Segurança | `HardHat` | Vermelho (`red-600`) | `bg-red-100 dark:bg-red-950/80 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800` |
 
 ### Funções Utilitárias Disponíveis
