@@ -15,19 +15,16 @@ import {
   Medal,
   Award,
   Search,
-  Monitor,
-  Wrench,
-  Bot,
   Tv,
   BarChart3,
   Flame,
   Users,
   Download,
-  FlaskConical,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
 import { AuditBadge, getAuditMeta } from "@/components/AuditBadge";
+import { LABORATORIES, type Laboratory } from "@/constants/laboratories";
 import * as XLSX from "xlsx";
 
 interface LogEntry {
@@ -59,7 +56,7 @@ interface ScheduleDoc {
   id: string;
   professorId?: string;
   professorName: string;
-  laboratory: "LabTec" | "Manutec" | "Robotica" | "Biologia";
+  laboratory: Laboratory;
   date: string;
   shift: string;
   classHours: number[];
@@ -70,10 +67,7 @@ interface ProfessorRank {
   name: string;
   totalHours: number;
   totalReservations: number;
-  labTecHours: number;
-  manutecHours: number;
-  roboticaHours: number;
-  biologiaHours: number;
+  labHours: Record<string, number>;
   tvCount: number;
 }
 
@@ -156,10 +150,7 @@ export default function LogsPage() {
         professor: string;
         totalHours: number;
         totalBookings: number;
-        labTecHours: number;
-        manutecHours: number;
-        roboticaHours: number;
-        biologiaHours: number;
+        labHours: Record<string, number>;
         tvBookings: number;
       }>();
 
@@ -171,19 +162,13 @@ export default function LogsPage() {
           professor: profName,
           totalHours: 0,
           totalBookings: 0,
-          labTecHours: 0,
-          manutecHours: 0,
-          roboticaHours: 0,
-          biologiaHours: 0,
+          labHours: {},
           tvBookings: 0,
         };
 
         stat.totalHours += hoursCount;
         stat.totalBookings += 1;
-        if (s.laboratory === "LabTec") stat.labTecHours += hoursCount;
-        else if (s.laboratory === "Manutec") stat.manutecHours += hoursCount;
-        else if (s.laboratory === "Robotica") stat.roboticaHours += hoursCount;
-        else if (s.laboratory === "Biologia") stat.biologiaHours += hoursCount;
+        stat.labHours[s.laboratory] = (stat.labHours[s.laboratory] || 0) + hoursCount;
 
         if (s.hasTv) stat.tvBookings += 1;
 
@@ -196,16 +181,20 @@ export default function LogsPage() {
         return b.totalBookings - a.totalBookings;
       });
 
-      const profStatsData = sortedProfStats.map((p) => ({
-        "Professor": p.professor,
-        "Total de Aulas (Horas)": p.totalHours,
-        "Total de Agendamentos (Reservas)": p.totalBookings,
-        "Aulas no LabTec": p.labTecHours,
-        "Aulas no Manutec": p.manutecHours,
-        "Aulas na Robótica": p.roboticaHours,
-        "Aulas na Biologia": p.biologiaHours,
-        "Agendamentos c/ TV": p.tvBookings,
-      }));
+      const profStatsData = sortedProfStats.map((p) => {
+        const row: Record<string, string | number> = {
+          "Professor": p.professor,
+          "Total de Aulas (Horas)": p.totalHours,
+          "Total de Agendamentos (Reservas)": p.totalBookings,
+        };
+
+        LABORATORIES.forEach((lab) => {
+          row[`Aulas em ${lab.shortName}`] = p.labHours[lab.id] || 0;
+        });
+
+        row["Agendamentos c/ TV"] = p.tvBookings;
+        return row;
+      });
 
       // Sheet 1: "Total por Professor" (Consolidated count requested)
       const wsProfStats = XLSX.utils.json_to_sheet(profStatsData);
@@ -213,10 +202,7 @@ export default function LogsPage() {
         { wch: 26 }, // Professor
         { wch: 22 }, // Total de Aulas (Horas)
         { wch: 30 }, // Total de Agendamentos (Reservas)
-        { wch: 16 }, // Aulas no LabTec
-        { wch: 16 }, // Aulas no Manutec
-        { wch: 18 }, // Aulas na Robótica
-        { wch: 18 }, // Aulas na Biologia
+        ...LABORATORIES.map(() => ({ wch: 18 })), // Aulas por laboratório
         { wch: 18 }, // Agendamentos c/ TV
       ];
       XLSX.utils.book_append_sheet(wb, wsProfStats, "Total por Professor");
@@ -313,19 +299,13 @@ export default function LogsPage() {
         name: rawName,
         totalHours: 0,
         totalReservations: 0,
-        labTecHours: 0,
-        manutecHours: 0,
-        roboticaHours: 0,
-        biologiaHours: 0,
+        labHours: {},
         tvCount: 0,
       };
 
       existing.totalHours += hoursCount;
       existing.totalReservations += 1;
-      if (s.laboratory === "LabTec") existing.labTecHours += hoursCount;
-      else if (s.laboratory === "Manutec") existing.manutecHours += hoursCount;
-      else if (s.laboratory === "Robotica") existing.roboticaHours += hoursCount;
-      else if (s.laboratory === "Biologia") existing.biologiaHours += hoursCount;
+      existing.labHours[s.laboratory] = (existing.labHours[s.laboratory] || 0) + hoursCount;
 
       if (s.hasTv) existing.tvCount += 1;
 
@@ -339,14 +319,18 @@ export default function LogsPage() {
       if (!rawName) return;
 
       if (!map.has(rawName)) {
+        const matchedLab = LABORATORIES.find((lab) => {
+          const shortBase = lab.shortName.split(" / ")[0];
+          return l.details.includes(lab.id) || l.details.includes(shortBase);
+        });
+        const labHours: Record<string, number> = {};
+        if (matchedLab) labHours[matchedLab.id] = 1;
+
         map.set(rawName, {
           name: rawName,
           totalHours: 1,
           totalReservations: 1,
-          labTecHours: l.details.includes("LabTec") ? 1 : 0,
-          manutecHours: l.details.includes("Manutec") ? 1 : 0,
-          roboticaHours: l.details.includes("Robotica") || l.details.includes("Robótica") ? 1 : 0,
-          biologiaHours: l.details.includes("Biologia") ? 1 : 0,
+          labHours,
           tvCount: l.details.includes("TV") ? 1 : 0,
         });
       }
@@ -742,26 +726,20 @@ export default function LogsPage() {
                             {/* LABS DISTRIBUTION */}
                             <td className="px-6 py-4">
                               <div className="flex flex-wrap items-center gap-1.5">
-                                {p.labTecHours > 0 && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-50 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800">
-                                    <Monitor className="w-3 h-3" /> LabTec: {p.labTecHours} {p.labTecHours === 1 ? "aula" : "aulas"}
-                                  </span>
-                                )}
-                                {p.manutecHours > 0 && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-                                    <Wrench className="w-3 h-3" /> Manutec: {p.manutecHours} {p.manutecHours === 1 ? "aula" : "aulas"}
-                                  </span>
-                                )}
-                                {p.roboticaHours > 0 && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-purple-50 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 border border-purple-100 dark:border-purple-800">
-                                    <Bot className="w-3 h-3" /> Robótica: {p.roboticaHours} {p.roboticaHours === 1 ? "aula" : "aulas"}
-                                  </span>
-                                )}
-                                {p.biologiaHours > 0 && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                                    <FlaskConical className="w-3 h-3" /> Biologia: {p.biologiaHours} {p.biologiaHours === 1 ? "aula" : "aulas"}
-                                  </span>
-                                )}
+                                {LABORATORIES.map((lab) => {
+                                  const hours = p.labHours[lab.id] || 0;
+                                  if (hours === 0) return null;
+                                  const Icon = lab.icon;
+
+                                  return (
+                                    <span
+                                      key={lab.id}
+                                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold border ${lab.color.badge}`}
+                                    >
+                                      <Icon className="w-3 h-3" /> {lab.shortName}: {hours} {hours === 1 ? "aula" : "aulas"}
+                                    </span>
+                                  );
+                                })}
                               </div>
                             </td>
 
