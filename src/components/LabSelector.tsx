@@ -29,7 +29,7 @@ export const LabSelector: React.FC<LabSelectorProps> = ({
     return (
       <section
         data-tour-id={dataTourId}
-        className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 ${className}`}
+        className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 ${className}`}
       >
         {LABORATORIES.map((lab) => {
           const isSelected = selectedLab === lab.id;
@@ -138,7 +138,7 @@ export const LabSelector: React.FC<LabSelectorProps> = ({
   return (
     <section
       data-tour-id={dataTourId}
-      className={`bg-white dark:bg-gray-900 p-1.5 sm:p-2 rounded-2xl shadow-xs border border-gray-200 dark:border-gray-800 grid grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-2 transition-colors ${className}`}
+      className={`bg-white dark:bg-gray-900 p-1.5 sm:p-2 rounded-2xl shadow-xs border border-gray-200 dark:border-gray-800 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1 sm:gap-2 transition-colors ${className}`}
     >
       {LABORATORIES.map((lab) => {
         const isSelected = selectedLab === lab.id;
