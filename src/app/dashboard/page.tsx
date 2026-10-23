@@ -41,9 +41,8 @@ import { LabSelector } from "@/components/LabSelector";
 import { QuotaCard } from "@/components/QuotaCard";
 import { Tour } from "@/components/Tour";
 import type { TourStep } from "@/components/Tour";
-import { getLabBadgeClass, getLabDotClass } from "@/constants/laboratories";
+import { getLabBadgeClass, getLabConfig, getLabDotClass, type Laboratory } from "@/constants/laboratories";
 
-type Laboratory = "LabTec" | "Manutec" | "Robotica" | "Biologia";
 type Shift = "Matutino" | "Vespertino" | "Noturno";
 
 interface Schedule {
@@ -76,7 +75,7 @@ const PROFESSOR_TOUR_STEPS: TourStep[] = [
     emoji: "🖥️",
     target: "tour-labs",
     description:
-      "Aqui você escolhe o laboratório que deseja reservar: LabTec (Tecnologia), Manutec (Manutenção) ou Robótica.",
+      "Aqui você escolhe o laboratório que deseja reservar: LabTec (Tecnologia), Manutec (Manutenção), Robótica, Biologia, Nutrição ou Segurança do Trabalho.",
   },
   {
     id: "calendar",
@@ -126,6 +125,7 @@ export default function DashboardPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(startOfToday());
   const [currentMonth, setCurrentMonth] = useState<Date>(startOfToday());
   const [selectedLab, setSelectedLab] = useState<Laboratory>("LabTec");
+  const selectedLabLabel = getLabConfig(selectedLab).shortName;
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [monthSchedules, setMonthSchedules] = useState<Schedule[]>([]);
 
@@ -137,6 +137,8 @@ export default function DashboardPage() {
     Manutec: 2,
     Robotica: 2,
     Biologia: 2,
+    Nutricao: 2,
+    SegurancaTrabalho: 2,
   });
   const [hideWeekends, setHideWeekends] = useState<boolean>(false);
   const [secretaryQuotaOverride, setSecretaryQuotaOverride] = useState<boolean>(true);
@@ -200,6 +202,8 @@ export default function DashboardPage() {
             Manutec: Number(data.quotaPerLab.Manutec) || 2,
             Robotica: Number(data.quotaPerLab.Robotica) || 2,
             Biologia: Number(data.quotaPerLab.Biologia) || 2,
+            Nutricao: Number(data.quotaPerLab.Nutricao) || 2,
+            SegurancaTrabalho: Number(data.quotaPerLab.SegurancaTrabalho) || 2,
           });
         }
         if (typeof data.hideWeekends === "boolean") {
@@ -459,11 +463,11 @@ export default function DashboardPage() {
     // Weekly limit validation using dynamic maxLimit (isolated per lab or global)
     const currentMaxLimit = weeklyUsage.maxLimit;
     const totalAfterBooking = weeklyUsage.used + selectedClasses.length;
-    const labNameStr = usePerLabQuota ? `no ${selectedLab}` : "em todos os laboratórios";
+    const labNameStr = usePerLabQuota ? `no ${selectedLabLabel}` : "em todos os laboratórios";
 
     if (user.role === "professor" && totalAfterBooking > currentMaxLimit) {
       alert(
-        `Limite Semanal ${usePerLabQuota ? `no ${selectedLab}` : "Global"} Excedido!\n\n` +
+        `Limite Semanal ${usePerLabQuota ? `no ${selectedLabLabel}` : "Global"} Excedido!\n\n` +
         `Cada professor pode agendar no máximo ${currentMaxLimit} ${currentMaxLimit === 1 ? "aula" : "aulas"} por semana ${labNameStr}.\n` +
         `Você já utilizou ${weeklyUsage.used} de ${currentMaxLimit} aulas na semana (${weeklyUsage.weekStartFormatted} a ${weeklyUsage.weekEndFormatted}) e está tentando agendar mais ${selectedClasses.length} ${selectedClasses.length === 1 ? "aula" : "aulas"}.`
       );
@@ -475,10 +479,10 @@ export default function DashboardPage() {
       if (!canOverride) {
         alert(
           secretaryQuotaOverride
-            ? `Limite Semanal ${usePerLabQuota ? `no ${selectedLab}` : ""} Excedido para o Prof. ${finalProfName}!\n\n` +
+            ? `Limite Semanal ${usePerLabQuota ? `no ${selectedLabLabel}` : ""} Excedido para o Prof. ${finalProfName}!\n\n` +
               `O professor já possui ${weeklyUsage.used} de ${currentMaxLimit} aulas agendadas ${labNameStr} nesta semana (${weeklyUsage.weekStartFormatted} a ${weeklyUsage.weekEndFormatted}).\n` +
               `Para liberar essa reserva como exceção, marque a opção "Autorização Especial da Secretaria".`
-            : `Limite Semanal ${usePerLabQuota ? `no ${selectedLab}` : ""} Excedido para o Prof. ${finalProfName}!\n\n` +
+            : `Limite Semanal ${usePerLabQuota ? `no ${selectedLabLabel}` : ""} Excedido para o Prof. ${finalProfName}!\n\n` +
               `O professor já possui ${weeklyUsage.used} de ${currentMaxLimit} aulas agendadas ${labNameStr} nesta semana (${weeklyUsage.weekStartFormatted} a ${weeklyUsage.weekEndFormatted}).\n` +
               `A autorização da secretaria para ultrapassar a cota dos professores está desativada pelo coordenador.`
         );
@@ -509,7 +513,7 @@ export default function DashboardPage() {
         .join(" e ");
       alert(
         `Conflito de Horário para o Professor!\n\n` +
-        `O(a) Prof. ${finalProfName} já possui um agendamento no laboratório "${conflictSchedule.laboratory}" no dia ${format(selectedDate, "dd/MM")} (${selectedShift}) no(s) horário(s): ${conflictHours}.\n` +
+        `O(a) Prof. ${finalProfName} já possui um agendamento no laboratório "${getLabConfig(conflictSchedule.laboratory).shortName}" no dia ${format(selectedDate, "dd/MM")} (${selectedShift}) no(s) horário(s): ${conflictHours}.\n` +
         `Não é permitido agendar laboratórios diferentes no mesmo horário.`
       );
       return;
@@ -540,8 +544,8 @@ export default function DashboardPage() {
       const tvStr = hasTv ? " (com TV 📺)" : " (sem TV)";
 
       const logDetails = isSec
-        ? `(Secretaria) agendou para o Prof. ${finalProfName}${tvStr} no ${selectedLab} para a ${dayOfWeek} no ${hoursStr} no dia ${dateStr}`
-        : `registrou agenda${tvStr} no ${selectedLab} para a ${dayOfWeek} no ${hoursStr} no dia ${dateStr}`;
+        ? `(Secretaria) agendou para o Prof. ${finalProfName}${tvStr} no ${selectedLabLabel} para a ${dayOfWeek} no ${hoursStr} no dia ${dateStr}`
+        : `registrou agenda${tvStr} no ${selectedLabLabel} para a ${dayOfWeek} no ${hoursStr} no dia ${dateStr}`;
 
       await addDoc(collection(db, "logs"), {
         professorId: user.uid,
@@ -782,7 +786,7 @@ export default function DashboardPage() {
               <div className="pt-2 border-t border-purple-200/60 dark:border-purple-800/60 flex flex-wrap items-center justify-between gap-3">
                 <div className="text-xs text-purple-900 dark:text-purple-200 font-semibold flex flex-wrap items-center gap-2">
                   <span>
-                    Cota de <strong>{targetProfessorName}</strong> {usePerLabQuota ? `no ${selectedLab}` : "nesta semana"} ({weeklyUsage.weekStartFormatted} a {weeklyUsage.weekEndFormatted}):{" "}
+                    Cota de <strong>{targetProfessorName}</strong> {usePerLabQuota ? `no ${selectedLabLabel}` : "nesta semana"} ({weeklyUsage.weekStartFormatted} a {weeklyUsage.weekEndFormatted}):{" "}
                   </span>
                   <span className={`px-2 py-0.5 rounded-full font-bold ${
                     weeklyUsage.used >= weeklyUsage.maxLimit ? "bg-red-100 dark:bg-red-950/70 text-red-700 dark:text-red-300" : "bg-purple-200 dark:bg-purple-900/70 text-purple-900 dark:text-purple-200"
@@ -972,17 +976,17 @@ export default function DashboardPage() {
           <QuotaCard
             used={weeklyUsage.used}
             total={weeklyUsage.maxLimit}
-            label={usePerLabQuota ? `Cota Semanal - ${selectedLab}` : "Cota Semanal Global"}
+            label={usePerLabQuota ? `Cota Semanal - ${selectedLabLabel}` : "Cota Semanal Global"}
             title={
               user.role === "secretario"
-                ? `Uso do(a) Prof. ${effectiveProfName} ${usePerLabQuota ? `no ${selectedLab}` : ""}`
+                ? `Uso do(a) Prof. ${effectiveProfName} ${usePerLabQuota ? `no ${selectedLabLabel}` : ""}`
                 : usePerLabQuota
-                ? `Seu Limite no ${selectedLab}`
+                ? `Seu Limite no ${selectedLabLabel}`
                 : "Seu Limite Semanal"
             }
             periodLabel={`Semana: ${weeklyUsage.weekStartFormatted} a ${weeklyUsage.weekEndFormatted}`}
             isCustomQuota={weeklyUsage.isCustomQuota}
-            labName={usePerLabQuota ? selectedLab : undefined}
+            labName={usePerLabQuota ? selectedLabLabel : undefined}
           />
         )}
 
@@ -991,7 +995,7 @@ export default function DashboardPage() {
           <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex flex-wrap justify-between items-center gap-4 bg-gray-50/70 dark:bg-gray-800/60">
             <div>
               <h2 className="text-lg font-bold text-gray-900 dark:text-white uppercase">
-                {selectedLab}{" "}
+                {selectedLabLabel}{" "}
                 <span className="text-gray-500 dark:text-gray-300 font-medium ml-2">
                   — {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
                 </span>
@@ -1121,7 +1125,7 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <h4 className="font-bold text-sm sm:text-base flex items-center gap-2">
-                    <span>{selectedLab}</span>
+                    <span>{selectedLabLabel}</span>
                     <span className="text-blue-400">— {selectedShift}</span>
                   </h4>
                   <p className="text-xs text-gray-300">

@@ -1,6 +1,12 @@
-import { Monitor, Wrench, Bot, FlaskConical, type LucideIcon } from "lucide-react";
+import { Monitor, Wrench, Bot, FlaskConical, Salad, HardHat, type LucideIcon } from "lucide-react";
 
-export type Laboratory = "LabTec" | "Manutec" | "Robotica" | "Biologia";
+export type Laboratory =
+  | "LabTec"
+  | "Manutec"
+  | "Robotica"
+  | "Biologia"
+  | "Nutricao"
+  | "SegurancaTrabalho";
 export type LabId = Laboratory;
 
 export interface LabThemeColors {
@@ -29,7 +35,14 @@ export interface LabDefinition {
   color: LabThemeColors;
 }
 
-export const LAB_IDS: readonly LabId[] = ["LabTec", "Manutec", "Robotica", "Biologia"] as const;
+export const LAB_IDS: readonly LabId[] = [
+  "LabTec",
+  "Manutec",
+  "Robotica",
+  "Biologia",
+  "Nutricao",
+  "SegurancaTrabalho",
+] as const;
 
 export const LABORATORIES_CONFIG: Record<LabId, LabDefinition> = {
   LabTec: {
@@ -124,6 +137,52 @@ export const LABORATORIES_CONFIG: Record<LabId, LabDefinition> = {
       hoverBg: "hover:bg-emerald-100 dark:hover:bg-emerald-900/50",
     },
   },
+  Nutricao: {
+    id: "Nutricao",
+    name: "Laboratório de Nutrição",
+    shortName: "Nutrição",
+    description: "Laboratório de Nutrição",
+    icon: Salad,
+    iconName: "Salad",
+    color: {
+      primary: "rose-600",
+      bg: "bg-rose-50 dark:bg-rose-900/20",
+      bgSubtle: "bg-rose-50/60 dark:bg-rose-950/30",
+      bgActive: "bg-rose-600",
+      text: "text-rose-700 dark:text-rose-300",
+      textActive: "text-white",
+      border: "border-rose-200 dark:border-rose-800",
+      borderSubtle: "border-rose-100 dark:border-rose-900/50",
+      badge: "bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800",
+      dot: "bg-rose-500",
+      ring: "focus:ring-rose-500/20 focus:border-rose-500",
+      shadow: "shadow-rose-500/20",
+      hoverBg: "hover:bg-rose-100 dark:hover:bg-rose-900/50",
+    },
+  },
+  SegurancaTrabalho: {
+    id: "SegurancaTrabalho",
+    name: "Laboratório de Segurança do Trabalho",
+    shortName: "Segurança",
+    description: "Laboratório de Segurança do Trabalho",
+    icon: HardHat,
+    iconName: "HardHat",
+    color: {
+      primary: "red-600",
+      bg: "bg-red-50 dark:bg-red-900/20",
+      bgSubtle: "bg-red-50/60 dark:bg-red-950/30",
+      bgActive: "bg-red-600",
+      text: "text-red-700 dark:text-red-300",
+      textActive: "text-white",
+      border: "border-red-200 dark:border-red-800",
+      borderSubtle: "border-red-100 dark:border-red-900/50",
+      badge: "bg-red-100 dark:bg-red-950/80 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800",
+      dot: "bg-red-500",
+      ring: "focus:ring-red-500/20 focus:border-red-500",
+      shadow: "shadow-red-500/20",
+      hoverBg: "hover:bg-red-100 dark:hover:bg-red-900/50",
+    },
+  },
 };
 
 export const LABORATORIES: LabDefinition[] = [
@@ -131,6 +190,8 @@ export const LABORATORIES: LabDefinition[] = [
   LABORATORIES_CONFIG.Manutec,
   LABORATORIES_CONFIG.Robotica,
   LABORATORIES_CONFIG.Biologia,
+  LABORATORIES_CONFIG.Nutricao,
+  LABORATORIES_CONFIG.SegurancaTrabalho,
 ];
 
 /**

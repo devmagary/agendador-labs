@@ -30,9 +30,8 @@ import {
 import { db } from "@/lib/firebase";
 import { Header } from "@/components/Header";
 import { LabSelector } from "@/components/LabSelector";
-import { getLabDotClass } from "@/constants/laboratories";
+import { getLabConfig, getLabDotClass, type Laboratory } from "@/constants/laboratories";
 
-type Laboratory = "LabTec" | "Manutec" | "Robotica" | "Biologia";
 type Shift = "Matutino" | "Vespertino" | "Noturno";
 
 interface Schedule {
@@ -151,7 +150,7 @@ export default function PublicCalendarPage() {
           Este painel é de visualização pública em tempo real. Os agendamentos são realizados pelo portal dos professores.
         </div>
 
-        {/* LABORATORY SELECTOR (LabTec, Manutec, Robótica, Biologia) */}
+        {/* LABORATORY SELECTOR (LabTec, Manutec, Robótica, Biologia, Nutrição, Segurança) */}
         <LabSelector
           selectedLab={selectedLab}
           onSelectLab={(lab) => setSelectedLab(lab)}
@@ -302,7 +301,7 @@ export default function PublicCalendarPage() {
           <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex flex-wrap justify-between items-center gap-4 bg-gray-50/70 dark:bg-gray-800/60">
             <div>
               <h2 className="text-lg font-bold text-gray-900 dark:text-white uppercase">
-                {selectedLab}{" "}
+                {getLabConfig(selectedLab).shortName}{" "}
                 <span className="text-gray-500 dark:text-gray-300 font-medium ml-2">
                   — {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
                 </span>
