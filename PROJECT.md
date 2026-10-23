@@ -8,7 +8,7 @@ The front-end architecture is transitioning from monolithic, duplicate inline pa
 - **Component Layer**: Reusable primitives and domain components in `src/components/`:
   - `Header.tsx` & `MobileDrawer.tsx`: Unified navigation, user profile, role badge, theme toggle, and actions.
   - `RoleBadge.tsx`: Consistent role indicator (Professor: blue/indigo, Coordenador/Admin: amber/gold, Secretaria: purple, Public: gray).
-  - `LabSelector.tsx`: Unified laboratory switcher across Dashboard, Calendário, and Admin with standardized lab palette (LabTec: blue, Manutec: amber, Robótica: purple, Biologia: emerald).
+  - `LabSelector.tsx`: Unified laboratory switcher across Dashboard, Calendário, and Admin with standardized lab palette (LabTec: blue, Manutec: amber, Robótica: purple, Biologia: emerald, Nutrição: rose, Segurança do Trabalho: red).
   - `QuotaCard.tsx`: Quota progress and limit visualizer.
   - `AuditBadge.tsx`: Standardized audit action tags.
 - **Documentation & Agent Skill**: `.gemini/skills/frontend-design-system/SKILL.md` containing the complete style guide and component catalog.
@@ -19,9 +19,9 @@ The front-end architecture is transitioning from monolithic, duplicate inline pa
 | 1 | Tailwind v4 Semantic Tokens | Declare `:root` and `.dark` CSS variables and `@theme inline` in `globals.css` | M1 | Survey (Explorer 2) |
 | 2 | Invalid Tailwind Classes Fix | Fix `hover:bg-gray-750`, `backdrop-blur-xs`, unregistered animations (`animate-fade-in`, `animate-fade-in-up`) | M1 | Survey (Explorer 2) |
 | 3 | Dark Mode Contrast & Hover Fix | Fix missing `dark:hover:bg-*` in admin quota steppers, custom quotas, and dashboard initial load flash | M1 | Survey (Explorer 2) |
-| 4 | Laboratory Palette Harmonization | Unify colors for LabTec (blue), Manutec (amber), Robótica (purple), and Biologia (emerald) across all views | M1 | Survey (Explorer 1, 2, 3) |
+| 4 | Laboratory Palette Harmonization | Unify colors for LabTec (blue), Manutec (amber), Robótica (purple), Biologia (emerald), Nutrição (rose), and Segurança do Trabalho (red) across all views | M1 | Survey (Explorer 1, 2, 3) |
 | 5 | RoleBadge Component | Componentize role badges with standardized colors and icons for Professor, Admin, Secretaria, Public | M2 | Survey (Explorer 1, 3) |
-| 6 | LabSelector Component | Componentize the 4-lab switcher supporting active states, counts, and responsive layout | M2 | Survey (Explorer 1, 3) |
+| 6 | LabSelector Component | Componentize the 6-lab switcher supporting active states, counts, and responsive layout | M2 | Survey (Explorer 1, 3) |
 | 7 | QuotaCard & Indicators | Componentize quota visualization for daily/weekly/monthly quotas with progress bars and badges | M2 | Survey (Explorer 3) |
 | 8 | AuditBadge Component | Componentize status and action badges for logs and appointment history | M2 | Survey (Explorer 3) |
 | 9 | Unified Header Component | Modular Header supporting desktop layout, user profile, role badges, theme toggle, logout, and responsive drawer | M3 | Survey (Explorer 1, 3) |
@@ -43,7 +43,13 @@ The front-end architecture is transitioning from monolithic, duplicate inline pa
 ## Interface Contracts
 ### Laboratory Constants (`src/constants/laboratories.ts` or `src/types/designSystem.ts`)
 ```typescript
-export type LabId = "LabTec" | "Manutec" | "Robotica" | "Biologia";
+export type LabId =
+  | "LabTec"
+  | "Manutec"
+  | "Robotica"
+  | "Biologia"
+  | "Nutricao"
+  | "SegurancaTrabalho";
 
 export interface LabDefinition {
   id: LabId;

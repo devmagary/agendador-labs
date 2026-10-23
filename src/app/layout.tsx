@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "AgendaLab - Agendamento de Laboratórios",
-  description: "Sistema escolar de agendamento de laboratórios LabTec, Manutec e Robótica.",
+  description: "Sistema escolar de agendamento de laboratórios de Tecnologia, Manutenção, Robótica, Biologia, Nutrição e Segurança do Trabalho.",
   manifest: "/manifest.json",
   applicationName: "AgendaLab",
   appleWebApp: {

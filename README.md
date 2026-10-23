@@ -20,11 +20,13 @@ O sistema opera com sincronização em **tempo real** via Firebase Firestore. Qu
 
 ## 🚀 Principais Funcionalidades
 
-### 🧪 Gestão de 4 Laboratórios Especializados
+### 🧪 Gestão de 6 Laboratórios Especializados
 - 🖥️ **LabTec:** Laboratório de Tecnologia e Informática.
 - 🔧 **Manutec:** Laboratório de Manutenção e Hardware.
 - 🤖 **Robótica:** Laboratório de Robótica Educacional e Automação.
 - 🧪 **Biologia / Análise Clínica:** Laboratório de Ciências Biológicas e Práticas de Saúde.
+- 🥗 **Nutrição:** Laboratório de Nutrição e Práticas Alimentares.
+- 🦺 **Segurança do Trabalho:** Laboratório de Segurança e Saúde Ocupacional.
 
 ### ⚙️ Gestão Flexível de Cotas Semanais (Painel do Coordenador)
 - **Cota Global vs. Cotas Isoladas por Laboratório:** O Coordenador Geral pode alternar entre cota unificada (ex: 4 aulas/semana somadas) ou limites específicos para cada laboratório (ex: 2 aulas no LabTec, 2 no Manutec, etc.).

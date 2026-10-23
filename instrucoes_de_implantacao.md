@@ -35,7 +35,7 @@ O banco NoSQL do Firebase organiza os dados nas seguintes coleções:
 ### 4. `schedules` (Reservas de Laboratórios)
 - `professorId` *(string)*: UID do usuário no Firebase Auth.
 - `professorName` *(string)*: Nome do professor responsável pela aula.
-- `laboratory` *(string)*: `"LabTec"` | `"Manutec"` | `"Robotica"`.
+- `laboratory` *(string)*: `"LabTec"` | `"Manutec"` | `"Robotica"` | `"Biologia"` | `"Nutricao"` | `"SegurancaTrabalho"`.
 - `date` *(string)*: Data no formato ISO `yyyy-MM-dd` (ex: `2026-08-14`).
 - `shift` *(string)*: `"Matutino"` | `"Vespertino"` | `"Noturno"`.
 - `classHours` *(array de números)*: Aulas reservadas (ex: `[1, 2]`).

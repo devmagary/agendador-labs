@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "AgendaLab - Agendamento de Laboratórios",
     short_name: "AgendaLab",
-    description: "Sistema escolar de agendamento de laboratórios LabTec, Manutec e Robótica.",
+    description: "Sistema escolar de agendamento de laboratórios de Tecnologia, Manutenção, Robótica, Biologia, Nutrição e Segurança do Trabalho.",
     start_url: "/",
     display: "standalone",
     background_color: "#030712",

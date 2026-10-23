@@ -11,11 +11,11 @@ Este documento define os padrões visuais, a arquitetura de tokens, a hierarquia
 
 ## 1. Filosofia de Design & Stack Tecnológica
 
-O AgendaLab é um sistema escolar e acadêmico para agendamento e gerenciamento compartilhado de laboratórios de informática, robótica, biologia e manutenção.
+O AgendaLab é um sistema escolar e acadêmico para agendamento e gerenciamento compartilhado de laboratórios de informática, robótica, biologia, manutenção, nutrição e segurança do trabalho.
 
 ### Pilares de Design
 1. **Clareza Operacional**: Interfaces limpas, informativas e com densidade de dados equilibrada para professores, coordenadores e secretários escolares.
-2. **Identidade Visual por Papel e Laboratório**: Cores semânticas consistentes para distinguir instantaneamente papéis administrativos e os 4 laboratórios da instituição.
+2. **Identidade Visual por Papel e Laboratório**: Cores semânticas consistentes para distinguir instantaneamente papéis administrativos e os 6 laboratórios da instituição.
 3. **Harmonia nos Modos Claro e Escuro**: Suporte nativo a Light/Dark Mode sem FOUC (*Flash of Unstyled Content*), mantendo alto contraste em estados interativos (`hover`, `active`, `focus`).
 4. **Modularidade e Tipagem Estrita**: Componentes desacoplados com contratos TypeScript rígidos, eliminando duplicações em rotas.
 5. **Acessibilidade & Responsividade**: Suporte completo a telas móveis (Smartphones), tablets e desktops com navegação por teclado e semântica ARIA.
@@ -105,7 +105,7 @@ Cada perfil de usuário possui uma cor primária semântica e um ícone associad
 
 ## 4. Identidade dos Laboratórios & Helpers (`@/constants/laboratories`)
 
-A instituição possui 4 laboratórios padronizados. Toda a estilização e dados dos laboratórios são centralizados em `src/constants/laboratories.ts`.
+A instituição possui 6 laboratórios padronizados. Toda a estilização e dados dos laboratórios são centralizados em `src/constants/laboratories.ts`.
 
 ### Paleta dos Laboratórios
 
@@ -115,6 +115,8 @@ A instituição possui 4 laboratórios padronizados. Toda a estilização e dado
 | **`Manutec`** | Laboratório de Manutenção e Suporte | Manutec | `Wrench` | Âmbar (`amber-600`) | `bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800` |
 | **`Robotica`**| Laboratório de Robótica Educacional | Robótica | `Bot` | Roxo (`purple-600`) | `bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-800` |
 | **`Biologia`**| Laboratório de Biologia / Análise Clínica | Biologia / Análise | `FlaskConical` | Esmeralda (`emerald-600`) | `bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800` |
+| **`Nutricao`**| Laboratório de Nutrição | Nutrição | `Salad` | Rosa (`rose-600`) | `bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800` |
+| **`SegurancaTrabalho`**| Laboratório de Segurança do Trabalho | Segurança | `HardHat` | Vermelho (`red-600`) | `bg-red-100 dark:bg-red-950/80 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800` |
 
 ### Funções Utilitárias Disponíveis
 
@@ -319,7 +321,7 @@ import type { Laboratory } from "@/constants/laboratories";
 
 export function LaboratoryFilter() {
   const [activeLab, setActiveLab] = useState<Laboratory>("LabTec");
-  const appointmentCounts = { LabTec: 12, Manutec: 5, Robotica: 8, Biologia: 3 };
+  const appointmentCounts = { LabTec: 12, Manutec: 5, Robotica: 8, Biologia: 3, Nutricao: 4, SegurancaTrabalho: 2 };
 
   return (
     <LabSelector
